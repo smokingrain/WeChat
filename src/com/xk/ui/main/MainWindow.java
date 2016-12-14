@@ -1,6 +1,7 @@
 package com.xk.ui.main;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -296,7 +297,7 @@ public class MainWindow {
 						String result = rst.replace("window.synccheck=", "");
 						Map<String, String> map = JSONUtil.toBean(result, JSONUtil.getCollectionType(Map.class, String.class, String.class));
 						if("0".equals(map.get("retcode")) && "2".equals(map.get("selector"))) {
-							
+							webwxsync();
 						}
 						
 					}
@@ -345,7 +346,7 @@ public class MainWindow {
 						}else if(1 == MsgType) {
 							if(Constant.FILTER_USERS.contains(FromUserName)) {
 								System.out.println("忽略特殊用户信息！！" + Content);
-							}else if(FromUserName.equals(user.getUserName())){
+							}else if(FromUserName.equals(user.UserName)){
 								System.out.println("来自手机端自己的消息：" + Content);
 							}else if(ToUserName.indexOf("@@") > -1) {
 								String[] splt = Content.split(":<br/>");
@@ -393,9 +394,17 @@ public class MainWindow {
 					for(Map<String, Object> cmap : contactList) {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
+						if(1 == convs.ContactFlag){
+							continue;
+						}
+						contacts.put(convs.UserName, convs);
 						Image img = null;
 						try {
-							img = new Image(null, hu.getInput(headUrl));
+							InputStream in = hu.getInput(headUrl);
+							Image temp = new Image(null, in);
+							img = SWTTools.scaleImage(temp.getImageData(), 50, 50);
+							temp.dispose();
+							in.close();
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -403,17 +412,18 @@ public class MainWindow {
 						String nick = convs.NickName;
 						String remark = convs.RemarkName;
 						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
+						System.out.println("load conver " + name);
 						Integer Statues = convs.Statues;
 						Integer ContactFlag = convs.ContactFlag;
-						ConvItem ci = new ConvItem(convs, img, name, null, null, null, ContactFlag == 2051, Statues == 0, null);
+						ConvItem ci = new ConvItem(convs, img, name, null, null, null, ContactFlag == 2051, Statues == 0, 0);
 						MyList list = lists.get(ctItem);
 						list.addItem(ci);
 					}
-					
+					System.out.println("convers loaded!!");
 					Map<String, Object> SyncKey = (Map<String, Object>) rstMap.get("SyncKey");
 					flushSyncKey(SyncKey);
 					
-					user = (User) rstMap.get("User");
+					user = User.fromMap( (Map<String, Object>) rstMap.get("User"));
 				}
 			}
 		} catch (Exception e) {
@@ -459,7 +469,7 @@ public class MainWindow {
 			Map<String, Object> rstMap = JSONUtil.fromJson(result);
 			Map<String, Object> baseResponse = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != baseResponse && new Integer(0).equals(baseResponse.get("Ret"))) {
-				List<Map<String, Object>> contactList = (List<Map<String, Object>>) rstMap.get("ContactList");
+				List<Map<String, Object>> contactList = (List<Map<String, Object>>) rstMap.get("MemberList");
 				if(null != contactList) {
 					for(Map<String, Object> cmap : contactList) {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
@@ -467,7 +477,14 @@ public class MainWindow {
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 						Image img = null;
 						try {
-							img = new Image(null, hu.getInput(headUrl));
+							if(convs.VerifyFlag != 24) {
+								InputStream in = hu.getInput(headUrl);
+								Image temp = new Image(null, in);
+								img = SWTTools.scaleImage(temp.getImageData(), 50, 50);
+								temp.dispose();
+								in.close();
+							}
+							
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -475,10 +492,15 @@ public class MainWindow {
 						String nick = convs.NickName;
 						String remark = convs.RemarkName;
 						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
+						System.out.println("load contact " + name);
+						if("李小安".equals(name)) {
+							System.out.println();
+						}
 						ContactItem ci = new ContactItem(convs, false, img, name);
 						MyList list = lists.get(ctItem);
 						list.addItem(ci);
 					}
+					System.out.println("load contacts over!!");
 				}
 			}
 		} catch (ClientProtocolException e) {
@@ -511,7 +533,7 @@ public class MainWindow {
 			Map<String, Object> rstMap = JSONUtil.fromJson(result);
 			Map<String, Object> baseResponse = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != baseResponse && new Integer(0).equals(baseResponse.get("Ret"))) {
-				List<Map<String, Object>> contactList = (List<Map<String, Object>>) rstMap.get("ContactList");
+				List<Map<String, Object>> contactList = (List<Map<String, Object>>) rstMap.get("MemberList");
 				if(null != contactList) {
 					for(Map<String, Object> cmap : contactList) {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
@@ -519,7 +541,11 @@ public class MainWindow {
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 						Image img = null;
 						try {
-							img = new Image(null, hu.getInput(headUrl));
+							InputStream in = hu.getInput(headUrl);
+							Image temp = new Image(null, in);
+							img = SWTTools.scaleImage(temp.getImageData(), 50, 50);
+							temp.dispose();
+							in.close();
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
@@ -527,10 +553,12 @@ public class MainWindow {
 						String nick = convs.NickName;
 						String remark = convs.RemarkName;
 						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
+						System.out.println("load group " + name);
 						ContactItem ci = new ContactItem(convs, false, img, name);
 						MyList list = lists.get(ctItem);
 						list.addItem(ci);
 					}
+					System.out.println("load Group over!!");
 				}
 			}
 		} catch (ClientProtocolException e) {

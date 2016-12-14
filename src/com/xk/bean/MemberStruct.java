@@ -2,7 +2,7 @@ package com.xk.bean;
 
 public class MemberStruct {
 
-	public Integer Uin;
+	public Long Uin;
 	public String UserName;
 	public String NickName;
 	public Integer AttrStatus;
@@ -18,7 +18,7 @@ public class MemberStruct {
 		
 	}
 	
-	public MemberStruct(Integer uin, String userName, String nickName, Integer attrStatus, String pYInitial,
+	public MemberStruct(Long uin, String userName, String nickName, Integer attrStatus, String pYInitial,
 			String pYQuanPin, String remarkPYInitial, String remarkPYQuanPin, Integer memberStatus, String displayName,
 			String keyWord) {
 		super();

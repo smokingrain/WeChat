@@ -106,7 +106,7 @@ public class HTTPUtil {
 		HttpGet httppost = new HttpGet(url);  
 		httppost.addHeader("Connection", "keep-alive");
 		httppost.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
-		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(2000).setConnectTimeout(2000).build();//设置请求和传输超时时间
+		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(5000).setConnectTimeout(5000).setConnectionRequestTimeout(5000).build();//设置请求和传输超时时间
 		httppost.setConfig(requestConfig);
 		try {
 			CloseableHttpResponse response = httpClient.execute(httppost);  
@@ -119,7 +119,7 @@ public class HTTPUtil {
 					return getInput(redirect);
 				}
 			}else{
-				HttpEntity entity = response.getEntity(); 
+				HttpEntity entity = response.getEntity();
 				return entity.getContent();
 			}
 		} catch (ClientProtocolException e) {

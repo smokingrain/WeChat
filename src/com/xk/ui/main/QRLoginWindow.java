@@ -1,6 +1,7 @@
 package com.xk.ui.main;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -143,7 +144,9 @@ public class QRLoginWindow {
 			if(null != result && result.contains(sign)){
 				String uuid = result.replace(sign, "").replace("\"", "").replace(";", "");
 				String qrUrl = Constant.GET_QR_IMG.replace("{UUID}", uuid);
-				Image img = new Image(null, hu.getInput(qrUrl));
+				InputStream in = hu.getInput(qrUrl);
+				Image img = new Image(null, in);
+				in.close();
 				Image dest = SWTTools.scaleImage(img.getImageData(), 186, 186);
 				qrImage.setImage(dest);
 				img.dispose();

@@ -6,7 +6,7 @@ import java.util.Map;
 import com.xk.utils.JSONUtil;
 
 public class ContactsStruct {
-	public Integer Uin;
+	public Long Uin;
 	public String UserName;
 	public String NickName;
 	public String HeadImgUrl;
@@ -18,7 +18,7 @@ public class ContactsStruct {
 	public Integer Sex;
 	public String Signature;
 	public Integer VerifyFlag;
-	public Integer OwnerUin;
+	public Long OwnerUin;
 	public String PYInitial;
 	public String PYQuanPin;
 	public String RemarkPYInitial;
@@ -26,7 +26,7 @@ public class ContactsStruct {
 	public Integer StarFriend;
 	public Integer AppAccountFlag;
 	public Integer Statues;
-	public Integer AttrStatus;
+	public Long AttrStatus;
 	public String Province;
 	public String City;
 	public String Alias;
@@ -42,11 +42,11 @@ public class ContactsStruct {
 	}
 	
 	
-	public ContactsStruct(Integer uin, String userName, String nickName, String headImgUrl, Integer contactFlag,
+	public ContactsStruct(Long uin, String userName, String nickName, String headImgUrl, Integer contactFlag,
 			Integer memberCount, List<MemberStruct> memberList, String remarkName, Integer hideInputBarFlag,
-			Integer sex, String signature, Integer verifyFlag, Integer ownerUin, String pYInitial, String pYQuanPin,
+			Integer sex, String signature, Integer verifyFlag, Long ownerUin, String pYInitial, String pYQuanPin,
 			String remarkPYInitial, String remarkPYQuanPin, Integer starFriend, Integer appAccountFlag, Integer statues,
-			Integer attrStatus, String province, String city, String alias, Integer snsFlag, Integer uniFriend,
+			Long attrStatus, String province, String city, String alias, Integer snsFlag, Integer uniFriend,
 			String displayName, Integer chatRoomId, String keyWord, String encryChatRoomId) {
 		super();
 		Uin = uin;

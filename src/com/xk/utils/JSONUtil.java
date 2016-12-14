@@ -20,6 +20,7 @@ public class JSONUtil {
 	
 	static{
 		mapper.configure(Feature.ALLOW_SINGLE_QUOTES, true) ;
+		mapper.configure(Feature.ALLOW_UNQUOTED_FIELD_NAMES, true) ;
 	}
 	
 	/**
