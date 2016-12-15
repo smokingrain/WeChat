@@ -5,7 +5,7 @@ public class MemberStruct {
 	public Long Uin;
 	public String UserName;
 	public String NickName;
-	public Integer AttrStatus;
+	public Long AttrStatus;
 	public String PYInitial;
 	public String PYQuanPin;
 	public String RemarkPYInitial;
@@ -18,7 +18,7 @@ public class MemberStruct {
 		
 	}
 	
-	public MemberStruct(Long uin, String userName, String nickName, Integer attrStatus, String pYInitial,
+	public MemberStruct(Long uin, String userName, String nickName, Long attrStatus, String pYInitial,
 			String pYQuanPin, String remarkPYInitial, String remarkPYQuanPin, Integer memberStatus, String displayName,
 			String keyWord) {
 		super();

@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +41,7 @@ import com.xk.utils.JSONUtil;
 import com.xk.utils.SWTTools;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.wb.swt.SWTResourceManager;
 import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import org.eclipse.swt.widgets.Label;
@@ -52,6 +55,7 @@ public class MainWindow {
 	private Map<ListItem, MyList> lists = new HashMap<ListItem, MyList>();
 	private MyText text;
 	private Map<String, ContactsStruct> contacts = new HashMap<>();
+	private boolean syncGroup = false;
 
 	public MainWindow(WeChatSign sign) {
 		this.sign = sign;
@@ -79,6 +83,7 @@ public class MainWindow {
 		shell.setSize(850, 590);
 		shell.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		shell.setText("微信");
+		shell.setImage(SWTResourceManager.getImage(MainWindow.class, "/images/wechat.jpg"));
 		SWTTools.enableTrag(shell);
 
 		
@@ -237,15 +242,18 @@ public class MainWindow {
 			@Override
 			public void mouseUp(MouseEvent e) {
 				shell.dispose();
+				System.exit(0);
 			}
 			
 		});
 		
-		loadConvers(ctItem);
-		loadContacts(conItem);
-		loadGroups(conItem);
+		List<String> g = loadConvers(ctItem);
 		startNotify();
-		syncData();
+		loadGroups(conItem,g);
+		syncData(conItem);
+		List<String> group = loadContacts(conItem);
+		loadGroups(conItem,group);
+		
 		
 	}
 	
@@ -255,7 +263,7 @@ public class MainWindow {
 	 */
 	public void startNotify(){
 		HTTPUtil hu = HTTPUtil.getInstance();
-		String url = Constant.STATUS_NOTIFY + "?pass_ticket=" + sign.pass_ticket;
+		String url = Constant.STATUS_NOTIFY + "?lang=zh_CN&pass_ticket=" + sign.pass_ticket;
 		Map<String, Object> body = new HashMap<String, Object>();
 		Map<String, Object> BaseRequest = new HashMap<>();
 		BaseRequest.put("DeviceID", sign.deviceid);
@@ -263,6 +271,11 @@ public class MainWindow {
 		BaseRequest.put("Skey", sign.skey);
 		BaseRequest.put("Uin", sign.wxuin);
 		body.put("BaseRequest", BaseRequest);
+		body.put("ClientMsgId", System.currentTimeMillis());
+		body.put("Code", 3);
+		body.put("FromUserName", user.UserName);
+		body.put("ToUserName", user.UserName);
+		
 		try {
 			String result = hu.postBody(url, JSONUtil.toJson(body));
 			Map<String, Object> rst = JSONUtil.fromJson(result);
@@ -276,7 +289,7 @@ public class MainWindow {
 		}
 	}
 	
-	private void syncData() {
+	private void syncData(TypeItem conItem) {
 		HTTPUtil hu = HTTPUtil.getInstance();
 		timer = new Timer();
 		timer.schedule(new TimerTask() {
@@ -284,20 +297,29 @@ public class MainWindow {
 			@Override
 			public void run() {
 				Map<String, String> params = new HashMap<String, String>();
-				params.put("r", System.currentTimeMillis() + "");
 				params.put("_", System.currentTimeMillis() + "");
-				params.put("Uin", sign.wxuin);
-				params.put("Sid", sign.wxsid);
-				params.put("Skey", sign.skey);
-				params.put("DeviceID", sign.deviceid);
+				params.put("r", (System.currentTimeMillis() + 91136) + "");
+				params.put("uin", sign.wxuin);
+				try {
+					params.put("sid", URLEncoder.encode(sign.wxsid, "UTF-8"));
+					params.put("skey", URLEncoder.encode(sign.skey, "UTF-8"));
+				} catch (UnsupportedEncodingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				params.put("deviceid", sign.deviceid);
 				params.put("synckey", sign.synckey);
 				try {
-					String rst = hu.readJsonfromURL2(Constant.SYNC_CHECK, params);
+					String rst = hu.getJsonfromURL2(Constant.SYNC_CHECK, params);
 					if(null != rst && rst.contains("window.synccheck=")) {
 						String result = rst.replace("window.synccheck=", "");
+						System.out.println("checksync + " + result);
 						Map<String, String> map = JSONUtil.toBean(result, JSONUtil.getCollectionType(Map.class, String.class, String.class));
 						if("0".equals(map.get("retcode")) && "2".equals(map.get("selector"))) {
-							webwxsync();
+							webwxsync(conItem);
+						}else if("1101".equals(map.get("retcode"))) {
+							System.out.println("已在其它端登陆！！");
+							System.exit(0);
 						}
 						
 					}
@@ -313,7 +335,7 @@ public class MainWindow {
 		}, 1000, 1000);
 	}
 
-	private void webwxsync() {
+	private void webwxsync(TypeItem conItem) {
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Map<String,Object> bodyMap = new HashMap<String,Object>();
 		Map<String,Object> bodyInner = new HashMap<String,Object>();
@@ -326,6 +348,7 @@ public class MainWindow {
 		bodyMap.put("rr", System.currentTimeMillis());
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("sid", sign.wxsid);
+		params.put("lang", "zh_CN");
 		params.put("skey", sign.skey);
 		params.put("pass_ticket", sign.pass_ticket);
 		try {
@@ -342,25 +365,40 @@ public class MainWindow {
 						String ToUserName = (String) msg.get("ToUserName");
 						String FromUserName = (String) msg.get("FromUserName");
 						if(51 == MsgType) {
-							System.out.println("系统初始化信息获取完毕！！");
+							String StatusNotifyUserName = (String) msg.get("StatusNotifyUserName");
+							if(null != StatusNotifyUserName && !syncGroup) {
+								String[] spl = StatusNotifyUserName.split(",");
+								List<String> groups = Arrays.asList(spl);
+								loadGroups(conItem, groups);
+								Display.getDefault().asyncExec(new Runnable() {
+									public void run() {
+										lists.get(conItem).flush();
+									}
+								});
+								syncGroup = true;
+							}
 						}else if(1 == MsgType) {
 							if(Constant.FILTER_USERS.contains(FromUserName)) {
 								System.out.println("忽略特殊用户信息！！" + Content);
 							}else if(FromUserName.equals(user.UserName)){
 								System.out.println("来自手机端自己的消息：" + Content);
-							}else if(ToUserName.indexOf("@@") > -1) {
+							}else if(FromUserName.indexOf("@@") > -1) {
 								String[] splt = Content.split(":<br/>");
 								String sender = ContactsStruct.getGroupMember(splt[0], contacts.get(FromUserName));
 								
 								System.out.println(sender + " 在群里说:" + splt[1]);
+//								sendMsg(splt[1], FromUserName);
 							}else {
 								String sender = ContactsStruct.getContactName(contacts.get(FromUserName));
 								System.out.println(sender + " 说：" + Content);
+								sendMsg("我是自动回复，有事打我电话！", FromUserName);
 							}
 						}
 					}
 				}
 			}
+			Map<String, Object> SyncKey = (Map<String, Object>) rst.get("SyncKey");
+			flushSyncKey(SyncKey);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -374,7 +412,8 @@ public class MainWindow {
 	 * @date 2016年12月14日
 	 * @param ctItem
 	 */
-	private void loadConvers(TypeItem ctItem) {
+	private List<String> loadConvers(TypeItem ctItem) {
+		List<String> allGroups = new ArrayList<String>();
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Map<String,Map<String,String>> bodyMap = new HashMap<String,Map<String,String>>();
 		Map<String,String> bodyInner = new HashMap<String,String>();
@@ -394,20 +433,22 @@ public class MainWindow {
 					for(Map<String, Object> cmap : contactList) {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
-						if(1 == convs.ContactFlag){
-							continue;
-						}
-						contacts.put(convs.UserName, convs);
+						
 						Image img = null;
+						
+						InputStream in = hu.getInput(headUrl);
 						try {
-							InputStream in = hu.getInput(headUrl);
 							Image temp = new Image(null, in);
 							img = SWTTools.scaleImage(temp.getImageData(), 50, 50);
 							temp.dispose();
-							in.close();
+							
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
+						}finally {
+							if(null != in) {
+								in.close();
+							}
 						}
 						String nick = convs.NickName;
 						String remark = convs.RemarkName;
@@ -418,6 +459,9 @@ public class MainWindow {
 						ConvItem ci = new ConvItem(convs, img, name, null, null, null, ContactFlag == 2051, Statues == 0, 0);
 						MyList list = lists.get(ctItem);
 						list.addItem(ci);
+						if(convs.UserName.indexOf("@@") > -1) {
+							allGroups.add(convs.UserName);
+						}
 					}
 					System.out.println("convers loaded!!");
 					Map<String, Object> SyncKey = (Map<String, Object>) rstMap.get("SyncKey");
@@ -431,10 +475,13 @@ public class MainWindow {
 			System.out.println("获取会话失败");
 			System.exit(0);
 		}
-		
+		return allGroups;
 	}
 	
 	private void flushSyncKey(Map<String, Object> SyncKey) {
+		if(null == SyncKey){
+			return ;
+		}
 		List<Map<String, Integer>> List = (java.util.List<Map<String, Integer>>) SyncKey.get("List");
 		StringBuffer sb = new StringBuffer();
 		for(Map<String, Integer> v : List) {
@@ -443,26 +490,28 @@ public class MainWindow {
 			sb.append(Key).append("_").append(Val).append("|");
 		}
 		try {
-			sign.synckey = URLEncoder.encode(sb.substring(0, sb.length() - 1), "UTF-8");
-			sign.syncKeyOringe = SyncKey;
+			sign.synckey = URLEncoder.encode(sb.substring(0, sb.length() - 1), "UTF-8");//sb.substring(0, sb.length() - 1);
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		sign.syncKeyOringe = SyncKey;
 	}
 	
 	/**
-	 * 用途：抓取联系人
+	 * 用途：抓取联系人,返回所有群组
 	 * @date 2016年12月14日
 	 * @param ctItem
 	 */
-	private void loadContacts(TypeItem ctItem) {
+	private List<String> loadContacts(TypeItem ctItem) {
+		List<String> allGroups = new ArrayList<String>();
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("pass_ticket", sign.pass_ticket);
 		params.put("r", System.currentTimeMillis() + "");
 		params.put("seq", "0");
 		params.put("skey", sign.skey);
+		params.put("lang", "zh_CN");
 		
 		try {
 			String result = hu.readJsonfromURL2(Constant.GET_CONTACT, params);
@@ -476,29 +525,30 @@ public class MainWindow {
 						contacts.put(convs.UserName, convs);
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 						Image img = null;
+						InputStream in = hu.getInput(headUrl);
 						try {
-							if(convs.VerifyFlag != 24) {
-								InputStream in = hu.getInput(headUrl);
-								Image temp = new Image(null, in);
-								img = SWTTools.scaleImage(temp.getImageData(), 50, 50);
-								temp.dispose();
-								in.close();
-							}
+							Image temp = new Image(null, in);
+							img = SWTTools.scaleImage(temp.getImageData(), 50, 50);
+							temp.dispose();
 							
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
+						}finally {
+							if(null != in) {
+								in.close();
+							}
 						}
 						String nick = convs.NickName;
 						String remark = convs.RemarkName;
 						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
-						System.out.println("load contact " + name);
-						if("李小安".equals(name)) {
-							System.out.println();
-						}
+						System.out.println("load contact " + name + "   " + convs.UserName);
 						ContactItem ci = new ContactItem(convs, false, img, name);
 						MyList list = lists.get(ctItem);
 						list.addItem(ci);
+						if(convs.UserName.indexOf("@@") > -1) {
+							allGroups.add(convs.UserName);
+						}
 					}
 					System.out.println("load contacts over!!");
 				}
@@ -510,6 +560,7 @@ public class MainWindow {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return allGroups;
 	}
 	
 	/**
@@ -517,15 +568,29 @@ public class MainWindow {
 	 * @date 2016年12月14日
 	 * @param ctItem
 	 */
-	private void loadGroups(TypeItem ctItem) {
+	private void loadGroups(TypeItem ctItem, List<String> groups) {
+		if(null == groups || groups.size() == 0) {
+			return ;
+		}
+		
+		List<Map<String, String>> gs = new ArrayList<>();
+		for(String name : groups) {
+			Map<String, String> map = new HashMap<>();
+			map.put("UserName", name);
+			map.put("ChatRoomId", "");
+			gs.add(map);
+		}
+		
 		HTTPUtil hu = HTTPUtil.getInstance();
-		Map<String,Map<String,String>> bodyMap = new HashMap<String,Map<String,String>>();
+		Map<String, Object> bodyMap = new HashMap<String, Object>();
 		Map<String,String> bodyInner = new HashMap<String,String>();
 		bodyInner.put("Uin", sign.wxuin);
 		bodyInner.put("Sid", sign.wxsid);
 		bodyInner.put("Skey", sign.skey);
 		bodyInner.put("DeviceID", sign.deviceid);
 		bodyMap.put("BaseRequest", bodyInner);
+		bodyMap.put("Count", gs.size());
+		bodyMap.put("List", gs);
 		
 		try {
 			String url = Constant.GET_GROUPS.replace("{TIME}", System.currentTimeMillis() + "").replace("{TICKET}", sign.pass_ticket);
@@ -533,27 +598,31 @@ public class MainWindow {
 			Map<String, Object> rstMap = JSONUtil.fromJson(result);
 			Map<String, Object> baseResponse = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != baseResponse && new Integer(0).equals(baseResponse.get("Ret"))) {
-				List<Map<String, Object>> contactList = (List<Map<String, Object>>) rstMap.get("MemberList");
+				List<Map<String, Object>> contactList = (List<Map<String, Object>>) rstMap.get("ContactList");
 				if(null != contactList) {
 					for(Map<String, Object> cmap : contactList) {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
 						contacts.put(convs.UserName, convs);
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 						Image img = null;
+						InputStream in = hu.getInput(headUrl);
 						try {
-							InputStream in = hu.getInput(headUrl);
 							Image temp = new Image(null, in);
 							img = SWTTools.scaleImage(temp.getImageData(), 50, 50);
 							temp.dispose();
-							in.close();
+							
 						} catch (Exception e) {
 							// TODO Auto-generated catch block
 							e.printStackTrace();
+						}finally {
+							if(null != in) {
+								in.close();
+							}
 						}
 						String nick = convs.NickName;
 						String remark = convs.RemarkName;
 						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
-						System.out.println("load group " + name);
+						System.out.println("load group " + name + convs.UserName);
 						ContactItem ci = new ContactItem(convs, false, img, name);
 						MyList list = lists.get(ctItem);
 						list.addItem(ci);
@@ -570,6 +639,41 @@ public class MainWindow {
 		}
 	}
 	
-	
+	public void sendMsg(String msg, String to) {
+		Map<String, String> params = new HashMap<>();
+		params.put("lang", "zh_CN");
+		params.put("pass_ticket", sign.pass_ticket);
+		Map<String, Object> body = new HashMap<>();
+		Map<String, Object> bodyInner = new HashMap<String, Object>();
+		bodyInner.put("Uin", sign.wxuin);
+		bodyInner.put("Sid", sign.wxsid);
+		bodyInner.put("Skey", sign.skey);
+		bodyInner.put("DeviceID", sign.deviceid);
+		body.put("BaseRequest", bodyInner);
+		body.put("Scene", 0);
+		Map<String, Object> msgMap = new HashMap<>();
+		long cur = System.currentTimeMillis();
+		msgMap.put("ClientMsgId", cur);
+		msgMap.put("Content", msg);
+		msgMap.put("Type", 1);
+		msgMap.put("ToUserName", to);
+		msgMap.put("FromUserName", user.UserName);
+		msgMap.put("LocalID", cur);
+		body.put("Msg", msgMap);
+		
+		HTTPUtil hu = HTTPUtil.getInstance();
+		try {
+			String result = hu.postBody(Constant.SEND_MSG, params, JSONUtil.toJson(body));
+			Map<String, Object> rstMap= JSONUtil.fromJson(result);
+			Map<String, Object> obj = (Map<String, Object>) rstMap.get("BaseResponse");
+			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {
+				System.out.println("msg : " + msg +"-> 发送成功！！");
+				
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 }

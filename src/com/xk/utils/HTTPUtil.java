@@ -31,6 +31,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 
 
@@ -65,7 +66,7 @@ public class HTTPUtil {
 		try {
 			HttpGet httppost = new HttpGet(url);  
 			httppost.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
-			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(2000).setConnectTimeout(2000).build();//设置请求和传输超时时间
+			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(50000).setConnectTimeout(50000).setConnectionRequestTimeout(50000).build();//设置请求和传输超时时间
 			httppost.setConfig(requestConfig);
 			CloseableHttpResponse response = httpClient.execute(httppost);  
 			if(302==response.getStatusLine().getStatusCode()){
@@ -106,7 +107,7 @@ public class HTTPUtil {
 		HttpGet httppost = new HttpGet(url);  
 		httppost.addHeader("Connection", "keep-alive");
 		httppost.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
-		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(5000).setConnectTimeout(5000).setConnectionRequestTimeout(5000).build();//设置请求和传输超时时间
+		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(50000).setConnectTimeout(50000).setConnectionRequestTimeout(50000).build();//设置请求和传输超时时间
 		httppost.setConfig(requestConfig);
 		try {
 			CloseableHttpResponse response = httpClient.execute(httppost);  
@@ -227,7 +228,7 @@ public class HTTPUtil {
 		return result.toString();
 	}
 	
-	public String readJsonfromURL2(String url,Map<String,String> params) throws ClientProtocolException, IOException{
+	public String readJsonfromURL2(String url, Map<String, String> params, Map<String, String> cookie) throws ClientProtocolException, IOException{
 		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
 		if(null!=params){
 			Set<String> keys=params.keySet();
@@ -242,6 +243,9 @@ public class HTTPUtil {
 		httppost.setEntity(entity1);  
 		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();//设置请求和传输超时时间
 		httppost.setConfig(requestConfig);
+		if(null != cookie) {
+		}
+		
 		//处理请求，得到响应  
 		CloseableHttpResponse response = httpClient.execute(httppost);  
 		
@@ -262,48 +266,22 @@ public class HTTPUtil {
 		return result.toString();
 	}
 	
-	public String readJsonfromURL3(String url,Map<String,String> params) throws ClientProtocolException, IOException{
-		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
-		if(null!=params){
-			Set<String> keys=params.keySet();
-			for(String key:keys){
-				formparams.add(new BasicNameValuePair(key, params.get(key)));
+	public String getJsonfromURL2(String url,Map<String,String> params) throws ClientProtocolException, IOException{
+		StringBuffer sb = new StringBuffer(url);
+		if(null != params) {
+			sb.append("?");
+			for(String key : params.keySet()) {
+				sb.append(key).append("=").append(params.get(key)).append("&");
 			}
 		}
-		UrlEncodedFormEntity entity1 = new UrlEncodedFormEntity(formparams, "UTF-8");  
+		return getHtml(sb.toString());
 		
-		//新建Http  post请求  
-		HttpPost httppost = new HttpPost(url);  
-		httppost.setEntity(entity1);  
-		httppost.setHeader("Connection", "keep-alive");
-        httppost.setHeader("Accept", "application/json, text/javascript, */*; q=0.01");
-        httppost.setHeader("Accept-Encoding", "gzip, deflate");
-        httppost.setHeader("Accept-Language", "zh-CN,zh;q=0.8");
-        httppost.setHeader("Content-Type", "application/x-www-form-urlencoded; charset=UTF-8");
-        httppost.setHeader("Host", "kyfw.12306.cn");
-        httppost.setHeader("Origin", "https://kyfw.12306.cn");
-        httppost.setHeader("Referer", "https://kyfw.12306.cn/otn/confirmPassenger/initDc");
-        httppost.setHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/39.0.2171.99 Safari/537.36");
-        httppost.setHeader("X-Requested-With", "XMLHttpRequest");
-		//处理请求，得到响应  
-		CloseableHttpResponse response = httpClient.execute(httppost);  
-		
-		//打印返回的结果  
-		HttpEntity entity = response.getEntity();  
-		
-		StringBuilder result = new StringBuilder();  
-		if (entity != null) {  
-			InputStream instream = entity.getContent();  
-			BufferedReader br = new BufferedReader(new InputStreamReader(instream,"UTF-8"));  
-			String temp = "";  
-			while ((temp = br.readLine()) != null) {  
-				result.append(temp);  
-			}  
-		}  
-		httppost.releaseConnection();
-		response.close();
-		return result.toString();
 	}
+	public String readJsonfromURL2(String url,Map<String,String> params) throws ClientProtocolException, IOException{
+		return readJsonfromURL2(url, params, null);
+	}
+	
+	
 	
 	public void saveToStream(String url,OutputStream out){
 		try {

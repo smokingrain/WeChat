@@ -70,7 +70,7 @@ public class ConvItem extends ListItem {
 		}
 		if(selected) {
 			int alf=gc.getAlpha();
-			gc.setAlpha(55);
+			gc.setAlpha(155);
 			gc.fillRectangle(0, start, width-MyList.BAR_WIDTH, getHeight());
 			gc.setAlpha(alf);
 		}

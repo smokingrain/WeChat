@@ -39,7 +39,7 @@ public class ContactItem extends ListItem {
 		Font font=SWTResourceManager.getFont("宋体", 10, SWT.NORMAL);
 		if(dir) {
 			int alf=gc.getAlpha();
-			gc.setAlpha(55);
+			gc.setAlpha(155);
 			gc.fillRectangle(0, start, width-MyList.BAR_WIDTH, getHeight());
 			gc.setAlpha(alf);
 			Color fo = gc.getForeground();

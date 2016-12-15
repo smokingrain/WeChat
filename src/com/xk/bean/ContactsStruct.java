@@ -89,7 +89,7 @@ public class ContactsStruct {
 	
 	public static String getGroupMember(String user, ContactsStruct con) {
 		String name = "匿名";
-		if(con.UserName.startsWith("@@")) {
+		if(null != con && con.UserName.startsWith("@@")) {
 			for(MemberStruct member : con.MemberList) {
 				if(user.equals(member.UserName)) {
 					if(null != member.DisplayName && !member.DisplayName.isEmpty()) {
