@@ -6,7 +6,7 @@ import java.util.Map;
 
 public class AutoReply {
 	
-	public static String call(String cmd) {
+	public static String call(String cmd,String userid) {
 		//图灵网站上的apiKey
 		String apiKey = "xxx";
 		//待加密的json数据
@@ -14,6 +14,7 @@ public class AutoReply {
 		Map<String, String> dataMap = new HashMap<String, String>();
 		dataMap.put("key", apiKey);
 		dataMap.put("info", cmd);
+		dataMap.put("userid", userid);
 
 		HTTPUtil hu = HTTPUtil.getInstance();
 		try {
@@ -29,7 +30,7 @@ public class AutoReply {
 		return "我居然不明白你说什么！！";
 	}
 	public static void main(String[] args) {
-		call("你好哦");
+		call("你好哦","test");
 	}
  	
 }

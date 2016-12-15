@@ -370,13 +370,13 @@ public class MainWindow {
 								String sender = ContactsStruct.getGroupMember(splt[0], contacts.get(FromUserName));
 								String ctt = splt[1].replace("<br/>", "\n");
 								System.out.println(sender + " 在群里说:" + ctt);
-								String reply = AutoReply.call(ctt);
+								String reply = AutoReply.call(ctt, sender);
 								WeChatUtil.sendMsg(reply, FromUserName, sign, user);
 							}else {
 								String sender = ContactsStruct.getContactName(contacts.get(FromUserName));
 								String ctt = Content.replace("<br/>", "\n");
 								System.out.println(sender + " 说：" + ctt);
-								String reply = AutoReply.call(ctt);
+								String reply = AutoReply.call(ctt, sender);
 								WeChatUtil.sendMsg(reply, FromUserName, sign, user);
 							}
 						}
