@@ -1,6 +1,8 @@
 package com.xk.utils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -12,9 +14,15 @@ public class AutoReply {
 		//待加密的json数据
 		
 		Map<String, String> dataMap = new HashMap<String, String>();
-		dataMap.put("key", apiKey);
-		dataMap.put("info", cmd);
-		dataMap.put("userid", userid);
+		try {
+			dataMap.put("key", URLEncoder.encode(apiKey, "UTF-8"));
+			dataMap.put("info", URLEncoder.encode(cmd, "UTF-8"));
+			dataMap.put("userid", URLEncoder.encode(userid, "UTF-8"));
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
 
 		HTTPUtil hu = HTTPUtil.getInstance();
 		try {
