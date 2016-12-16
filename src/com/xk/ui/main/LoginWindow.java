@@ -60,8 +60,8 @@ public class LoginWindow {
 	 * Create contents of the window.
 	 */
 	protected void createContents() {
-		Color back = SWTResourceManager.getColor(245, 245, 245);
-		Color red = SWTResourceManager.getColor(SWT.COLOR_RED);
+		final Color back = SWTResourceManager.getColor(245, 245, 245);
+		final Color red = SWTResourceManager.getColor(SWT.COLOR_RED);
 		shell = new Shell(SWT.FILL);
 		shell.setBackground(back);
 		shell.setSize(280, 400);
@@ -69,7 +69,7 @@ public class LoginWindow {
 		SWTTools.centerWindow(shell);
 		SWTTools.enableTrag(shell);
 		
-		CLabel  closeL = new CLabel (shell, SWT.NONE);
+		final CLabel  closeL = new CLabel (shell, SWT.NONE);
 		closeL.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		closeL.setBackground(back);
 		closeL.setAlignment(SWT.CENTER);

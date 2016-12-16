@@ -65,8 +65,8 @@ public class QRLoginWindow {
 	 * Create contents of the window.
 	 */
 	protected void createContents() {
-		Color back = SWTResourceManager.getColor(245, 245, 245);
-		Color red = SWTResourceManager.getColor(SWT.COLOR_RED);
+		final Color back = SWTResourceManager.getColor(245, 245, 245);
+		final Color red = SWTResourceManager.getColor(SWT.COLOR_RED);
 		shell = new Shell(SWT.FILL);
 		shell.setBackground(back);
 		shell.setSize(280, 400);
@@ -75,7 +75,7 @@ public class QRLoginWindow {
 		SWTTools.centerWindow(shell);
 		SWTTools.enableTrag(shell);
 		
-		CLabel  closeL = new CLabel (shell, SWT.NONE);
+		final CLabel  closeL = new CLabel (shell, SWT.NONE);
 		closeL.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		closeL.setBackground(back);
 		closeL.setAlignment(SWT.CENTER);
@@ -166,7 +166,7 @@ public class QRLoginWindow {
 	 * @date 2016年12月13日
 	 */
 	private void loopGetState(String uuid) {
-		String url = Constant.GET_STATUE.replace("{TIME}", System.currentTimeMillis() + "").replace("{UUID}", uuid);
+		final String url = Constant.GET_STATUE.replace("{TIME}", System.currentTimeMillis() + "").replace("{UUID}", uuid);
 		timer = new Timer();
 		timer.schedule(new TimerTask() {
 			
@@ -200,7 +200,7 @@ public class QRLoginWindow {
 								Document doc = XMLUtils.fromText(winAndsid);
 								if(null != doc) {
 									Element root = doc.getRootElement();
-									WeChatSign sign = new WeChatSign();
+									final WeChatSign sign = new WeChatSign();
 									sign.pass_ticket = root.elementTextTrim("pass_ticket");
 									sign.skey = root.elementTextTrim("skey");
 									sign.wxsid = root.elementTextTrim("wxsid");

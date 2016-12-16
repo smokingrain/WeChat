@@ -2,11 +2,12 @@ package com.xk.utils;
 
 import java.security.Key;
 import java.security.MessageDigest;
-import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+
+import sun.misc.BASE64Encoder;
 
 /**
  * aes加密算法
@@ -14,6 +15,8 @@ import javax.crypto.spec.SecretKeySpec;
  *
  */
 public class Aes {
+	
+	private BASE64Encoder encoder = new BASE64Encoder();
 	
 	private Key key;
 	/**
@@ -53,8 +56,7 @@ public class Aes {
 			byte[] data = strContent.getBytes("UTF-8");
 			cipher.init(Cipher.ENCRYPT_MODE, key, iv);
 			byte[] encryptData = cipher.doFinal(data);
-			String encryptResult = new String(Base64.getEncoder().encode(
-					encryptData), "UTF-8");
+			String encryptResult = encoder.encode(encryptData);
 			return encryptResult;
 		} catch (Exception ex) {
 			throw new RuntimeException(ex.getMessage());

@@ -77,9 +77,9 @@ public class MainWindow {
 	 * Create contents of the window.
 	 */
 	protected void createContents() {
-		Color back = SWTResourceManager.getColor(234, 234, 234);
-		Color red = SWTResourceManager.getColor(SWT.COLOR_RED);
-		Color dark = SWTResourceManager.getColor(220, 220, 220);
+		final Color back = SWTResourceManager.getColor(234, 234, 234);
+		final Color red = SWTResourceManager.getColor(SWT.COLOR_RED);
+		final Color dark = SWTResourceManager.getColor(220, 220, 220);
 		shell = new Shell(SWT.FILL_WINDING);
 		shell.setBackground(back);
 		shell.setSize(850, 590);
@@ -175,7 +175,7 @@ public class MainWindow {
 		label.setBounds(262, 16, 29, 24);
 		label.setText("+");
 		
-		Label minL = new Label(shell, SWT.NONE);
+		final Label minL = new Label(shell, SWT.NONE);
 		minL.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		minL.setFont(SWTResourceManager.getFont("微软雅黑", 6, SWT.NORMAL));
 		minL.setAlignment(SWT.CENTER);
@@ -212,7 +212,7 @@ public class MainWindow {
 		});
 		
 		
-		Label closeL = new Label(shell, SWT.NONE);
+		final Label closeL = new Label(shell, SWT.NONE);
 		closeL.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		closeL.setText("\nX");
 		closeL.setOrientation(SWT.RIGHT_TO_LEFT);
@@ -261,8 +261,8 @@ public class MainWindow {
 	
 	
 	
-	private void syncData(TypeItem conItem) {
-		HTTPUtil hu = HTTPUtil.getInstance();
+	private void syncData(final TypeItem conItem) {
+		final HTTPUtil hu = HTTPUtil.getInstance();
 		timer = new Timer();
 		timer.schedule(new TimerTask() {
 			
@@ -318,7 +318,7 @@ public class MainWindow {
 		}, 1000, 1000);
 	}
 
-	private void webwxsync(TypeItem conItem) {
+	private void webwxsync(final TypeItem conItem) {
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Map<String,Object> bodyMap = new HashMap<String,Object>();
 		Map<String,Object> bodyInner = new HashMap<String,Object>();
