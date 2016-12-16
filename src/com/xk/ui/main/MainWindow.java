@@ -95,6 +95,10 @@ public class MainWindow {
 		composite.setBounds(0, 0, 50, 590);
 		composite.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		
+		Label me = new Label(composite, SWT.NONE);
+		me.setBounds(10, 10, 30, 30);
+		me.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
+		
 		MyList types = new MyList(composite ,50 , 490);
 		types.setMask(10);
 		types.setLocation(0, 50);
@@ -140,6 +144,7 @@ public class MainWindow {
 		});
 		
 		types.select(ctItem, false);
+		
 		
 		
 		Image search=SWTResourceManager.getImage(MainWindow.class, "/images/search.png");
@@ -257,6 +262,29 @@ public class MainWindow {
 		WeChatUtil.loadGroups(conItem,group, sign, this);
 		
 		
+		HTTPUtil hu = HTTPUtil.getInstance();
+		Image img = null;
+		String headUrl = Constant.BASE_URL + user.HeadImgUrl;
+		InputStream in = hu.getInput(headUrl);
+		try {
+			Image temp = new Image(null, in);
+			img = SWTTools.scaleImage(temp.getImageData(), 30, 30);
+			temp.dispose();
+			
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}finally {
+			if(null != in) {
+				try {
+					in.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		}
+		me.setImage(img);
 	}
 	
 	
@@ -371,7 +399,12 @@ public class MainWindow {
 								String ctt = splt[1].replace("<br/>", "\n");
 								System.out.println(sender + " 在群里说:" + ctt);
 								if(ctt.contains("@" + user.NickName)) {
-									String reply = AutoReply.call(ctt.replace("@" + user.NickName, ""), sender);
+									String detail = ctt.replace("@" + user.NickName, "");
+									String reply = "什么情况?";
+									if(!"".equals(detail.trim())) {
+										reply = AutoReply.call(detail, sender);
+									}
+									
 									WeChatUtil.sendMsg(reply, FromUserName, sign, user);
 								}
 								
@@ -382,6 +415,8 @@ public class MainWindow {
 								String reply = AutoReply.call(ctt, sender);
 								WeChatUtil.sendMsg(reply, FromUserName, sign, user);
 							}
+						}else if(3 == MsgType) {
+							
 						}
 					}
 				}
