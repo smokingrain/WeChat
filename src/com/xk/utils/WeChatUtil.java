@@ -11,6 +11,8 @@ import java.util.Map;
 
 import org.apache.http.client.ClientProtocolException;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.User;
@@ -88,6 +90,7 @@ public class WeChatUtil {
 		
 		try {
 			String result = hu.postBody(Constant.GET_INIT.replace("{TIME}", System.currentTimeMillis() + ""), JSONUtil.toJson(bodyMap));
+			System.out.println(result);
 			Map<String, Object> rstMap = JSONUtil.fromJson(result);
 			Map<String, Object> baseResponse = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != baseResponse && new Integer(0).equals(baseResponse.get("Ret"))) {
@@ -97,12 +100,11 @@ public class WeChatUtil {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 						
-						Image img = null;
 						
 						InputStream in = hu.getInput(headUrl);
 						try {
 							Image temp = new Image(null, in);
-							img = SWTTools.scaleImage(temp.getImageData(), 50, 50);
+							convs.head = SWTTools.scaleImage(temp.getImageData(), 50, 50);
 							temp.dispose();
 							
 						} catch (Exception e) {
@@ -119,9 +121,15 @@ public class WeChatUtil {
 						System.out.println("load conver " + name);
 						Integer Statues = convs.Statues;
 						Integer ContactFlag = convs.ContactFlag;
-						ConvItem ci = new ConvItem(convs, img, name, null, null, null, ContactFlag == 2051, Statues == 0, 0);
+						boolean top = ContactFlag == 2051;
+						ConvItem ci = new ConvItem(convs, name, null, null, null, top, Statues == 0, 0);
 						MyList list = window.lists.get(ctItem);
-						list.addItem(ci);
+						if(top) {
+							list.addItem(0, ci);
+						} else {
+							list.addItem(ci);
+						}
+						
 						if(convs.UserName.indexOf("@@") > -1) {
 							allGroups.add(convs.UserName);
 						}
@@ -217,6 +225,7 @@ public class WeChatUtil {
 		
 		try {
 			String result = hu.readJsonfromURL2(Constant.GET_CONTACT, params);
+			System.out.println(result);
 			Map<String, Object> rstMap = JSONUtil.fromJson(result);
 			Map<String, Object> baseResponse = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != baseResponse && new Integer(0).equals(baseResponse.get("Ret"))) {
@@ -226,11 +235,10 @@ public class WeChatUtil {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
 						window.contacts.put(convs.UserName, convs);
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
-						Image img = null;
 						InputStream in = hu.getInput(headUrl);
 						try {
 							Image temp = new Image(null, in);
-							img = SWTTools.scaleImage(temp.getImageData(), 50, 50);
+							convs.head = SWTTools.scaleImage(temp.getImageData(), 50, 50);
 							temp.dispose();
 							
 						} catch (Exception e) {
@@ -245,7 +253,7 @@ public class WeChatUtil {
 						String remark = convs.RemarkName;
 						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
 						System.out.println("load contact " + name + "   " + convs.UserName);
-						ContactItem ci = new ContactItem(convs, false, img, name);
+						ContactItem ci = new ContactItem(convs, false, name);
 						MyList list = window.lists.get(ctItem);
 						list.addItem(ci);
 						if(convs.UserName.indexOf("@@") > -1) {
@@ -265,6 +273,65 @@ public class WeChatUtil {
 		return allGroups;
 	}
 	
+	
+	/**
+	 * 用途：抓取聊天图片
+	 * @date 2016年12月20日
+	 * @return
+	 */
+	public static ImageLoader loadImage(WeChatSign sign, String msgId, String type) {
+		String url = Constant.LOAD_IMG;
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("MsgID", msgId);
+		params.put("skey", sign.skey);
+		if(null != type && !type.trim().isEmpty()) {
+			params.put("type", type);
+		}
+		HTTPUtil hu = HTTPUtil.getInstance();
+		InputStream in = hu.getInput(url, params);
+		try {
+			
+			ImageLoader load = new ImageLoader();
+			load.load(in);
+			return load;
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if(null != in) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
+	
+	
+	/**
+	 * 用途：退出微信
+	 * @date 2016年12月20日
+	 * @param sign
+	 */
+	public static void exitWeChat(WeChatSign sign) {
+		String url = Constant.LOGOUT_URL.replace("{SKEY}", sign.skey);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("sid", sign.wxsid);
+		params.put("uin", sign.wxuin);
+		HTTPUtil hu = HTTPUtil.getInstance();
+		try {
+			hu.readJsonfromURL2(url, params);
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	/**
 	 * 用途：抓取群组
@@ -307,11 +374,10 @@ public class WeChatUtil {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
 						window.contacts.put(convs.UserName, convs);
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
-						Image img = null;
 						InputStream in = hu.getInput(headUrl);
 						try {
 							Image temp = new Image(null, in);
-							img = SWTTools.scaleImage(temp.getImageData(), 50, 50);
+							convs.head = SWTTools.scaleImage(temp.getImageData(), 50, 50);
 							temp.dispose();
 							
 						} catch (Exception e) {
@@ -326,7 +392,7 @@ public class WeChatUtil {
 						String remark = convs.RemarkName;
 						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
 						System.out.println("load group " + name + convs.UserName);
-						ContactItem ci = new ContactItem(convs, false, img, name);
+						ContactItem ci = new ContactItem(convs, false, name);
 						MyList list = window.lists.get(ctItem);
 						list.addItem(ci);
 					}

@@ -1,7 +1,5 @@
 package com.xk.ui.items;
 
-import java.util.Map;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Color;
@@ -19,7 +17,6 @@ import com.xk.utils.FileUtils;
 public class ConvItem extends ListItem {
 
 	private ContactsStruct data;
-	private Image head;//头像
 	private String name;//会话名
 	private String lastChat;//上一个发言人
 	private String lastMsg;//上一条消息
@@ -32,11 +29,10 @@ public class ConvItem extends ListItem {
 	private Image topImage=SWTResourceManager.getImage(ConvItem.class, "/images/top.png");
 	
 	
-	public ConvItem(ContactsStruct data, Image head, String name, String lastChat, String lastMsg, String lastTime,
+	public ConvItem(ContactsStruct data, String name, String lastChat, String lastMsg, String lastTime,
 			boolean top, boolean silence, Integer unread) {
 		super();
 		this.data = data;
-		this.head = head;
 		this.name = name;
 		this.lastChat = lastChat;
 		this.lastMsg = lastMsg;
@@ -53,8 +49,14 @@ public class ConvItem extends ListItem {
 
 	@Override
 	public void draw(GC gc, int start, int width, int index) {
+		if(selected) {
+			int alf=gc.getAlpha();
+			gc.setAlpha(155);
+			gc.fillRectangle(0, start, width-MyList.BAR_WIDTH, getHeight());
+			gc.setAlpha(alf);
+		}
 		Font font=SWTResourceManager.getFont("宋体", 10, SWT.NORMAL);
-		gc.drawImage((null == head || head.isDisposed()) ? headDefault : head, 15, start + 7);
+		gc.drawImage((null == data.head || data.head.isDisposed()) ? headDefault : data.head, 15, start + 7);
 		Path path=new Path(null);
 		path.addString(name, 15 + 58f, start + 15f, font);
 		if(top) {
@@ -68,12 +70,7 @@ public class ConvItem extends ListItem {
 		if(null != lastTime) {
 			path.addString(lastTime, width - MyList.BAR_WIDTH - 40f, start + 15f, font);
 		}
-		if(selected) {
-			int alf=gc.getAlpha();
-			gc.setAlpha(155);
-			gc.fillRectangle(0, start, width-MyList.BAR_WIDTH, getHeight());
-			gc.setAlpha(alf);
-		}
+		
 		gc.drawPath(path);
 		path.dispose();
 		if(unread > 0) {
@@ -97,6 +94,70 @@ public class ConvItem extends ListItem {
 	@Override
 	public boolean oncliek(MouseEvent e, int itemHeight, int index) {
 		return true;
+	}
+
+	public ContactsStruct getData() {
+		return data;
+	}
+
+	public void setData(ContactsStruct data) {
+		this.data = data;
+	}
+
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getLastChat() {
+		return lastChat;
+	}
+
+	public void setLastChat(String lastChat) {
+		this.lastChat = lastChat;
+	}
+
+	public String getLastMsg() {
+		return lastMsg;
+	}
+
+	public void setLastMsg(String lastMsg) {
+		this.lastMsg = lastMsg;
+	}
+
+	public String getLastTime() {
+		return lastTime;
+	}
+
+	public void setLastTime(String lastTime) {
+		this.lastTime = lastTime;
+	}
+
+	public boolean isTop() {
+		return top;
+	}
+
+	public void setTop(boolean top) {
+		this.top = top;
+	}
+
+	public boolean isSilence() {
+		return silence;
+	}
+
+	public void setSilence(boolean silence) {
+		this.silence = silence;
+	}
+
+	public Integer getUnread() {
+		return unread;
+	}
+
+	public void setUnread(Integer unread) {
+		this.unread = unread;
 	}
 
 }

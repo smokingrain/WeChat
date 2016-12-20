@@ -18,14 +18,12 @@ public class ContactItem extends ListItem {
 	private ContactsStruct data;
 	private Image headDefault=SWTResourceManager.getImage(ContactItem.class, "/images/head.png");
 	private boolean dir;
-	private Image head;
 	private String name;
 	
-	public ContactItem(ContactsStruct data, boolean dir, Image head, String name) {
+	public ContactItem(ContactsStruct data, boolean dir, String name) {
 		super();
 		this.data = data;
 		this.dir = dir;
-		this.head = head;
 		this.name = name;
 	}
 
@@ -36,12 +34,24 @@ public class ContactItem extends ListItem {
 
 	@Override
 	public void draw(GC gc, int start, int width, int index) {
-		Font font=SWTResourceManager.getFont("宋体", 10, SWT.NORMAL);
-		if(dir) {
+		if(selected) {
 			int alf=gc.getAlpha();
+			Color bk = gc.getBackground();
+			gc.setBackground(SWTResourceManager.getColor(136, 136, 136));
 			gc.setAlpha(155);
 			gc.fillRectangle(0, start, width-MyList.BAR_WIDTH, getHeight());
 			gc.setAlpha(alf);
+			gc.setBackground(bk);
+		}
+		Font font=SWTResourceManager.getFont("宋体", 10, SWT.NORMAL);
+		if(dir) {
+			int alf=gc.getAlpha();
+			Color bk = gc.getBackground();
+			gc.setBackground(SWTResourceManager.getColor(136, 136, 136));
+			gc.setAlpha(155);
+			gc.fillRectangle(0, start, width-MyList.BAR_WIDTH, getHeight());
+			gc.setAlpha(alf);
+			gc.setBackground(bk);
 			Color fo = gc.getForeground();
 			gc.setForeground(SWTResourceManager.getColor(112, 128, 144));
 			Path path = new Path(null);
@@ -50,11 +60,7 @@ public class ContactItem extends ListItem {
 			path.dispose();
 			gc.setForeground(fo);
 		}else {
-			int alf=gc.getAlpha();
-			gc.setAlpha(155);
-			gc.fillRectangle(0, start, width-MyList.BAR_WIDTH, getHeight());
-			gc.setAlpha(alf);
-			gc.drawImage((null == head || head.isDisposed()) ? headDefault : head, 10, start + 5);
+			gc.drawImage((null == data.head || data.head.isDisposed()) ? headDefault : data.head, 10, start + 5);
 			Path path = new Path(null);
 			path.addString(name, 15f + 60f, start + 25, font);
 			gc.drawPath(path);

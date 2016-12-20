@@ -2,6 +2,9 @@ package com.xk.bean;
 
 import java.util.Map;
 
+import org.eclipse.swt.graphics.Image;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.xk.utils.JSONUtil;
 
 public class User {
@@ -25,6 +28,9 @@ public class User {
 	public Integer WebWxPluginSwitch;
 	public Integer HeadImgFlag;
 	public Integer SnsFlag;
+	
+	@JsonIgnore
+	public Image head;
 	
 	public User() {
 		

@@ -406,7 +406,15 @@ public class MyList extends Composite {
 		}
 	}
 	
-	public void addItem(ListItem item){
+	public void addItem(Integer index, ListItem item) {
+		if(null != item && null != index){
+			items.add(index, item);
+			item.setParent(this);
+			countHeight();
+		}
+	}
+	
+	public void addItem(ListItem item) {
 		if(null!=item){
 			items.add(item);
 			item.setParent(this);

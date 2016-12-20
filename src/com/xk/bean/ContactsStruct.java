@@ -3,6 +3,9 @@ package com.xk.bean;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.swt.graphics.Image;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.xk.utils.JSONUtil;
 
 public class ContactsStruct {
@@ -36,6 +39,9 @@ public class ContactsStruct {
 	public Integer ChatRoomId;
 	public String KeyWord;
 	public String EncryChatRoomId;
+	
+	@JsonIgnore
+	public Image head;
 	
 	public ContactsStruct(){
 		

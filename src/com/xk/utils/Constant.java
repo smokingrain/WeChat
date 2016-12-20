@@ -17,6 +17,11 @@ public class Constant {
 	public static final String GET_STATUE = "https://login.weixin.qq.com/cgi-bin/mmwebwx-bin/login?uuid={UUID}&tip=1&_={TIME}";
 	public static final String GET_INIT = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxinit?r={TIME}";
 	public static final String BASE_URL = "https://wx.qq.com/";
+	public static final String LOGOUT_URL = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxlogout?redirect=1&type=1&skey={SKEY}";
+	public static final String LOAD_IMG = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxgetmsgimg";
+	
+	public static final String[] FORMATS = {".bmp", ".bmp", ".gif", ".ico", ".jpg", ".png", ".tiff", ".bmp"};
+	
 	
 	// 特殊用户 须过滤
 	public static final List<String> FILTER_USERS = Arrays.asList("newsapp", "fmessage", "filehelper", "weibo", "qqmail", 

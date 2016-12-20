@@ -1,5 +1,7 @@
 package com.xk.ui.main;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
@@ -14,6 +16,8 @@ import java.util.TimerTask;
 
 import org.apache.http.client.ClientProtocolException;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.FocusAdapter;
+import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -21,6 +25,8 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
 import com.xk.bean.ContactsStruct;
@@ -29,6 +35,8 @@ import com.xk.bean.WeChatSign;
 import com.xk.ui.items.ContactItem;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.items.TypeItem;
+import com.xk.ui.main.chat.ChatComp;
+import com.xk.uiLib.BaseBox;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 import com.xk.uiLib.MyText;
@@ -98,6 +106,24 @@ public class MainWindow {
 		Label me = new Label(composite, SWT.NONE);
 		me.setBounds(10, 10, 30, 30);
 		me.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
+		me.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseUp(MouseEvent e) {
+				Point globPos = me.toDisplay(me.getLocation());
+				System.out.println(globPos.x  + "  " + globPos.y);
+				FloatWindow bb = FloatWindow.getInstance();
+				bb.init();
+				bb.setSize(180, 255);
+				MyInfoComp mic = new MyInfoComp(bb.shell, SWT.NONE, user);
+				bb.add(mic);
+				Integer rst = (Integer) bb.open(globPos.x + e.x, globPos.y + e.y);
+				if(null != rst && 1 == rst) {
+					//打开和自己聊天的窗口
+				}
+			}
+			
+		});
 		
 		MyList types = new MyList(composite ,50 , 490);
 		types.setMask(10);
@@ -180,14 +206,18 @@ public class MainWindow {
 		label.setBounds(262, 16, 29, 24);
 		label.setText("+");
 		
-		final Label minL = new Label(shell, SWT.NONE);
+		ChatComp cc = new ChatComp(shell, SWT.NONE);
+		SWTTools.enableTrag(cc);
+		
+		
+		final Label minL = new Label(cc, SWT.NONE);
 		minL.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		minL.setFont(SWTResourceManager.getFont("微软雅黑", 6, SWT.NORMAL));
 		minL.setAlignment(SWT.CENTER);
 		minL.setOrientation(SWT.RIGHT_TO_LEFT);
-		minL.setBounds(791, 0, 29, 25);
+		minL.setBounds(491, 0, 29, 25);
 		minL.setText("\n__");
-		minL.setBackground(back);
+		minL.setBackground(SWTResourceManager.getColor(245, 245, 245));
 		minL.setToolTipText("最小化");
 		minL.addMouseTrackListener(new MouseTrackListener() {
 			
@@ -197,7 +227,7 @@ public class MainWindow {
 			
 			@Override
 			public void mouseExit(MouseEvent arg0) {
-				minL.setBackground(back);
+				minL.setBackground(cc.getBackground());
 				
 			}
 			
@@ -217,14 +247,14 @@ public class MainWindow {
 		});
 		
 		
-		final Label closeL = new Label(shell, SWT.NONE);
+		final Label closeL = new Label(cc, SWT.NONE);
 		closeL.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		closeL.setText("\nX");
 		closeL.setOrientation(SWT.RIGHT_TO_LEFT);
 		closeL.setFont(SWTResourceManager.getFont("微软雅黑", 6, SWT.NORMAL));
 		closeL.setAlignment(SWT.CENTER);
-		closeL.setBounds(819, 0, 29, 25);
-		closeL.setBackground(back);
+		closeL.setBounds(519, 0, 29, 25);
+		closeL.setBackground(SWTResourceManager.getColor(245, 245, 245));
 		closeL.setToolTipText("关闭");
 		closeL.addMouseTrackListener(new MouseTrackListener() {
 			
@@ -234,7 +264,7 @@ public class MainWindow {
 			
 			@Override
 			public void mouseExit(MouseEvent arg0) {
-				closeL.setBackground(back);
+				closeL.setBackground(cc.getBackground());
 				
 			}
 			
@@ -248,11 +278,14 @@ public class MainWindow {
 
 			@Override
 			public void mouseUp(MouseEvent e) {
+				WeChatUtil.exitWeChat(sign);
 				shell.dispose();
 				System.exit(0);
 			}
 			
 		});
+		
+		
 		
 		List<String> g = WeChatUtil.loadConvers(ctItem, sign, this);
 		WeChatUtil.startNotify(sign, user);
@@ -264,11 +297,12 @@ public class MainWindow {
 		
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Image img = null;
-		String headUrl = Constant.BASE_URL + user.HeadImgUrl;
+		String headUrl = Constant.BASE_URL + user.HeadImgUrl + "&type=big";
 		InputStream in = hu.getInput(headUrl);
 		try {
 			Image temp = new Image(null, in);
 			img = SWTTools.scaleImage(temp.getImageData(), 30, 30);
+			user.head = SWTTools.scaleImage(temp.getImageData(), 180, 180);
 			temp.dispose();
 			
 		} catch (Exception e) {
@@ -415,8 +449,17 @@ public class MainWindow {
 								String reply = AutoReply.call(ctt, sender);
 								WeChatUtil.sendMsg(reply, FromUserName, sign, user);
 							}
-						}else if(3 == MsgType) {
-							
+						}else if(3 == MsgType || 47 == MsgType) {
+							if(null != Content && !Content.isEmpty()) {
+								String MsgId = (String) msg.get("MsgId");
+								ImageLoader loader = WeChatUtil.loadImage(sign, MsgId, null);
+								if(null != loader) {
+									File file = new File("msgimages", MsgId + Constant.FORMATS[loader.format]);
+									FileOutputStream out = new FileOutputStream(file); 
+									loader.save(out, loader.format);
+									out.close();
+								}
+							}
 						}
 					}
 				}

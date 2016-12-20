@@ -8,6 +8,7 @@ import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Transform;
+import org.eclipse.swt.internal.win32.OS;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -17,6 +18,10 @@ import org.eclipse.swt.widgets.Shell;
 
 public class SWTTools {
 
+	public static void topWindow(Shell shell) {
+		OS.SetWindowPos(shell.handle , OS.HWND_TOPMOST, shell.getLocation().x , shell.getLocation().y , shell.getSize().x , shell.getSize().y , SWT.NULL);
+	}
+	
 	public static void enableTrag(Control ctrl) {
 		final Composite composite=ctrl.getShell();
 		

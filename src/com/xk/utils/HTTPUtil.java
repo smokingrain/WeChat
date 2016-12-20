@@ -103,7 +103,14 @@ public class HTTPUtil {
 		return result.toString();
 	}
 	
-	public InputStream getInput(String url){
+	public InputStream getInput(String url, Map<String, String> params){
+		if(null != params) {
+			url += "?";
+			for(String key : params.keySet()) {
+				String value = params.get(key);
+				url += key + "=" + value + "&";
+			}
+		}
 		HttpGet httppost = new HttpGet(url);  
 		httppost.addHeader("Connection", "keep-alive");
 		httppost.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
@@ -134,6 +141,10 @@ public class HTTPUtil {
 			e.printStackTrace();
 		}
 		return null;
+		
+	}
+	public InputStream getInput(String url){
+		return getInput(url, null);
 		
 	}
 	
