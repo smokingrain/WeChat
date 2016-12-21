@@ -24,9 +24,9 @@ public class ConvItem extends ListItem {
 	private boolean top;//是否置顶
 	private boolean silence;//是否不提示消息数
 	private Integer unread;//未读数
-	private Image headDefault=SWTResourceManager.getImage(ConvItem.class, "/images/head.png");
-	private Image silenceImage=SWTResourceManager.getImage(ConvItem.class, "/images/silence.png");
-	private Image topImage=SWTResourceManager.getImage(ConvItem.class, "/images/top.png");
+	private Image headDefault = SWTResourceManager.getImage(ConvItem.class, "/images/head.png");
+	private Image silenceImage = SWTResourceManager.getImage(ConvItem.class, "/images/silence.png");
+	private Image topImage = SWTResourceManager.getImage(ConvItem.class, "/images/top.png");
 	
 	
 	public ConvItem(ContactsStruct data, String name, String lastChat, String lastMsg, String lastTime,
@@ -51,9 +51,12 @@ public class ConvItem extends ListItem {
 	public void draw(GC gc, int start, int width, int index) {
 		if(selected) {
 			int alf=gc.getAlpha();
+			Color bk = gc.getBackground();
+			gc.setBackground(SWTResourceManager.getColor(136, 136, 136));
 			gc.setAlpha(155);
 			gc.fillRectangle(0, start, width-MyList.BAR_WIDTH, getHeight());
 			gc.setAlpha(alf);
+			gc.setBackground(bk);
 		}
 		Font font=SWTResourceManager.getFont("宋体", 10, SWT.NORMAL);
 		gc.drawImage((null == data.head || data.head.isDisposed()) ? headDefault : data.head, 15, start + 7);

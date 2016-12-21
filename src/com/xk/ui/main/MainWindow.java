@@ -16,6 +16,7 @@ import java.util.TimerTask;
 
 import org.apache.http.client.ClientProtocolException;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.KeyAdapter;
@@ -210,13 +211,13 @@ public class MainWindow {
 		SWTTools.enableTrag(cc);
 		
 		
-		final Label minL = new Label(cc, SWT.NONE);
-		minL.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
-		minL.setFont(SWTResourceManager.getFont("微软雅黑", 6, SWT.NORMAL));
-		minL.setAlignment(SWT.CENTER);
+		final CLabel minL = new CLabel(cc, SWT.CENTER);
 		minL.setOrientation(SWT.RIGHT_TO_LEFT);
+		minL.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
+		minL.setFont(SWTResourceManager.getFont("微软雅黑", 9, SWT.NORMAL));
+		minL.setAlignment(SWT.CENTER);
 		minL.setBounds(491, 0, 29, 25);
-		minL.setText("\n__");
+		minL.setText("__");
 		minL.setBackground(SWTResourceManager.getColor(245, 245, 245));
 		minL.setToolTipText("最小化");
 		minL.addMouseTrackListener(new MouseTrackListener() {
@@ -247,11 +248,11 @@ public class MainWindow {
 		});
 		
 		
-		final Label closeL = new Label(cc, SWT.NONE);
+		final CLabel closeL = new CLabel(cc, SWT.CENTER);
 		closeL.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
-		closeL.setText("\nX");
+		closeL.setText("X");
 		closeL.setOrientation(SWT.RIGHT_TO_LEFT);
-		closeL.setFont(SWTResourceManager.getFont("微软雅黑", 6, SWT.NORMAL));
+		closeL.setFont(SWTResourceManager.getFont("微软雅黑", 8, SWT.NORMAL));
 		closeL.setAlignment(SWT.CENTER);
 		closeL.setBounds(519, 0, 29, 25);
 		closeL.setBackground(SWTResourceManager.getColor(245, 245, 245));
@@ -455,6 +456,7 @@ public class MainWindow {
 								ImageLoader loader = WeChatUtil.loadImage(sign, MsgId, null);
 								if(null != loader) {
 									File file = new File("msgimages", MsgId + Constant.FORMATS[loader.format]);
+									file.getParentFile().mkdirs();
 									FileOutputStream out = new FileOutputStream(file); 
 									loader.save(out, loader.format);
 									out.close();
