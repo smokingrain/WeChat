@@ -29,7 +29,7 @@ public class ImageCache {
 	}
 	
 	
-	private static Image getImage(String id, File cache, Map<String, Image> caches, String url, Map<String, String> params) {
+	private static Image getImage(final String id, File cache, Map<String, Image> caches, String url, Map<String, String> params) {
 		if(!cache.exists()) {
 			cache.mkdirs();
 		}else if(cache.exists() && !cache.isDirectory()) {

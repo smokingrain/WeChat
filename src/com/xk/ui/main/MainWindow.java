@@ -104,7 +104,7 @@ public class MainWindow {
 		composite.setBounds(0, 0, 50, 590);
 		composite.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		
-		Label me = new Label(composite, SWT.NONE);
+		final Label me = new Label(composite, SWT.NONE);
 		me.setBounds(10, 10, 30, 30);
 		me.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		me.addMouseListener(new MouseAdapter() {
@@ -207,7 +207,7 @@ public class MainWindow {
 		label.setBounds(262, 16, 29, 24);
 		label.setText("+");
 		
-		ChatComp cc = new ChatComp(shell, SWT.NONE);
+		final ChatComp cc = new ChatComp(shell, SWT.NONE);
 		SWTTools.enableTrag(cc);
 		
 		
