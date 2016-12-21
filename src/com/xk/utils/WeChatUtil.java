@@ -283,7 +283,12 @@ public class WeChatUtil {
 		String url = Constant.LOAD_IMG;
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("MsgID", msgId);
-		params.put("skey", sign.skey);
+		try {
+			params.put("skey", URLEncoder.encode(sign.skey, "UTF-8"));
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
 		if(null != type && !type.trim().isEmpty()) {
 			params.put("type", type);
 		}
