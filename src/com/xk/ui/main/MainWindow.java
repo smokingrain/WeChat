@@ -17,6 +17,8 @@ import java.util.TimerTask;
 import org.apache.http.client.ClientProtocolException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusAdapter;
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.KeyAdapter;
@@ -95,6 +97,14 @@ public class MainWindow {
 		shell.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		shell.setText("微信");
 		shell.setImage(SWTResourceManager.getImage(MainWindow.class, "/images/wechat.jpg"));
+		shell.addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent arg0) {
+				WeChatUtil.exitWeChat(sign);
+				System.exit(0);
+			}
+		});
 		SWTTools.enableTrag(shell);
 
 		
@@ -216,7 +226,7 @@ public class MainWindow {
 		minL.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		minL.setFont(SWTResourceManager.getFont("微软雅黑", 9, SWT.NORMAL));
 		minL.setAlignment(SWT.CENTER);
-		minL.setBounds(491, 0, 29, 25);
+		minL.setBounds(491, -5, 29, 30);
 		minL.setText("__");
 		minL.setBackground(SWTResourceManager.getColor(245, 245, 245));
 		minL.setToolTipText("最小化");
@@ -279,9 +289,7 @@ public class MainWindow {
 
 			@Override
 			public void mouseUp(MouseEvent e) {
-				WeChatUtil.exitWeChat(sign);
 				shell.dispose();
-				System.exit(0);
 			}
 			
 		});

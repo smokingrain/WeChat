@@ -51,9 +51,11 @@ public class ChatComp extends Composite {
 		coolBar.setBounds(0, 400, 550, 30);
 		
 		coolItem = new CoolItem(coolBar, SWT.NONE);
+		coolItem.setImage(SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png"));
 		
-		text = new Text(this, SWT.BORDER);
-		text.setBounds(0, 430, 550, 115);
+		
+		text = new Text(this, SWT.MULTI);
+		text.setBounds(0, 430, 549, 115);
 		
 		lbls = new CLabel(this, SWT.CENTER);
 		lbls.setBounds(479, 551, 60, 29);
