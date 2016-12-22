@@ -47,17 +47,15 @@ public class ChatComp extends Composite {
 		chatList = new MyList(this, 550, 375);
 		chatList.setLocation(0, 25);
 		
-		CoolBar coolBar = new CoolBar(this, SWT.FLAT);
-		coolBar.setBounds(0, 400, 550, 30);
-		
-		coolItem = new CoolItem(coolBar, SWT.NONE);
-		coolItem.setImage(SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png"));
-		
+		CLabel emojL = new CLabel(this, SWT.NONE);
+		emojL.setBounds(0, 400, 30, 30);
+		emojL.setBackground(SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png"));
 		
 		text = new Text(this, SWT.MULTI);
 		text.setBounds(0, 430, 549, 115);
 		
 		lbls = new CLabel(this, SWT.CENTER);
+		lbls.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		lbls.setBounds(479, 551, 60, 29);
 		lbls.setText("发送(S)");
 		lbls.setBackground(getBackground());

@@ -49,6 +49,7 @@ import com.xk.uiLib.listeners.ItemSelectionListener;
 import com.xk.utils.AutoReply;
 import com.xk.utils.Constant;
 import com.xk.utils.HTTPUtil;
+import com.xk.utils.ImageCache;
 import com.xk.utils.JSONUtil;
 import com.xk.utils.SWTTools;
 import com.xk.utils.WeChatUtil;
@@ -294,7 +295,8 @@ public class MainWindow {
 			
 		});
 		
-		
+		//头像缓存
+		ImageCache.loadHeadCache();
 		
 		List<String> g = WeChatUtil.loadConvers(ctItem, sign, this);
 		WeChatUtil.startNotify(sign, user);
@@ -304,29 +306,11 @@ public class MainWindow {
 		WeChatUtil.loadGroups(conItem,group, sign, this);
 		
 		
-		HTTPUtil hu = HTTPUtil.getInstance();
 		Image img = null;
 		String headUrl = Constant.BASE_URL + user.HeadImgUrl + "&type=big";
-		InputStream in = hu.getInput(headUrl);
-		try {
-			Image temp = new Image(null, in);
-			img = SWTTools.scaleImage(temp.getImageData(), 30, 30);
-			user.head = SWTTools.scaleImage(temp.getImageData(), 180, 180);
-			temp.dispose();
-			
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}finally {
-			if(null != in) {
-				try {
-					in.close();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-			}
-		}
+		Image temp = ImageCache.getUserHeadCache(user.UserName, headUrl, null, 180, 180);
+		img = SWTTools.scaleImage(temp.getImageData(), 30, 30);
+		user.head = temp;
 		me.setImage(img);
 	}
 	

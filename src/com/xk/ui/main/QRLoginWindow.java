@@ -10,6 +10,8 @@ import org.dom4j.Document;
 import org.dom4j.Element;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseTrackListener;
@@ -71,6 +73,13 @@ public class QRLoginWindow {
 		shell.setBackground(back);
 		shell.setSize(280, 400);
 		shell.setText("微信");
+		shell.addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent paramDisposeEvent) {
+				System.exit(0);
+			}
+		});
 		
 		SWTTools.centerWindow(shell);
 		SWTTools.enableTrag(shell);
