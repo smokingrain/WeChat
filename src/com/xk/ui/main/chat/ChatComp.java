@@ -116,6 +116,7 @@ public class ChatComp extends Composite {
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
+				
 				nameL.setText(item.getName());
 				chatList.scrollToBottom();
 				chatList.flush();
