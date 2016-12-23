@@ -49,7 +49,7 @@ public class MyList extends Composite {
 	private STATE state=STATE.NORMAL;//滚动条状态
 	private int downY=0;//鼠标按下位置(相对滚动条bar)
 	
-	private int mask=0;//模糊背景
+	private int mask = 255;//模糊背景
 	private boolean simpleSelect=false;//单击选中
 	
 	/**
@@ -197,6 +197,15 @@ public class MyList extends Composite {
 			}
 			
 		});
+	}
+	
+	public void scrollToBottom() {
+		if (!showScroll) {
+			return;
+		}
+		barY = height - barHeight - 2 * BAR_ARROW_HEIGHT;
+		double per = (double) barY / (height - barHeight - 2 * BAR_ARROW_HEIGHT);// 滚动百分比
+		startY = (int) (0 - (allHeight - height) * per);
 	}
 	
 	private void checkFocus(MouseEvent e){

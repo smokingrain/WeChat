@@ -70,7 +70,6 @@ public class ImageCache {
 		if(null != temp && !temp.isDisposed()) {
 			if(temp.getImageData().width != width || temp.getImageData().height != height) {
 				Image img = SWTTools.scaleImage(temp.getImageData(), width, height);
-				temp.dispose();
 				chatImages.put(msgId, img);
 				return img;
 			}
@@ -157,7 +156,6 @@ public class ImageCache {
 			System.out.println(userName + " find cache!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			if(temp.getImageData().width != width || temp.getImageData().height != height) {
 				Image img = SWTTools.scaleImage(temp.getImageData(), width, height);
-				temp.dispose();
 				userHeads.put(userName, img);
 				return img;
 			}

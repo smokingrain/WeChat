@@ -3,10 +3,8 @@ package com.xk.ui.main;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -19,8 +17,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -35,11 +31,11 @@ import org.eclipse.swt.widgets.Shell;
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.User;
 import com.xk.bean.WeChatSign;
-import com.xk.ui.items.ContactItem;
+import com.xk.chatlogs.ChatLog;
+import com.xk.chatlogs.ChatLogCache;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.items.TypeItem;
 import com.xk.ui.main.chat.ChatComp;
-import com.xk.uiLib.BaseBox;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 import com.xk.uiLib.MyText;
@@ -57,18 +53,15 @@ import com.xk.utils.WeChatUtil;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.wb.swt.SWTResourceManager;
-import org.omg.PortableInterceptor.SYSTEM_EXCEPTION;
 import org.eclipse.swt.widgets.Label;
 
 public class MainWindow {
 
 	private Timer timer;
-	public User user;
 	protected Shell shell;
 	private WeChatSign sign;
 	public Map<ListItem, MyList> lists = new HashMap<ListItem, MyList>();
 	private MyText text;
-	public Map<String, ContactsStruct> contacts = new HashMap<>();
 	private boolean syncGroup = false;
 
 	public MainWindow(WeChatSign sign) {
@@ -127,7 +120,7 @@ public class MainWindow {
 				FloatWindow bb = FloatWindow.getInstance();
 				bb.init();
 				bb.setSize(180, 255);
-				MyInfoComp mic = new MyInfoComp(bb.shell, SWT.NONE, user);
+				MyInfoComp mic = new MyInfoComp(bb.shell, SWT.NONE, Constant.user);
 				bb.add(mic);
 				Integer rst = (Integer) bb.open(globPos.x + e.x, globPos.y + e.y);
 				if(null != rst && 1 == rst) {
@@ -150,7 +143,7 @@ public class MainWindow {
 		MyList convers = new MyList(shell, 250, 540);
 		convers.setMask(120);
 		convers.setLocation(50, 50);
-		convers.setSimpleSelect(true);
+		convers.setSimpleSelect(false);
 		
 		lists.put(ctItem, convers);
 		
@@ -221,6 +214,17 @@ public class MainWindow {
 		final ChatComp cc = new ChatComp(shell, SWT.NONE);
 		SWTTools.enableTrag(cc);
 		
+		//选中聊天会话
+		convers.add(new ItemSelectionListener() {
+			
+			@Override
+			public void selected(ItemSelectionEvent e) {
+				ConvItem item = (ConvItem) e.item;
+				System.out.println(item.getName() + " selected!!!");
+				cc.flush(item);
+				
+			}
+		});
 		
 		final CLabel minL = new CLabel(cc, SWT.CENTER);
 		minL.setOrientation(SWT.RIGHT_TO_LEFT);
@@ -299,7 +303,7 @@ public class MainWindow {
 		ImageCache.loadHeadCache();
 		
 		List<String> g = WeChatUtil.loadConvers(ctItem, sign, this);
-		WeChatUtil.startNotify(sign, user);
+		WeChatUtil.startNotify(sign);
 		WeChatUtil.loadGroups(conItem,g, sign, this);
 		syncData(conItem);
 		List<String> group = WeChatUtil.loadContacts(conItem, sign, this);
@@ -307,10 +311,10 @@ public class MainWindow {
 		
 		
 		Image img = null;
-		String headUrl = Constant.BASE_URL + user.HeadImgUrl + "&type=big";
-		Image temp = ImageCache.getUserHeadCache(user.UserName, headUrl, null, 180, 180);
+		String headUrl = Constant.BASE_URL + Constant.user.HeadImgUrl + "&type=big";
+		Image temp = ImageCache.getUserHeadCache(Constant.user.UserName, headUrl, null, 180, 180);
 		img = SWTTools.scaleImage(temp.getImageData(), 30, 30);
-		user.head = temp;
+		Constant.user.head = temp;
 		me.setImage(img);
 	}
 	
@@ -418,29 +422,36 @@ public class MainWindow {
 						}else if(1 == MsgType) {
 							if(Constant.FILTER_USERS.contains(FromUserName)) {
 								System.out.println("忽略特殊用户信息！！" + Content);
-							}else if(FromUserName.equals(user.UserName)){
+							}else if(FromUserName.equals(Constant.user.UserName)){
+								ChatLog log = ChatLog.fromMap(msg);
+								ChatLogCache.saveLogs(ToUserName, log);
 								System.out.println("来自手机端自己的消息：" + Content);
-							}else if(FromUserName.indexOf("@@") > -1) {
+							}else if(FromUserName.startsWith("@@")) {
+								ChatLog log = ChatLog.fromMap(msg);
+								ChatLogCache.saveLogs(FromUserName, log);
 								String[] splt = Content.split(":<br/>");
-								String sender = ContactsStruct.getGroupMember(splt[0], contacts.get(FromUserName));
+								String sender = ContactsStruct.getGroupMember(splt[0], Constant.contacts.get(FromUserName));
 								String ctt = splt[1].replace("<br/>", "\n");
+								
 								System.out.println(sender + " 在群里说:" + ctt);
-								if(ctt.contains("@" + user.NickName)) {
-									String detail = ctt.replace("@" + user.NickName, "");
+								if(ctt.contains("@" + Constant.user.NickName)) {
+									String detail = ctt.replace("@" + Constant.user.NickName, "");
 									String reply = "什么情况?";
 									if(!"".equals(detail.trim())) {
 										reply = AutoReply.call(detail, sender);
 									}
 									
-									WeChatUtil.sendMsg(reply, FromUserName, sign, user);
+									WeChatUtil.sendMsg(reply, FromUserName, sign);
 								}
 								
 							}else {
-								String sender = ContactsStruct.getContactName(contacts.get(FromUserName));
+								ChatLog log = ChatLog.fromMap(msg);
+								ChatLogCache.saveLogs(FromUserName, log);
+								String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
 								String ctt = Content.replace("<br/>", "\n");
 								System.out.println(sender + " 说：" + ctt);
 								String reply = AutoReply.call(ctt, sender);
-								WeChatUtil.sendMsg(reply, FromUserName, sign, user);
+								WeChatUtil.sendMsg(reply, FromUserName, sign);
 							}
 						}else if(3 == MsgType || 47 == MsgType) {
 							if(null != Content && !Content.isEmpty()) {
