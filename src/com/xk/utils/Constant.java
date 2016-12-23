@@ -1,7 +1,12 @@
 package com.xk.utils;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+
+import com.xk.bean.ContactsStruct;
+import com.xk.bean.User;
 
 public class Constant {
 	
@@ -22,6 +27,9 @@ public class Constant {
 	
 	public static final String[] FORMATS = {".bmp", ".bmp", ".gif", ".ico", ".jpg", ".png", ".tiff", ".bmp"};
 	
+	public static User user;
+	
+	public static Map<String, ContactsStruct> contacts = new HashMap<>();
 	
 	// 特殊用户 须过滤
 	public static final List<String> FILTER_USERS = Arrays.asList("newsapp", "fmessage", "filehelper", "weibo", "qqmail", 

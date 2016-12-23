@@ -34,7 +34,7 @@ public class WeChatUtil {
 	 * @param sign
 	 * @param user
 	 */
-	public static void sendMsg(String msg, String to, WeChatSign sign, User user) {
+	public static void sendMsg(String msg, String to, WeChatSign sign) {
 		Map<String, String> params = new HashMap<>();
 		params.put("lang", "zh_CN");
 		params.put("pass_ticket", sign.pass_ticket);
@@ -52,7 +52,7 @@ public class WeChatUtil {
 		msgMap.put("Content", msg);
 		msgMap.put("Type", 1);
 		msgMap.put("ToUserName", to);
-		msgMap.put("FromUserName", user.UserName);
+		msgMap.put("FromUserName", Constant.user.UserName);
 		msgMap.put("LocalID", cur);
 		body.put("Msg", msgMap);
 		
@@ -90,7 +90,6 @@ public class WeChatUtil {
 		
 		try {
 			String result = hu.postBody(Constant.GET_INIT.replace("{TIME}", System.currentTimeMillis() + ""), JSONUtil.toJson(bodyMap));
-			System.out.println(result);
 			Map<String, Object> rstMap = JSONUtil.fromJson(result);
 			Map<String, Object> baseResponse = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != baseResponse && new Integer(0).equals(baseResponse.get("Ret"))) {
@@ -100,21 +99,8 @@ public class WeChatUtil {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 						
+						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
 						
-						InputStream in = hu.getInput(headUrl);
-						try {
-							Image temp = new Image(null, in);
-							convs.head = SWTTools.scaleImage(temp.getImageData(), 50, 50);
-							temp.dispose();
-							
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}finally {
-							if(null != in) {
-								in.close();
-							}
-						}
 						String nick = convs.NickName;
 						String remark = convs.RemarkName;
 						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
@@ -138,7 +124,7 @@ public class WeChatUtil {
 					Map<String, Object> SyncKey = (Map<String, Object>) rstMap.get("SyncKey");
 					flushSyncKey(SyncKey, sign);
 					
-					window.user = User.fromMap( (Map<String, Object>) rstMap.get("User"));
+					Constant.user = User.fromMap( (Map<String, Object>) rstMap.get("User"));
 				}
 			}
 		} catch (Exception e) {
@@ -179,7 +165,7 @@ public class WeChatUtil {
 	 * 用途：开启消息通知
 	 * @date 2016年12月14日
 	 */
-	public static void startNotify(WeChatSign sign, User user){
+	public static void startNotify(WeChatSign sign){
 		HTTPUtil hu = HTTPUtil.getInstance();
 		String url = Constant.STATUS_NOTIFY + "?lang=zh_CN&pass_ticket=" + sign.pass_ticket;
 		Map<String, Object> body = new HashMap<String, Object>();
@@ -191,8 +177,8 @@ public class WeChatUtil {
 		body.put("BaseRequest", BaseRequest);
 		body.put("ClientMsgId", System.currentTimeMillis());
 		body.put("Code", 3);
-		body.put("FromUserName", user.UserName);
-		body.put("ToUserName", user.UserName);
+		body.put("FromUserName", Constant.user.UserName);
+		body.put("ToUserName", Constant.user.UserName);
 		
 		try {
 			String result = hu.postBody(url, JSONUtil.toJson(body));
@@ -233,22 +219,9 @@ public class WeChatUtil {
 				if(null != contactList) {
 					for(Map<String, Object> cmap : contactList) {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
-						window.contacts.put(convs.UserName, convs);
+						Constant.contacts.put(convs.UserName, convs);
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
-						InputStream in = hu.getInput(headUrl);
-						try {
-							Image temp = new Image(null, in);
-							convs.head = SWTTools.scaleImage(temp.getImageData(), 50, 50);
-							temp.dispose();
-							
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}finally {
-							if(null != in) {
-								in.close();
-							}
-						}
+						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
 						String nick = convs.NickName;
 						String remark = convs.RemarkName;
 						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
@@ -377,22 +350,9 @@ public class WeChatUtil {
 				if(null != contactList) {
 					for(Map<String, Object> cmap : contactList) {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
-						window.contacts.put(convs.UserName, convs);
+						Constant.contacts.put(convs.UserName, convs);
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
-						InputStream in = hu.getInput(headUrl);
-						try {
-							Image temp = new Image(null, in);
-							convs.head = SWTTools.scaleImage(temp.getImageData(), 50, 50);
-							temp.dispose();
-							
-						} catch (Exception e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}finally {
-							if(null != in) {
-								in.close();
-							}
-						}
+						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
 						String nick = convs.NickName;
 						String remark = convs.RemarkName;
 						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 

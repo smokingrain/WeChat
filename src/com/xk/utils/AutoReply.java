@@ -10,7 +10,7 @@ public class AutoReply {
 	
 	public static String call(String cmd,String userid) {
 		//图灵网站上的apiKey
-		String apiKey = "0ead20e9c92e4a39ba6cfd9fe75dd28c";
+		String apiKey = "xxx";
 		//待加密的json数据
 		
 		Map<String, String> dataMap = new HashMap<String, String>();

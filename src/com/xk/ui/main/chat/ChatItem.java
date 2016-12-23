@@ -18,7 +18,7 @@ public class ChatItem extends ListItem {
 
 	private static final Integer ITEM_AREA_WIDTH = 450;
 	private static final Integer LINE_SPACE_HEIGHT = 2;
-	private static final Integer HEAD_FOOT_SAPCE = 5;
+	private static final Integer HEAD_FOOT_SAPCE = 15;
 	private static final Integer HEAD_IMG_HEIGHT = 50;
 	
 	private String user;
