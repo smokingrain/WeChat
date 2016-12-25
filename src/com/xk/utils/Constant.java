@@ -2,11 +2,14 @@ package com.xk.utils;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.User;
+import com.xk.bean.WeChatSign;
 
 public class Constant {
 	
@@ -28,7 +31,8 @@ public class Constant {
 	public static final String[] FORMATS = {".bmp", ".bmp", ".gif", ".ico", ".jpg", ".png", ".tiff", ".bmp"};
 	
 	public static User user;
-	
+	public static Set<String> noReply = new HashSet<String>();
+	public static WeChatSign sign;
 	public static Map<String, ContactsStruct> contacts = new HashMap<>();
 	
 	// 特殊用户 须过滤

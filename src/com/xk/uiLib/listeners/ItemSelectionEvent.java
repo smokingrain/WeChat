@@ -3,8 +3,8 @@ package com.xk.uiLib.listeners;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 
-public class ItemSelectionEvent {
-	public ListItem item;
+public class ItemSelectionEvent<T extends ListItem> {
+	public T item;
 	public int itemHeights;
-	public MyList source;
+	public MyList<T> source;
 }

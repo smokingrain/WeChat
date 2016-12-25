@@ -1,7 +1,9 @@
 package com.xk.uiLib.listeners;
 
-public interface ItemSelectionListener {
+import com.xk.uiLib.ListItem;
 
-	public void selected(ItemSelectionEvent e);
+public interface ItemSelectionListener<T extends ListItem> {
+
+	public void selected(ItemSelectionEvent<T> e);
 	
 }

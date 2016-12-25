@@ -214,10 +214,11 @@ public class QRLoginWindow {
 									sign.skey = root.elementTextTrim("skey");
 									sign.wxsid = root.elementTextTrim("wxsid");
 									sign.wxuin = root.elementTextTrim("wxuin");
+									Constant.sign = sign;
 									Display.getDefault().asyncExec(new Runnable() {
 										public void run() {
 											shell.setVisible(false);
-											MainWindow main = new MainWindow(sign);
+											MainWindow main = new MainWindow();
 											main.open();
 										}
 									});

@@ -101,11 +101,11 @@ public class ImageCache {
 				if(null != datas && datas.length > 0) {
 					if(datas[0].width != width || datas[0].height != height) {
 						Image img = SWTTools.scaleImage(datas[0], width, height);
-						userHeads.put(id, img);
+						caches.put(id, img);
 						return img;
 					}else {
 						Image img = new Image(null,datas[0]);
-						userHeads.put(id, img);
+						caches.put(id, img);
 						return img;
 					}
 				}
@@ -122,15 +122,15 @@ public class ImageCache {
 			if(null != datas && datas.length > 0) {
 				if(datas[0].width != width || datas[0].height != height) {
 					Image img = SWTTools.scaleImage(datas[0], width, height);
-					userHeads.put(id, img);
-					File dest = new File(cache, id + Constant.FORMATS[loader.format]);
-					loader.save(dest.getAbsolutePath(), loader.format);
+					caches.put(id, img);
+//					File dest = new File(cache, id + Constant.FORMATS[loader.format]);
+//					loader.save(dest.getAbsolutePath(), loader.format);
 					return img;
 				}else {
 					Image img = new Image(null,datas[0]);
-					userHeads.put(id, img);
-					File dest = new File(cache, id + Constant.FORMATS[loader.format]);
-					loader.save(dest.getAbsolutePath(), loader.format);
+					caches.put(id, img);
+//					File dest = new File(cache, id + Constant.FORMATS[loader.format]);
+//					loader.save(dest.getAbsolutePath(), loader.format);
 					return img;
 				}
 			}

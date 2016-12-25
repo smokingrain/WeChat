@@ -2,16 +2,21 @@ package com.xk.ui.items;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Path;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.xk.bean.ContactsStruct;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
+import com.xk.utils.Constant;
 import com.xk.utils.FileUtils;
 
 public class ConvItem extends ListItem {
@@ -23,7 +28,7 @@ public class ConvItem extends ListItem {
 	private String lastTime;//上一条消息的时间
 	private boolean top;//是否置顶
 	private boolean silence;//是否不提示消息数
-	private Integer unread;//未读数
+	private Integer unread = 0;//未读数
 	private Image headDefault = SWTResourceManager.getImage(ConvItem.class, "/images/head.png");
 	private Image silenceImage = SWTResourceManager.getImage(ConvItem.class, "/images/silence.png");
 	private Image topImage = SWTResourceManager.getImage(ConvItem.class, "/images/top.png");
@@ -67,8 +72,8 @@ public class ConvItem extends ListItem {
 		}else if(silence){
 			gc.drawImage(silenceImage, width - MyList.BAR_WIDTH - 35, start + 37);
 		}
-		if(null != lastMsg && null != lastChat){
-			path.addString(FileUtils.getLimitString(lastChat + ":" + lastMsg, 10), 15 + 58f, start + 37F, font);
+		if(null != lastMsg){
+			path.addString(FileUtils.getLimitString(FileUtils.getLimitString(lastMsg, 7), 10), 15 + 58f, start + 37F, font);
 		}
 		if(null != lastTime) {
 			path.addString(lastTime, width - MyList.BAR_WIDTH - 40f, start + 15f, font);
@@ -81,11 +86,11 @@ public class ConvItem extends ListItem {
 			Color fo = gc.getForeground();
 			Color outer = SWTResourceManager.getColor(0XFE, 0X01, 0X01);
 			Color inner = SWTResourceManager.getColor(0XFE, 0XFE, 0XFE);
-			gc.setForeground(outer);
-			gc.fillOval(15 + 25 + 10, 3, 20, 20);
+			gc.setBackground(outer);
+			gc.fillOval(15 + 25 + 15, start + 3, 16, 16);
 			gc.setForeground(inner);
 			Path numPath = new Path(null);
-			numPath.addString(unread + "", 15 + 25 + 20, 4, font);
+			numPath.addString(unread + "", 15 + 25 + 20, start + 4, font);
 			gc.drawPath(numPath);
 			numPath.dispose();
 			gc.setBackground(bk);
@@ -96,6 +101,27 @@ public class ConvItem extends ListItem {
 
 	@Override
 	public boolean oncliek(MouseEvent e, int itemHeight, int index) {
+		if(e.button==3){
+			Menu m=new Menu(getParent());
+			Menu menu=getParent().getMenu();
+			if (menu != null) {
+				menu.dispose();
+			}
+			MenuItem noReply=new MenuItem(m, SWT.NONE);
+			noReply.setText("禁用自动回复");
+			noReply.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					if(!data.UserName.startsWith("@@")) {
+						Constant.noReply.add(data.UserName);
+					}
+				}
+				
+			});
+			getParent().setMenu(m);
+			m.setVisible(true);
+		}
 		return true;
 	}
 
@@ -159,8 +185,11 @@ public class ConvItem extends ListItem {
 		return unread;
 	}
 
-	public void setUnread(Integer unread) {
-		this.unread = unread;
+	public void incrUnread() {
+		unread++;
 	}
-
+	
+	public void clearUnread() {
+		unread = 0;
+	}
 }

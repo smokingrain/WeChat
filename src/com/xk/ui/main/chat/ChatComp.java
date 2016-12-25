@@ -10,6 +10,7 @@ import com.xk.ui.items.ConvItem;
 import com.xk.uiLib.MyList;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
+import com.xk.utils.WeChatUtil;
 
 import org.eclipse.swt.widgets.Label;
 
@@ -18,6 +19,10 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
@@ -32,9 +37,9 @@ import org.eclipse.swt.widgets.Display;
 public class ChatComp extends Composite {
 
 	private Label nameL;
-	private MyList chatList;
+	private MyList<ChatItem> chatList;
 	private Text text;
-	private CoolItem coolItem;
+	private ConvItem item;
 	private CLabel lbls;
 	private String convId;//会话id
 	
@@ -55,21 +60,40 @@ public class ChatComp extends Composite {
 		nameL.setAlignment(SWT.CENTER);
 		nameL.setBounds(0, 0, 470, 17);
 		
-		chatList = new MyList(this, 550, 375);
+		chatList = new MyList<ChatItem>(this, 550, 375);
 		chatList.setLocation(0, 25);
 		
-		CLabel emojL = new CLabel(this, SWT.NONE);
+		CLabel emojL = new CLabel(this, SWT.BORDER);
 		emojL.setBounds(0, 400, 30, 30);
 		emojL.setBackground(SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png"));
 		
 		text = new Text(this, SWT.MULTI);
 		text.setBounds(0, 430, 549, 115);
+		text.addKeyListener(new KeyAdapter() {
+
+			@Override
+			public void keyReleased(KeyEvent e) {
+				if(e.keyCode == SWT.CR || e.keyCode == 16777296) {
+					sendMsg();
+				}
+			}
+			
+		});
 		
 		lbls = new CLabel(this, SWT.CENTER);
 		lbls.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		lbls.setBounds(479, 551, 60, 29);
 		lbls.setText("发送(S)");
 		lbls.setBackground(getBackground());
+		lbls.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseUp(MouseEvent paramMouseEvent) {
+				sendMsg();
+			}
+			
+			
+		});
 		lbls.addPaintListener(new PaintListener() {
 			
 			@Override
@@ -86,6 +110,17 @@ public class ChatComp extends Composite {
 		
 		
 	}
+
+	private void sendMsg() {
+		String msg = text.getText().trim();
+		if(!"".equals(msg) && null != convId) {
+			ChatLog log = WeChatUtil.sendMsg(msg, convId);
+			ChatLogCache.saveLogs(convId, log);
+			text.setText("");
+			flush(item);
+		}
+		text.setFocus();
+	}
 	
 	/**
 	 * 用途：刷新界面
@@ -93,7 +128,9 @@ public class ChatComp extends Composite {
 	 * @param item
 	 */
 	public void flush(final ConvItem item) {
+		item.clearUnread();
 		convId = item.getData().UserName;
+		this.item = item;
 		chatList.clearAll();
 		List<ChatLog> logs = ChatLogCache.getLogs(convId);
 		if(null != logs) {
@@ -103,6 +140,8 @@ public class ChatComp extends Composite {
 				Image head = ImageCache.getUserHeadCache(user, "", null, 50, 50);
 				if(convId.startsWith("@@")) {
 					user = ContactsStruct.getGroupMember(log.fromId, Constant.contacts.get(convId));
+				}else if(Constant.user.UserName.equals(user)){
+					user = Constant.user.NickName;
 				}else {
 					user = ContactsStruct.getContactName(Constant.contacts.get(log.fromId));
 				}
@@ -116,7 +155,6 @@ public class ChatComp extends Composite {
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
-				
 				nameL.setText(item.getName());
 				chatList.scrollToBottom();
 				chatList.flush();

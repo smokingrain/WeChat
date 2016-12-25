@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.ImageLoader;
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.User;
 import com.xk.bean.WeChatSign;
+import com.xk.chatlogs.ChatLog;
 import com.xk.ui.items.ContactItem;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.items.TypeItem;
@@ -34,16 +35,16 @@ public class WeChatUtil {
 	 * @param sign
 	 * @param user
 	 */
-	public static void sendMsg(String msg, String to, WeChatSign sign) {
+	public static ChatLog sendMsg(String msg, String to) {
 		Map<String, String> params = new HashMap<>();
 		params.put("lang", "zh_CN");
-		params.put("pass_ticket", sign.pass_ticket);
+		params.put("pass_ticket", Constant.sign.pass_ticket);
 		Map<String, Object> body = new HashMap<>();
 		Map<String, Object> bodyInner = new HashMap<String, Object>();
-		bodyInner.put("Uin", sign.wxuin);
-		bodyInner.put("Sid", sign.wxsid);
-		bodyInner.put("Skey", sign.skey);
-		bodyInner.put("DeviceID", sign.deviceid);
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
 		body.put("BaseRequest", bodyInner);
 		body.put("Scene", 0);
 		Map<String, Object> msgMap = new HashMap<>();
@@ -63,12 +64,21 @@ public class WeChatUtil {
 			Map<String, Object> obj = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {
 				System.out.println("msg : " + msg +"-> 发送成功！！");
-				
+				ChatLog log = new ChatLog();
+				log.createTime = System.currentTimeMillis();
+				log.toId = to;
+				log.fromId = Constant.user.UserName;
+				log.msgid = rstMap.get("MsgID").toString();
+				log.newMsgId = Long.parseLong(rstMap.get("LocalID").toString());
+				log.msgType = 1;
+				log.content = msg;
+				return log;
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		return null;
 	}
 	
 	
@@ -77,15 +87,15 @@ public class WeChatUtil {
 	 * @date 2016年12月14日
 	 * @param ctItem
 	 */
-	public static List<String> loadConvers(TypeItem ctItem, WeChatSign sign, MainWindow window) {
+	public static List<String> loadConvers(TypeItem ctItem, MainWindow window) {
 		List<String> allGroups = new ArrayList<String>();
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Map<String,Map<String,String>> bodyMap = new HashMap<String,Map<String,String>>();
 		Map<String,String> bodyInner = new HashMap<String,String>();
-		bodyInner.put("Uin", sign.wxuin);
-		bodyInner.put("Sid", sign.wxsid);
-		bodyInner.put("Skey", sign.skey);
-		bodyInner.put("DeviceID", sign.deviceid);
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
 		bodyMap.put("BaseRequest", bodyInner);
 		
 		try {
@@ -97,24 +107,7 @@ public class WeChatUtil {
 				if(null != contactList) {
 					for(Map<String, Object> cmap : contactList) {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
-						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
-						
-						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
-						
-						String nick = convs.NickName;
-						String remark = convs.RemarkName;
-						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
-						System.out.println("load conver " + name);
-						Integer Statues = convs.Statues;
-						Integer ContactFlag = convs.ContactFlag;
-						boolean top = ContactFlag == 2051;
-						ConvItem ci = new ConvItem(convs, name, null, null, null, top, Statues == 0, 0);
-						MyList list = window.lists.get(ctItem);
-						if(top) {
-							list.addItem(0, ci);
-						} else {
-							list.addItem(ci);
-						}
+						window.addConversition(convs);
 						
 						if(convs.UserName.indexOf("@@") > -1) {
 							allGroups.add(convs.UserName);
@@ -122,7 +115,7 @@ public class WeChatUtil {
 					}
 					System.out.println("convers loaded!!");
 					Map<String, Object> SyncKey = (Map<String, Object>) rstMap.get("SyncKey");
-					flushSyncKey(SyncKey, sign);
+					flushSyncKey(SyncKey);
 					
 					Constant.user = User.fromMap( (Map<String, Object>) rstMap.get("User"));
 				}
@@ -141,7 +134,7 @@ public class WeChatUtil {
 	 * @param SyncKey
 	 * @param sign
 	 */
-	public static void flushSyncKey(Map<String, Object> SyncKey, WeChatSign sign) {
+	public static void flushSyncKey(Map<String, Object> SyncKey) {
 		if(null == SyncKey){
 			return ;
 		}
@@ -153,27 +146,27 @@ public class WeChatUtil {
 			sb.append(Key).append("_").append(Val).append("|");
 		}
 		try {
-			sign.synckey = URLEncoder.encode(sb.substring(0, sb.length() - 1), "UTF-8");//sb.substring(0, sb.length() - 1);
+			Constant.sign.synckey = URLEncoder.encode(sb.substring(0, sb.length() - 1), "UTF-8");//sb.substring(0, sb.length() - 1);
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		sign.syncKeyOringe = SyncKey;
+		Constant.sign.syncKeyOringe = SyncKey;
 	}
 	
 	/**
 	 * 用途：开启消息通知
 	 * @date 2016年12月14日
 	 */
-	public static void startNotify(WeChatSign sign){
+	public static void startNotify(){
 		HTTPUtil hu = HTTPUtil.getInstance();
-		String url = Constant.STATUS_NOTIFY + "?lang=zh_CN&pass_ticket=" + sign.pass_ticket;
+		String url = Constant.STATUS_NOTIFY + "?lang=zh_CN&pass_ticket=" + Constant.sign.pass_ticket;
 		Map<String, Object> body = new HashMap<String, Object>();
 		Map<String, Object> BaseRequest = new HashMap<>();
-		BaseRequest.put("DeviceID", sign.deviceid);
-		BaseRequest.put("Sid", sign.wxsid);
-		BaseRequest.put("Skey", sign.skey);
-		BaseRequest.put("Uin", sign.wxuin);
+		BaseRequest.put("DeviceID", Constant.sign.deviceid);
+		BaseRequest.put("Sid", Constant.sign.wxsid);
+		BaseRequest.put("Skey", Constant.sign.skey);
+		BaseRequest.put("Uin", Constant.sign.wxuin);
 		body.put("BaseRequest", BaseRequest);
 		body.put("ClientMsgId", System.currentTimeMillis());
 		body.put("Code", 3);
@@ -199,14 +192,14 @@ public class WeChatUtil {
 	 * @date 2016年12月14日
 	 * @param ctItem
 	 */
-	public static List<String> loadContacts(TypeItem ctItem, WeChatSign sign, MainWindow window) {
+	public static List<String> loadContacts(TypeItem ctItem, MainWindow window) {
 		List<String> allGroups = new ArrayList<String>();
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Map<String, String> params = new HashMap<String, String>();
-		params.put("pass_ticket", sign.pass_ticket);
+		params.put("pass_ticket", Constant.sign.pass_ticket);
 		params.put("r", System.currentTimeMillis() + "");
 		params.put("seq", "0");
-		params.put("skey", sign.skey);
+		params.put("skey", Constant.sign.skey);
 		params.put("lang", "zh_CN");
 		
 		try {
@@ -252,12 +245,12 @@ public class WeChatUtil {
 	 * @date 2016年12月20日
 	 * @return
 	 */
-	public static ImageLoader loadImage(WeChatSign sign, String msgId, String type) {
+	public static ImageLoader loadImage(String msgId, String type) {
 		String url = Constant.LOAD_IMG;
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("MsgID", msgId);
 		try {
-			params.put("skey", URLEncoder.encode(sign.skey, "UTF-8"));
+			params.put("skey", URLEncoder.encode(Constant.sign.skey, "UTF-8"));
 		} catch (UnsupportedEncodingException e1) {
 			// TODO Auto-generated catch block
 			e1.printStackTrace();
@@ -294,11 +287,11 @@ public class WeChatUtil {
 	 * @date 2016年12月20日
 	 * @param sign
 	 */
-	public static void exitWeChat(WeChatSign sign) {
-		String url = Constant.LOGOUT_URL.replace("{SKEY}", sign.skey);
+	public static void exitWeChat() {
+		String url = Constant.LOGOUT_URL.replace("{SKEY}", Constant.sign.skey);
 		Map<String, String> params = new HashMap<String, String>();
-		params.put("sid", sign.wxsid);
-		params.put("uin", sign.wxuin);
+		params.put("sid", Constant.sign.wxsid);
+		params.put("uin", Constant.sign.wxuin);
 		HTTPUtil hu = HTTPUtil.getInstance();
 		try {
 			hu.readJsonfromURL2(url, params);
@@ -316,7 +309,7 @@ public class WeChatUtil {
 	 * @date 2016年12月14日
 	 * @param ctItem
 	 */
-	public static void loadGroups(TypeItem ctItem, List<String> groups, WeChatSign sign, MainWindow window) {
+	public static void loadGroups(TypeItem ctItem, List<String> groups, MainWindow window) {
 		if(null == groups || groups.size() == 0) {
 			return ;
 		}
@@ -332,16 +325,16 @@ public class WeChatUtil {
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Map<String, Object> bodyMap = new HashMap<String, Object>();
 		Map<String,String> bodyInner = new HashMap<String,String>();
-		bodyInner.put("Uin", sign.wxuin);
-		bodyInner.put("Sid", sign.wxsid);
-		bodyInner.put("Skey", sign.skey);
-		bodyInner.put("DeviceID", sign.deviceid);
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
 		bodyMap.put("BaseRequest", bodyInner);
 		bodyMap.put("Count", gs.size());
 		bodyMap.put("List", gs);
 		
 		try {
-			String url = Constant.GET_GROUPS.replace("{TIME}", System.currentTimeMillis() + "").replace("{TICKET}", sign.pass_ticket);
+			String url = Constant.GET_GROUPS.replace("{TIME}", System.currentTimeMillis() + "").replace("{TICKET}", Constant.sign.pass_ticket);
 			String result = hu.postBody(url, JSONUtil.toJson(bodyMap));
 			Map<String, Object> rstMap = JSONUtil.fromJson(result);
 			Map<String, Object> baseResponse = (Map<String, Object>) rstMap.get("BaseResponse");

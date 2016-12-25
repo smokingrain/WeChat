@@ -5,12 +5,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class ChatLogCache {
 
 	private static final String LOG_PATH = "chatlogs";
 	
-	private static Map<String, List<ChatLog>> cache = new HashMap<String, List<ChatLog>>();
+	private static Map<String, List<ChatLog>> cache = new ConcurrentHashMap<String, List<ChatLog>>();
 	
 	public static void saveLogs(String conv, ChatLog log) {
 		if(null == conv || null == log) {
@@ -25,7 +27,7 @@ public class ChatLogCache {
 		}
 		List<ChatLog> logs = cache.get(conv);
 		if(null == logs) {
-			logs = new ArrayList<ChatLog>();
+			logs = new CopyOnWriteArrayList<ChatLog>();
 			cache.put(conv, logs);
 		}
 		logs.add(log);

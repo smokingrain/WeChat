@@ -28,19 +28,18 @@ import com.xk.uiLib.listeners.ItemSelectionListener;
 
 
 
-public class MyList extends Composite {
+public class MyList<T extends ListItem> extends Composite {
 
 	public static final int BAR_WIDTH=8;//滚动条宽度
 	private static final int BAR_ARROW_HEIGHT=8;
-	private List<ItemListener> itemListeners=new ArrayList<ItemListener>();
-	private List<ItemSelectionListener> selectionListeners=new ArrayList<ItemSelectionListener>();
+	private List<ItemListener<T>> itemListeners=new ArrayList<ItemListener<T>>();
+	private List<ItemSelectionListener<T>> selectionListeners=new ArrayList<ItemSelectionListener<T>>();
 	private int allHeight=0;
 	private int width;
 	private int height;
-	private List<ListItem>items=new ArrayList<ListItem>();
-	protected ListItem selected=null;
-	protected int selectIndex=-1;
-	private ListItem focused=null;
+	private List<T>items=new ArrayList<T>();
+	protected T selected=null;
+	private T focused=null;
 	protected Canvas back;
 	private boolean showScroll=false;//是否需要滚动条
 	private int barY=0;//滚动条位置
@@ -79,6 +78,10 @@ public class MyList extends Composite {
 		this.mask=mask;
 	}
 	
+	/**
+	 * 设置单击选中
+	 * @param simple 
+	 */
 	public void setSimpleSelect(boolean simple){
 		this.simpleSelect=simple;
 	}
@@ -94,6 +97,14 @@ public class MyList extends Composite {
 			
 			@Override
 			public void mouseUp(MouseEvent e) {
+				if(e.x<width-BAR_WIDTH){
+					if(simpleSelect){
+						checkSelection(e);
+					}else{
+						checkFocus(e);
+					}
+					
+				}
 				state=STATE.NORMAL;
 				downY=0;
 			}
@@ -108,14 +119,7 @@ public class MyList extends Composite {
 						return;
 					}
 				}
-				if(e.x<width-BAR_WIDTH){
-					if(simpleSelect){
-						checkSelection(e);
-					}else{
-						checkFocus(e);
-					}
-					
-				}else if(e.y>height-BAR_ARROW_HEIGHT){
+				if(e.y>height-BAR_ARROW_HEIGHT){
 					int temp=barY+1;
 					if(temp+barHeight+2*BAR_ARROW_HEIGHT>height){
 						temp=height-barHeight-2*BAR_ARROW_HEIGHT;
@@ -212,7 +216,7 @@ public class MyList extends Composite {
 		int realY=e.y+Math.abs(startY);//得到真实Y位移
 		int itemHeight=0;
 		int index=0;
-		for(ListItem item:items){
+		for(T item:items){
 			itemHeight+=item.getHeight();
 			if(itemHeight>realY){
 				if(item.oncliek(e,itemHeight,index)){
@@ -232,7 +236,7 @@ public class MyList extends Composite {
 		int realY=e.y+Math.abs(startY);//得到真实Y位移
 		int itemHeight=0;
 		int index=0;
-		for(ListItem item:items){
+		for(T item:items){
 			itemHeight+=item.getHeight();
 			if(itemHeight>realY){
 				if(item.oncliek(e,itemHeight,index)){
@@ -244,7 +248,7 @@ public class MyList extends Composite {
 		}
 	}
 	
-	private void focusItem(ListItem item){
+	private void focusItem(T item){
 		if(null!=focused){
 			focused.unFocus();
 		}
@@ -259,14 +263,14 @@ public class MyList extends Composite {
 	
 	
 	
-	public void select(ListItem item,boolean sync){
+	public void select(T item,boolean sync){
 		if(null!=selected){//清除上一个选择的item
 			selected.unSelect();
 		}
 		item.select();
 		countHeight();//重新计算整个高度
 		int itemHeight=0;
-		for(ListItem it:items){
+		for(T it:items){
 			itemHeight+=it.getHeight();
 			if(it.equals(item)){
 				if(itemHeight+startY<0){//在本组件之上
@@ -290,11 +294,11 @@ public class MyList extends Composite {
 		}else{
 			back.redraw();
 		}
-		ItemSelectionEvent even=new ItemSelectionEvent();
+		ItemSelectionEvent<T> even=new ItemSelectionEvent<T>();
 		even.item=item;
 		even.itemHeights=itemHeight;
 		even.source=this;
-		for(ItemSelectionListener listener:selectionListeners){
+		for(ItemSelectionListener<T> listener:selectionListeners){
 			listener.selected(even);	
 		}
 	}
@@ -355,7 +359,7 @@ public class MyList extends Composite {
 	private void drawItems(GC gc,int allHeight){
 		int nowY=startY;//开始渲染，每渲染一个子组件，位置叠加！
 		int index=0;
-		for(ListItem item:items){
+		for(T item:items){
 			index++;
 			if(nowY+item.getHeight()<0){//在我之上的不渲染
 				nowY+=item.getHeight();
@@ -389,20 +393,16 @@ public class MyList extends Composite {
 	 */
 	private void countHeight(){
 		allHeight=0;
-		selectIndex=-1;
 		focused=null;
 		selected=null;
-		int index=0;
-		for(ListItem it:items){
+		for(T it:items){
 			allHeight+=it.getHeight();
 			if(it.selected){
-				selectIndex=index;
 				selected=it;
 			}
 			if(it.focused){
 				focused=it;
 			}
-			index++;
 		}
 		if(allHeight>height){
 			showScroll=true;
@@ -415,7 +415,7 @@ public class MyList extends Composite {
 		}
 	}
 	
-	public void addItem(Integer index, ListItem item) {
+	public void addItem(Integer index, T item) {
 		if(null != item && null != index){
 			items.add(index, item);
 			item.setParent(this);
@@ -423,7 +423,7 @@ public class MyList extends Composite {
 		}
 	}
 	
-	public void addItem(ListItem item) {
+	public void addItem(T item) {
 		if(null!=item){
 			items.add(item);
 			item.setParent(this);
@@ -436,43 +436,50 @@ public class MyList extends Composite {
 		countHeight();
 	}
 	
-	public void removeItem(int index){
-		if(index<items.size()&&index>=0){
-			ListItem removed=items.get(index);
-			ItemEvent event=new ItemEvent();
-			event.index=index;
-			event.item=removed;
-			for(ItemListener listener:itemListeners){
+	/**
+	 * 移除指定位置的item
+	 * 
+	 * @param index
+	 */
+	public T removeItem(int index) {
+		if (index < items.size() && index >= 0) {
+			T removed = items.get(index);
+			ItemEvent event = new ItemEvent();
+			event.index = index;
+			event.item = removed;
+			for (ItemListener<T> listener : itemListeners) {
 				listener.itemRemove(event);
 			}
 			items.remove(index);
 			removed.setParent(null);
 			countHeight();
-			back.redraw();
+			return removed;
 		}
+		return null;
+	}
+
+	public T removeItem(T item) {
+		if (null != item) {
+			int index = items.indexOf(item);
+			return removeItem(index);
+		}
+		return null;
 	}
 	
-	public void removeItem(ListItem item){
-		if(null!=item){
-			int index=items.indexOf(item);
-			removeItem(index);
-		}
-	}
-	
-	public List<ListItem> getItems(){
+	public List<T> getItems(){
 		return Collections.unmodifiableList(items);
 	}
 	
 	
-	public void addItemListener(ItemListener listener){
+	public void addItemListener(ItemListener<T> listener){
 		itemListeners.add(listener);
 	}
 	
-	public boolean remove(ItemSelectionListener o) {
+	public boolean remove(ItemSelectionListener<T> o) {
 		return selectionListeners.remove(o);
 	}
 
-	public void add(ItemSelectionListener element) {
+	public void add(ItemSelectionListener<T> element) {
 		selectionListeners.add(element);
 	}
 
@@ -487,16 +494,19 @@ public class MyList extends Composite {
 		}
 	}
 	
-	public ListItem getFocus(){
+	public T getFocus(){
 		return focused;
 	}
 	
-	public ListItem getSelection(){
+	public T getSelection(){
 		return selected;
 	}
 	
 	public int getSelectIndex() {
-		return selectIndex;
+		if(null == selected) {
+			return -1;
+		}
+		return items.indexOf(selected);
 	}
 
 	public int getItemCount(){

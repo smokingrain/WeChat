@@ -30,7 +30,6 @@ public abstract class ListItem {
 	public void select(){
 		selected=true;
 		if(null!=parent){
-			parent.selectIndex=parent.getItems().indexOf(this);
 			parent.selected=this;
 		}
 	}

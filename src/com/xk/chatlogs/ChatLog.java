@@ -32,6 +32,7 @@ public class ChatLog {
 		log.content = (String) msg.get("Content");
 		log.fromId = (String) msg.get("FromUserName");
 		log.toId = (String) msg.get("ToUserName");
+		log.createTime = System.currentTimeMillis();
 		if(log.fromId.startsWith("@@") && !Constant.user.UserName.equals(log.fromId)) {
 			String[] splt = log.content.split(":<br/>");
 			log.fromId = splt[0];//ContactsStruct.getGroupMember(splt[0], Constant.contacts.get(log.fromId));

@@ -33,6 +33,7 @@ import com.xk.bean.User;
 import com.xk.bean.WeChatSign;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
+import com.xk.ui.items.ContactItem;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.items.TypeItem;
 import com.xk.ui.main.chat.ChatComp;
@@ -59,13 +60,13 @@ public class MainWindow {
 
 	private Timer timer;
 	protected Shell shell;
-	private WeChatSign sign;
 	public Map<ListItem, MyList> lists = new HashMap<ListItem, MyList>();
 	private MyText text;
+	private ChatComp cc;
+	private MyList<ConvItem> convers;
 	private boolean syncGroup = false;
 
-	public MainWindow(WeChatSign sign) {
-		this.sign = sign;
+	public MainWindow() {
 	}
 	
 	/**
@@ -95,7 +96,7 @@ public class MainWindow {
 			
 			@Override
 			public void widgetDisposed(DisposeEvent arg0) {
-				WeChatUtil.exitWeChat(sign);
+				WeChatUtil.exitWeChat();
 				System.exit(0);
 			}
 		});
@@ -130,7 +131,7 @@ public class MainWindow {
 			
 		});
 		
-		MyList types = new MyList(composite ,50 , 490);
+		final MyList<TypeItem> types = new MyList<TypeItem>(composite ,50 , 490);
 		types.setMask(10);
 		types.setLocation(0, 50);
 		types.setSimpleSelect(true);
@@ -140,7 +141,7 @@ public class MainWindow {
 		TypeItem ctItem = new TypeItem(chatImg, chatImgSele);
 		types.addItem(ctItem);
 		
-		MyList convers = new MyList(shell, 250, 540);
+		convers = new MyList<ConvItem>(shell, 250, 540);
 		convers.setMask(120);
 		convers.setLocation(50, 50);
 		convers.setSimpleSelect(false);
@@ -153,19 +154,19 @@ public class MainWindow {
 		types.addItem(conItem);
 		
 		
-		MyList contacts = new MyList(shell, 250, 540);
+		MyList<ContactItem> contacts = new MyList<ContactItem>(shell, 250, 540);
 		contacts.setMask(120);
 		contacts.setLocation(50, 50);
-		contacts.setSimpleSelect(true);
+		contacts.setSimpleSelect(false);
 		
 		lists.put(conItem, contacts);
 		
-		types.add(new ItemSelectionListener() {
+		types.add(new ItemSelectionListener<TypeItem>() {
 			
 			MyList current;
 			
 			@Override
-			public void selected(ItemSelectionEvent e) {
+			public void selected(ItemSelectionEvent<TypeItem> e) {
 				if(null != current) {
 					current.setVisible(false);
 				}
@@ -211,15 +212,29 @@ public class MainWindow {
 		label.setBounds(262, 16, 29, 24);
 		label.setText("+");
 		
-		final ChatComp cc = new ChatComp(shell, SWT.NONE);
+		cc = new ChatComp(shell, SWT.NONE);
 		SWTTools.enableTrag(cc);
 		
-		//选中聊天会话
-		convers.add(new ItemSelectionListener() {
+		contacts.add(new ItemSelectionListener<ContactItem>() {
 			
 			@Override
-			public void selected(ItemSelectionEvent e) {
-				ConvItem item = (ConvItem) e.item;
+			public void selected(ItemSelectionEvent<ContactItem> e) {
+				ContactItem item = e.item;
+				ContactsStruct convs = item.getData();
+				ConvItem ci = addConversition(convs);
+				System.out.println(convs.UserName + " selected!!!");
+				convers.select(ci, false);
+				types.select(0, false);
+				
+			}
+		});
+		
+		//选中聊天会话
+		convers.add(new ItemSelectionListener<ConvItem>() {
+			
+			@Override
+			public void selected(ItemSelectionEvent<ConvItem> e) {
+				ConvItem item = e.item;
 				System.out.println(item.getName() + " selected!!!");
 				cc.flush(item);
 				
@@ -302,12 +317,12 @@ public class MainWindow {
 		//头像缓存
 		ImageCache.loadHeadCache();
 		
-		List<String> g = WeChatUtil.loadConvers(ctItem, sign, this);
-		WeChatUtil.startNotify(sign);
-		WeChatUtil.loadGroups(conItem,g, sign, this);
+		List<String> g = WeChatUtil.loadConvers(ctItem, this);
+		WeChatUtil.startNotify();
+		WeChatUtil.loadGroups(conItem, g, this);
 		syncData(conItem);
-		List<String> group = WeChatUtil.loadContacts(conItem, sign, this);
-		WeChatUtil.loadGroups(conItem,group, sign, this);
+		List<String> group = WeChatUtil.loadContacts(conItem, this);
+		WeChatUtil.loadGroups(conItem,group, this);
 		
 		
 		Image img = null;
@@ -330,16 +345,16 @@ public class MainWindow {
 				Map<String, String> params = new HashMap<String, String>();
 				params.put("_", System.currentTimeMillis() + "");
 				params.put("r", (System.currentTimeMillis() + 91136) + "");
-				params.put("uin", sign.wxuin);
+				params.put("uin", Constant.sign.wxuin);
 				try {
-					params.put("sid", URLEncoder.encode(sign.wxsid, "UTF-8"));
-					params.put("skey", URLEncoder.encode(sign.skey, "UTF-8"));
+					params.put("sid", URLEncoder.encode(Constant.sign.wxsid, "UTF-8"));
+					params.put("skey", URLEncoder.encode(Constant.sign.skey, "UTF-8"));
 				} catch (UnsupportedEncodingException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-				params.put("deviceid", sign.deviceid);
-				params.put("synckey", sign.synckey);
+				params.put("deviceid", Constant.sign.deviceid);
+				params.put("synckey", Constant.sign.synckey);
 				try {
 					String rst = hu.getJsonfromURL2(Constant.SYNC_CHECK, params);
 					if(null != rst && rst.contains("window.synccheck=")) {
@@ -381,18 +396,18 @@ public class MainWindow {
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Map<String,Object> bodyMap = new HashMap<String,Object>();
 		Map<String,Object> bodyInner = new HashMap<String,Object>();
-		bodyInner.put("Uin", sign.wxuin);
-		bodyInner.put("Sid", sign.wxsid);
-		bodyInner.put("Skey", sign.skey);
-		bodyInner.put("DeviceID", sign.deviceid);
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
 		bodyMap.put("BaseRequest", bodyInner);
-		bodyMap.put("SyncKey", sign.syncKeyOringe);
+		bodyMap.put("SyncKey", Constant.sign.syncKeyOringe);
 		bodyMap.put("rr", System.currentTimeMillis() / 1000 * -1);
 		Map<String, String> params = new HashMap<String, String>();
-		params.put("sid", sign.wxsid);
+		params.put("sid", Constant.sign.wxsid);
 		params.put("lang", "zh_CN");
-		params.put("skey", sign.skey);
-		params.put("pass_ticket", sign.pass_ticket);
+		params.put("skey", Constant.sign.skey);
+		params.put("pass_ticket", Constant.sign.pass_ticket);
 		try {
 			String result =  hu.postBody(Constant.GET_STATUS, params, JSONUtil.toJson(bodyMap));
 			Map<String, Object> rst = JSONUtil.fromJson(result);
@@ -411,7 +426,7 @@ public class MainWindow {
 							if(null != StatusNotifyUserName && !syncGroup) {
 								String[] spl = StatusNotifyUserName.split(",");
 								List<String> groups = Arrays.asList(spl);
-								WeChatUtil.loadGroups(conItem, groups, sign, this);
+								WeChatUtil.loadGroups(conItem, groups, this);
 								Display.getDefault().asyncExec(new Runnable() {
 									public void run() {
 										lists.get(conItem).flush();
@@ -425,6 +440,7 @@ public class MainWindow {
 							}else if(FromUserName.equals(Constant.user.UserName)){
 								ChatLog log = ChatLog.fromMap(msg);
 								ChatLogCache.saveLogs(ToUserName, log);
+								flushChatView(ToUserName);
 								System.out.println("来自手机端自己的消息：" + Content);
 							}else if(FromUserName.startsWith("@@")) {
 								ChatLog log = ChatLog.fromMap(msg);
@@ -432,17 +448,20 @@ public class MainWindow {
 								String[] splt = Content.split(":<br/>");
 								String sender = ContactsStruct.getGroupMember(splt[0], Constant.contacts.get(FromUserName));
 								String ctt = splt[1].replace("<br/>", "\n");
-								
 								System.out.println(sender + " 在群里说:" + ctt);
 								if(ctt.contains("@" + Constant.user.NickName)) {
 									String detail = ctt.replace("@" + Constant.user.NickName, "");
 									String reply = "什么情况?";
-									if(!"".equals(detail.trim())) {
+									if(!detail.trim().isEmpty()) {
 										reply = AutoReply.call(detail, sender);
 									}
 									
-									WeChatUtil.sendMsg(reply, FromUserName, sign);
+									ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
+									if(null != replyLog) {
+										ChatLogCache.saveLogs(FromUserName, replyLog);
+									}
 								}
+								flushChatView(FromUserName);
 								
 							}else {
 								ChatLog log = ChatLog.fromMap(msg);
@@ -450,13 +469,21 @@ public class MainWindow {
 								String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
 								String ctt = Content.replace("<br/>", "\n");
 								System.out.println(sender + " 说：" + ctt);
-								String reply = AutoReply.call(ctt, sender);
-								WeChatUtil.sendMsg(reply, FromUserName, sign);
+								if(!Constant.noReply.contains(FromUserName)) {
+									String reply = AutoReply.call(ctt, sender);
+									ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
+									if(null != replyLog) {
+										ChatLogCache.saveLogs(FromUserName, replyLog);
+									}
+									
+								}
+								flushChatView(FromUserName);
+								
 							}
 						}else if(3 == MsgType || 47 == MsgType) {
 							if(null != Content && !Content.isEmpty()) {
 								String MsgId = (String) msg.get("MsgId");
-								ImageLoader loader = WeChatUtil.loadImage(sign, MsgId, null);
+								ImageLoader loader = WeChatUtil.loadImage(MsgId, null);
 								if(null != loader) {
 									File file = new File("msgimages", MsgId + Constant.FORMATS[loader.format]);
 									file.getParentFile().mkdirs();
@@ -470,7 +497,7 @@ public class MainWindow {
 				}
 			}
 			Map<String, Object> SyncKey = (Map<String, Object>) rst.get("SyncKey");
-			WeChatUtil.flushSyncKey(SyncKey,sign);
+			WeChatUtil.flushSyncKey(SyncKey);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -478,5 +505,71 @@ public class MainWindow {
 		
 	}
 	
+	public ConvItem addConversition(ContactsStruct convs) {
+		String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
+		convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
+		String nick = convs.NickName;
+		String remark = convs.RemarkName;
+		String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
+		System.out.println("load conver " + name);
+		Integer Statues = convs.Statues;
+		Integer ContactFlag = convs.ContactFlag;
+		boolean top = ContactFlag == 2051;
+		List<ConvItem> items = convers.getItems();
+		for(ConvItem item : items) {
+			if(item.getData().UserName.equals(convs.UserName)) {
+				return item;
+			}
+		}
+		ConvItem ci = new ConvItem(convs, name, null, null, null, top, Statues == 0, 0);
+		if(top) {
+			convers.addItem(0, ci);
+		} else {
+			convers.addItem(ci);
+		}
+		return ci;
+	}
+	
+	private void flushChatView (final String conv) {
+		Display.getDefault().asyncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				List<ConvItem> items = convers.getItems();
+				ConvItem ci = null;
+				for(ConvItem temp : items) {
+					if(temp.getData().UserName.equals(conv)) {
+						ci = temp;
+						break;
+					}
+				}
+				//此时没有在会话列表找到需要从好友中创建新的
+				if(null == ci) {
+					ContactsStruct struct = Constant.contacts.get(conv);
+					ci = addConversition(struct);
+				}
+				
+				ConvItem itm = convers.removeItem(ci);
+				if(null != itm) {//这时候还找不到的话，那就真的跪了，目测是新好友
+					convers.addItem(0, itm);
+					if(itm.equals(convers.getSelection())) {
+						cc.flush(itm);
+					} else {
+						itm.incrUnread();
+					}
+					List<ChatLog> logs = ChatLogCache.getLogs(conv);
+					if(null != logs && !logs.isEmpty()) {
+						ChatLog log = logs.get(logs.size() - 1);
+						itm.setLastMsg(log.content);
+						itm.setLastTime(log.createTime + "");
+					}
+				}
+				convers.flush();
+				return ;
+			
+			}
+		});
+		
+	}
 	
 }

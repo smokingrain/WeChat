@@ -34,11 +34,11 @@ public class ContactItem extends ListItem {
 
 	@Override
 	public void draw(GC gc, int start, int width, int index) {
-		if(selected) {
+		if(selected || focused) {
 			int alf=gc.getAlpha();
 			Color bk = gc.getBackground();
 			gc.setBackground(SWTResourceManager.getColor(136, 136, 136));
-			gc.setAlpha(155);
+			gc.setAlpha(selected ? 155 : 65);
 			gc.fillRectangle(0, start, width-MyList.BAR_WIDTH, getHeight());
 			gc.setAlpha(alf);
 			gc.setBackground(bk);
@@ -71,6 +71,10 @@ public class ContactItem extends ListItem {
 	@Override
 	public boolean oncliek(MouseEvent e, int itemHeight, int index) {
 		return !dir;
+	}
+
+	public ContactsStruct getData() {
+		return data;
 	}
 
 }
