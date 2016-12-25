@@ -507,6 +507,9 @@ public class MainWindow {
 	}
 	
 	public ConvItem addConversition(ContactsStruct convs) {
+		if(null == convs) {
+			return null;
+		}
 		String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 		convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
 		String nick = convs.NickName;
