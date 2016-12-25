@@ -17,6 +17,7 @@ import com.xk.bean.ContactsStruct;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 import com.xk.utils.Constant;
+import com.xk.utils.DateUtil;
 import com.xk.utils.FileUtils;
 
 public class ConvItem extends ListItem {
@@ -25,7 +26,7 @@ public class ConvItem extends ListItem {
 	private String name;//会话名
 	private String lastChat;//上一个发言人
 	private String lastMsg;//上一条消息
-	private String lastTime;//上一条消息的时间
+	private Long lastTime;//上一条消息的时间
 	private boolean top;//是否置顶
 	private boolean silence;//是否不提示消息数
 	private Integer unread = 0;//未读数
@@ -34,7 +35,7 @@ public class ConvItem extends ListItem {
 	private Image topImage = SWTResourceManager.getImage(ConvItem.class, "/images/top.png");
 	
 	
-	public ConvItem(ContactsStruct data, String name, String lastChat, String lastMsg, String lastTime,
+	public ConvItem(ContactsStruct data, String name, String lastChat, String lastMsg, Long lastTime,
 			boolean top, boolean silence, Integer unread) {
 		super();
 		this.data = data;
@@ -66,7 +67,7 @@ public class ConvItem extends ListItem {
 		Font font=SWTResourceManager.getFont("宋体", 10, SWT.NORMAL);
 		gc.drawImage((null == data.head || data.head.isDisposed()) ? headDefault : data.head, 15, start + 7);
 		Path path=new Path(null);
-		path.addString(name, 15 + 58f, start + 15f, font);
+		path.addString(FileUtils.getLimitString(name, 10), 15 + 58f, start + 15f, font);
 		if(top) {
 			gc.drawImage(topImage, width - MyList.BAR_WIDTH - 35, start + 37);
 		}else if(silence){
@@ -76,7 +77,7 @@ public class ConvItem extends ListItem {
 			path.addString(FileUtils.getLimitString(FileUtils.getLimitString(lastMsg, 7), 10), 15 + 58f, start + 37F, font);
 		}
 		if(null != lastTime) {
-			path.addString(lastTime, width - MyList.BAR_WIDTH - 40f, start + 15f, font);
+			path.addString(DateUtil.getChatTime(lastTime), width - MyList.BAR_WIDTH - 50f, start + 15f, font);
 		}
 		
 		gc.drawPath(path);
@@ -157,11 +158,11 @@ public class ConvItem extends ListItem {
 		this.lastMsg = lastMsg;
 	}
 
-	public String getLastTime() {
+	public Long getLastTime() {
 		return lastTime;
 	}
 
-	public void setLastTime(String lastTime) {
+	public void setLastTime(Long lastTime) {
 		this.lastTime = lastTime;
 	}
 

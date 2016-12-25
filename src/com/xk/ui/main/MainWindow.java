@@ -45,6 +45,7 @@ import com.xk.uiLib.listeners.ItemSelectionEvent;
 import com.xk.uiLib.listeners.ItemSelectionListener;
 import com.xk.utils.AutoReply;
 import com.xk.utils.Constant;
+import com.xk.utils.DateUtil;
 import com.xk.utils.HTTPUtil;
 import com.xk.utils.ImageCache;
 import com.xk.utils.JSONUtil;
@@ -561,7 +562,7 @@ public class MainWindow {
 					if(null != logs && !logs.isEmpty()) {
 						ChatLog log = logs.get(logs.size() - 1);
 						itm.setLastMsg(log.content);
-						itm.setLastTime(log.createTime + "");
+						itm.setLastTime(log.createTime);
 					}
 				}
 				convers.flush();

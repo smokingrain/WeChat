@@ -12,6 +12,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.xk.bean.ContactsStruct;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
+import com.xk.utils.FileUtils;
 
 public class ContactItem extends ListItem {
 
@@ -62,7 +63,7 @@ public class ContactItem extends ListItem {
 		}else {
 			gc.drawImage((null == data.head || data.head.isDisposed()) ? headDefault : data.head, 10, start + 5);
 			Path path = new Path(null);
-			path.addString(name, 15f + 60f, start + 25, font);
+			path.addString(FileUtils.getLimitString(name, 10), 15f + 60f, start + 25, font);
 			gc.drawPath(path);
 		}
 

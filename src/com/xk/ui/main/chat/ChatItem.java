@@ -164,7 +164,7 @@ public class ChatItem extends ListItem {
 						cMaxHeight = imgHeight;
 					}
 				} else if(content instanceof String) {
-					String str = (String) content;
+					String str = ((String) content).replace("\n", "").replace("\r", "");
 					Point point = gc.textExtent(str);
 					int temp = cLineWidth;
 					cLineWidth += point.x + str.length();//字间距
@@ -240,7 +240,7 @@ public class ChatItem extends ListItem {
 						cMaxHeight = imgHeight;
 					}
 				} else if(content instanceof String) {
-					String str = (String) content;
+					String str = ((String) content).replace("\n", "").replace("\r", "");
 					Point point = gc.textExtent(str);
 					int temp = cLineWidth;
 					cLineWidth += point.x + str.length();//字间距

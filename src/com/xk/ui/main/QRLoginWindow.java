@@ -138,6 +138,7 @@ public class QRLoginWindow {
 		tips.setBounds(0, 308, 280, 17);
 		tips.setText("请使用微信扫一扫以登录");
 		loadQRImage();
+		SWTTools.topWindow(shell);
 	}
 	
 	/**

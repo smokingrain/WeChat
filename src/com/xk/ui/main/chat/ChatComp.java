@@ -75,6 +75,7 @@ public class ChatComp extends Composite {
 			public void keyReleased(KeyEvent e) {
 				if(e.keyCode == SWT.CR || e.keyCode == 16777296) {
 					sendMsg();
+					e.doit = false;
 				}
 			}
 			
