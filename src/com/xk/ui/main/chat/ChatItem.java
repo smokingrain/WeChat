@@ -132,7 +132,7 @@ public class ChatItem extends ListItem {
 			gc.fillPath(namePath);
 			gc.drawPath(namePath);
 			gc.drawImage(head,width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + MyList.BAR_WIDTH), start + LINE_SPACE_HEIGHT);
-			gc.setBackground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
+			gc.setBackground(SWTResourceManager.getColor(0x9E, 0xEE, 0x6B));
 			gc.setForeground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
 			gc.fillRoundRectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, allHeight, 3, 3);
 			gc.setForeground(SWTResourceManager.getColor(0xe1, 0xe1, 0xe1));

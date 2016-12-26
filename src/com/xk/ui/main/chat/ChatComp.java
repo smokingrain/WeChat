@@ -10,6 +10,7 @@ import com.xk.ui.items.ConvItem;
 import com.xk.uiLib.MyList;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
+import com.xk.utils.SWTTools;
 import com.xk.utils.WeChatUtil;
 
 import org.eclipse.swt.widgets.Label;
@@ -36,7 +37,7 @@ import org.eclipse.swt.widgets.Display;
 
 public class ChatComp extends Composite {
 
-	private Label nameL;
+	private CLabel nameL;
 	private MyList<ChatItem> chatList;
 	private Text text;
 	private ConvItem item;
@@ -55,24 +56,28 @@ public class ChatComp extends Composite {
 		setSize(550, 590);
 		setBackground(SWTResourceManager.getColor(245, 245, 245));
 		
-		nameL = new Label(this, SWT.NONE);
+		nameL = new CLabel(this, SWT.CENTER);
+		nameL.setFont(SWTResourceManager.getFont("微软雅黑", 11, SWT.NORMAL));
 		nameL.setBackground(getBackground());
 		nameL.setAlignment(SWT.CENTER);
-		nameL.setBounds(0, 0, 470, 17);
+		nameL.setBounds(0, 0, 470, 24);
+		SWTTools.enableTrag(nameL);
 		
 		chatList = new MyList<ChatItem>(this, 550, 375);
 		chatList.setLocation(0, 25);
 		
-		CLabel emojL = new CLabel(this, SWT.BORDER);
+		Image temp = SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png");
+		
+		CLabel emojL = new CLabel(this, SWT.CENTER);
 		emojL.setBounds(0, 400, 30, 30);
-		emojL.setBackground(SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png"));
+		emojL.setBackground(SWTTools.scaleImage(temp.getImageData(), 30, 30));
 		
 		text = new Text(this, SWT.MULTI);
 		text.setBounds(0, 430, 549, 115);
 		text.addKeyListener(new KeyAdapter() {
 
 			@Override
-			public void keyReleased(KeyEvent e) {
+			public void keyPressed(KeyEvent e) {
 				if(e.keyCode == SWT.CR || e.keyCode == 16777296) {
 					sendMsg();
 					e.doit = false;

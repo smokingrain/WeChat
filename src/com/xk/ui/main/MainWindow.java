@@ -450,18 +450,18 @@ public class MainWindow {
 								String sender = ContactsStruct.getGroupMember(splt[0], Constant.contacts.get(FromUserName));
 								String ctt = splt[1].replace("<br/>", "\n");
 								System.out.println(sender + " 在群里说:" + ctt);
-								if(ctt.contains("@" + Constant.user.NickName)) {
-									String detail = ctt.replace("@" + Constant.user.NickName, "");
-									String reply = "什么情况?";
-									if(!detail.trim().isEmpty()) {
-										reply = AutoReply.call(detail, sender);
-									}
-									
-									ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
-									if(null != replyLog) {
-										ChatLogCache.saveLogs(FromUserName, replyLog);
-									}
-								}
+//								if(ctt.contains("@" + Constant.user.NickName)) {
+//									String detail = ctt.replace("@" + Constant.user.NickName, "");
+//									String reply = "什么情况?";
+//									if(!detail.trim().isEmpty()) {
+//										reply = AutoReply.call(detail, sender);
+//									}
+//									
+//									ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
+//									if(null != replyLog) {
+//										ChatLogCache.saveLogs(FromUserName, replyLog);
+//									}
+//								}
 								flushChatView(FromUserName);
 								
 							}else {
@@ -470,14 +470,14 @@ public class MainWindow {
 								String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
 								String ctt = Content.replace("<br/>", "\n");
 								System.out.println(sender + " 说：" + ctt);
-								if(!Constant.noReply.contains(FromUserName)) {
-									String reply = AutoReply.call(ctt, sender);
-									ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
-									if(null != replyLog) {
-										ChatLogCache.saveLogs(FromUserName, replyLog);
-									}
-									
-								}
+//								if(!Constant.noReply.contains(FromUserName)) {
+//									String reply = AutoReply.call(ctt, sender);
+//									ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
+//									if(null != replyLog) {
+//										ChatLogCache.saveLogs(FromUserName, replyLog);
+//									}
+//									
+//								}
 								flushChatView(FromUserName);
 								
 							}
