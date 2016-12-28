@@ -1,5 +1,5 @@
 # WeChat
-![img](./WeChat/src/images/example.png "预览图")
+![img](./src/images/example.png "预览图")
 微信客户端<br>
 当前支持64位操作系统，如果需要在32位操作系统上播放，请将SWT.jar替换成32位的就行了 <br>
 
