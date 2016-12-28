@@ -65,12 +65,13 @@ public class ImageCache {
 	
 	
 	
-	public static Image getChatImage(String msgId, String url, Map<String, String> params,int width, int height) {
+	public static Image getChatImage(String msgId, String url, Map<String, String> params,Integer width, Integer height) {
 		Image temp = chatImages.get(msgId);
 		if(null != temp && !temp.isDisposed()) {
-			if(temp.getImageData().width != width || temp.getImageData().height != height) {
+			if(null != width && null != height && (temp.getImageData().width != width || temp.getImageData().height != height)) {
 				Image img = SWTTools.scaleImage(temp.getImageData(), width, height);
 				chatImages.put(msgId, img);
+				temp.dispose();
 				return img;
 			}
 			return temp;
@@ -80,7 +81,7 @@ public class ImageCache {
 	}
 	
 	
-	private static Image getImage(final String id, File cache, Map<String, Image> caches, String url, Map<String, String> params, int width, int height) {
+	private static Image getImage(final String id, File cache, Map<String, Image> caches, String url, Map<String, String> params, Integer width, Integer height) {
 		if(!cache.exists()) {
 			cache.mkdirs();
 		}else if(cache.exists() && !cache.isDirectory()) {
@@ -99,7 +100,7 @@ public class ImageCache {
 				ImageLoader loader = new ImageLoader();
 				ImageData[] datas = loader.load(heads[0].getAbsolutePath());
 				if(null != datas && datas.length > 0) {
-					if(datas[0].width != width || datas[0].height != height) {
+					if(null != width && null != height && (datas[0].width != width || datas[0].height != height)) {
 						Image img = SWTTools.scaleImage(datas[0], width, height);
 						caches.put(id, img);
 						return img;
@@ -120,7 +121,7 @@ public class ImageCache {
 			ImageLoader loader = new ImageLoader();
 			ImageData[] datas = loader.load(in);
 			if(null != datas && datas.length > 0) {
-				if(datas[0].width != width || datas[0].height != height) {
+				if(null != width && null != height && (datas[0].width != width || datas[0].height != height)) {
 					Image img = SWTTools.scaleImage(datas[0], width, height);
 					caches.put(id, img);
 //					File dest = new File(cache, id + Constant.FORMATS[loader.format]);
@@ -150,7 +151,7 @@ public class ImageCache {
 	}
 	
 	
-	public static Image getUserHeadCache(String userName,String url, Map<String, String> params, int width, int height) {
+	public static Image getUserHeadCache(String userName,String url, Map<String, String> params, Integer width, Integer height) {
 		Image temp = userHeads.get(userName);
 		if(null != temp && !temp.isDisposed()) {
 			System.out.println(userName + " find cache!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");

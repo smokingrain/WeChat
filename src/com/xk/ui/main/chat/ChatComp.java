@@ -4,6 +4,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.xk.bean.ContactsStruct;
+import com.xk.bean.MemberStruct;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
 import com.xk.ui.items.ConvItem;
@@ -16,7 +17,9 @@ import com.xk.utils.WeChatUtil;
 import org.eclipse.swt.widgets.Label;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -60,11 +63,11 @@ public class ChatComp extends Composite {
 		nameL.setFont(SWTResourceManager.getFont("微软雅黑", 11, SWT.NORMAL));
 		nameL.setBackground(getBackground());
 		nameL.setAlignment(SWT.CENTER);
-		nameL.setBounds(0, 0, 470, 24);
+		nameL.setBounds(0, 0, 470, 49);
 		SWTTools.enableTrag(nameL);
 		
-		chatList = new MyList<ChatItem>(this, 550, 375);
-		chatList.setLocation(0, 25);
+		chatList = new MyList<ChatItem>(this, 550, 350);
+		chatList.setLocation(0, 50);
 		
 		Image temp = SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png");
 		
@@ -134,6 +137,9 @@ public class ChatComp extends Composite {
 	 * @param item
 	 */
 	public void flush(final ConvItem item) {
+		if(null == item) {
+			return;
+		}
 		item.clearUnread();
 		convId = item.getData().UserName;
 		this.item = item;
@@ -143,17 +149,41 @@ public class ChatComp extends Composite {
 			for(ChatLog log : logs) {
 				String user = log.fromId;
 				boolean fromSelf = user.equals(Constant.user.UserName);
-				Image head = ImageCache.getUserHeadCache(user, "", null, 50, 50);
+				Image head = null;
 				if(convId.startsWith("@@")) {
+					ContactsStruct struct = Constant.contacts.get(convId);
+					for(MemberStruct ms : struct.MemberList) {
+						if(log.fromId.equals(ms.UserName)) {
+							Map<String, String> params = new HashMap<String, String>();
+							params.put("seq", "0");
+							params.put("username", ms.UserName);
+							params.put("chatroomid", struct.EncryChatRoomId);
+							params.put("skey", Constant.sign.skey);
+							head = ImageCache.getUserHeadCache(log.fromId, Constant.GET_MEMBER_ICON, params, 50, 50);
+							break;
+						}
+					}
 					user = ContactsStruct.getGroupMember(log.fromId, Constant.contacts.get(convId));
 				}else if(Constant.user.UserName.equals(user)){
+					head = ImageCache.getUserHeadCache(user, Constant.contacts.get(user).HeadImgUrl, null, 50, 50);
 					user = Constant.user.NickName;
 				}else {
+					head = ImageCache.getUserHeadCache(user, Constant.contacts.get(user).HeadImgUrl, null, 50, 50);
 					user = ContactsStruct.getContactName(Constant.contacts.get(log.fromId));
 				}
-				
 				List<Object> chatContent = new ArrayList<>();
-				chatContent.add(log.content);
+				if(3 == log.msgType || 47 == log.msgType) {
+					if(null != log.img) {
+						chatContent.add(log.img);
+					}else {
+						chatContent.add(log.content);
+					}
+				}else {
+					chatContent.add(log.content);
+					
+				}
+				
+				
 				ChatItem ci = new ChatItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL));
 				chatList.addItem(ci);
 			}

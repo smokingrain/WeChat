@@ -114,18 +114,36 @@ public class ConvItem extends ListItem {
 			if (menu != null) {
 				menu.dispose();
 			}
-			MenuItem noReply=new MenuItem(m, SWT.NONE);
-			noReply.setText("禁用自动回复");
-			noReply.addSelectionListener(new SelectionAdapter() {
+			
+			if(Constant.noReply.contains(data.UserName)) {
+				MenuItem noReply=new MenuItem(m, SWT.NONE);
+				noReply.setText("启用自动回复");
+				noReply.addSelectionListener(new SelectionAdapter() {
 
-				@Override
-				public void widgetSelected(SelectionEvent arg0) {
-					if(!data.UserName.startsWith("@@")) {
-						Constant.noReply.add(data.UserName);
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						if(!data.UserName.startsWith("@@")) {
+							Constant.noReply.remove(data.UserName);
+						}
 					}
-				}
-				
-			});
+					
+				});
+			}else {
+				MenuItem noReply=new MenuItem(m, SWT.NONE);
+				noReply.setText("禁用自动回复");
+				noReply.addSelectionListener(new SelectionAdapter() {
+
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						if(!data.UserName.startsWith("@@")) {
+							Constant.noReply.add(data.UserName);
+						}
+					}
+					
+				});
+			}
+			
+			
 			getParent().setMenu(m);
 			m.setVisible(true);
 		}

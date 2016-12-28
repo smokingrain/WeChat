@@ -3,6 +3,7 @@ package com.xk.uiLib;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
@@ -37,7 +38,7 @@ public class MyList<T extends ListItem> extends Composite {
 	private int allHeight=0;
 	private int width;
 	private int height;
-	private List<T>items=new ArrayList<T>();
+	private List<T>items=new CopyOnWriteArrayList<T>();
 	protected T selected=null;
 	private T focused=null;
 	protected Canvas back;

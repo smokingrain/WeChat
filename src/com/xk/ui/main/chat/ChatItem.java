@@ -57,13 +57,13 @@ public class ChatItem extends ListItem {
 					Image img = (Image) content;
 					int width = img.getImageData().width;
 					if(maxWidth < width) {
-						maxWidth = width;
+						maxWidth = width + 10 + MARGIN;
 					}
 					int height = img.getImageData().height;
 					allLength += width;
 					if(allLength > ITEM_AREA_WIDTH) {
 						maxWidth = ITEM_AREA_WIDTH + 10;
-						allHeight += maxHeight + LINE_SPACE_HEIGHT *2 + LINE_SPACE_HEIGHT *2;
+						allHeight += maxHeight + LINE_SPACE_HEIGHT * 2 + LINE_SPACE_HEIGHT * 2;
 						lineNum++;
 						allLength = width;
 						maxHeight = 0;
@@ -74,7 +74,7 @@ public class ChatItem extends ListItem {
 					}
 				}else if(content instanceof String) {
 					String str = ((String) content).replace("\n", "").replace("\r", "");
-					Point point = gc.textExtent(str);
+					Point point = gc.stringExtent(str);
 					if(maxWidth < point.x) {
 						maxWidth = point.x + str.length() + 10;//字间距
 					}
@@ -83,7 +83,7 @@ public class ChatItem extends ListItem {
 						maxWidth = ITEM_AREA_WIDTH + 10;
 						int num = allLength / ITEM_AREA_WIDTH;
 						lineNum += num;
-						allHeight += maxHeight + point.y * num + num * LINE_SPACE_HEIGHT * 4 + MARGIN;
+						allHeight += maxHeight + point.y * num + num * LINE_SPACE_HEIGHT * 2 + MARGIN;
 						maxHeight = 0;
 						continue;
 					}
@@ -135,8 +135,8 @@ public class ChatItem extends ListItem {
 			gc.setBackground(SWTResourceManager.getColor(0x9E, 0xEE, 0x6B));
 			gc.setForeground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
 			gc.fillRoundRectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, allHeight, 3, 3);
-			gc.setForeground(SWTResourceManager.getColor(0xe1, 0xe1, 0xe1));
-			gc.drawRoundRectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, allHeight - 4, 3, 3);
+			gc.setForeground(SWTResourceManager.getColor(0x91, 0xe1, 0x61));
+			gc.drawRoundRectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, allHeight - 3, 3, 3);
 			gc.setFont(font);
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			gc.setForeground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
@@ -152,20 +152,20 @@ public class ChatItem extends ListItem {
 					int imgHeight = img.getImageData().height;
 					cLineWidth += imgWidth;
 					if(cLineWidth > ITEM_AREA_WIDTH) {
-						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
 						cHeight += cMaxHeight;
 						cMaxHeight = 0;
 						cLineWidth = 0;
 						continue;
 					} else {
-						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + cLineWidth - imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + cLineWidth - imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
 					}
 					if(imgHeight > cMaxHeight) {
 						cMaxHeight = imgHeight;
 					}
 				} else if(content instanceof String) {
 					String str = ((String) content).replace("\n", "").replace("\r", "");
-					Point point = gc.textExtent(str);
+					Point point = gc.stringExtent(str);
 					int temp = cLineWidth;
 					cLineWidth += point.x + str.length();//字间距
 					if(cLineWidth < ITEM_AREA_WIDTH) {
@@ -228,20 +228,20 @@ public class ChatItem extends ListItem {
 					int imgHeight = img.getImageData().height;
 					cLineWidth += imgWidth;
 					if(cLineWidth > ITEM_AREA_WIDTH) {
-						gc.drawImage(img, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+						gc.drawImage(img, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 3  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
 						cHeight += cMaxHeight;
 						cMaxHeight = 0;
 						cLineWidth = 0;
 						continue;
 					} else {
-						gc.drawImage(img, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + cLineWidth - imgWidth + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+						gc.drawImage(img, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + cLineWidth - imgWidth + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 3  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
 					}
 					if(imgHeight > cMaxHeight) {
 						cMaxHeight = imgHeight;
 					}
 				} else if(content instanceof String) {
 					String str = ((String) content).replace("\n", "").replace("\r", "");
-					Point point = gc.textExtent(str);
+					Point point = gc.stringExtent(str);
 					int temp = cLineWidth;
 					cLineWidth += point.x + str.length();//字间距
 					if(cLineWidth < ITEM_AREA_WIDTH) {

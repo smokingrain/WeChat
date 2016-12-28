@@ -435,63 +435,58 @@ public class MainWindow {
 								});
 								syncGroup = true;
 							}
-						}else if(1 == MsgType) {
+						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType) {
 							if(Constant.FILTER_USERS.contains(FromUserName)) {
 								System.out.println("忽略特殊用户信息！！" + Content);
 							}else if(FromUserName.equals(Constant.user.UserName)){
 								ChatLog log = ChatLog.fromMap(msg);
-								ChatLogCache.saveLogs(ToUserName, log);
-								flushChatView(ToUserName);
-								System.out.println("来自手机端自己的消息：" + Content);
+								if(null != log) {
+									ChatLogCache.saveLogs(ToUserName, log);
+									flushChatView(ToUserName);
+									System.out.println("来自手机端自己的消息：" + Content);
+								}
+								
 							}else if(FromUserName.startsWith("@@")) {
 								ChatLog log = ChatLog.fromMap(msg);
-								ChatLogCache.saveLogs(FromUserName, log);
-								String[] splt = Content.split(":<br/>");
-								String sender = ContactsStruct.getGroupMember(splt[0], Constant.contacts.get(FromUserName));
-								String ctt = splt[1].replace("<br/>", "\n");
-								System.out.println(sender + " 在群里说:" + ctt);
-//								if(ctt.contains("@" + Constant.user.NickName)) {
-//									String detail = ctt.replace("@" + Constant.user.NickName, "");
-//									String reply = "什么情况?";
-//									if(!detail.trim().isEmpty()) {
-//										reply = AutoReply.call(detail, sender);
+								if(null != log) {
+									ChatLogCache.saveLogs(FromUserName, log);
+//									String[] splt = Content.split(":<br/>");
+//									String sender = ContactsStruct.getGroupMember(splt[0], Constant.contacts.get(FromUserName));
+//									String ctt = splt[1].replace("<br/>", "\n");
+//									if(ctt.contains("@" + Constant.user.NickName)) {
+//										String detail = ctt.replace("@" + Constant.user.NickName, "");
+//										String reply = "什么情况?";
+//										if(!detail.trim().isEmpty()) {
+//											reply = AutoReply.call(detail, sender);
+//										}
+//										
+//										ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
+//										if(null != replyLog) {
+//											ChatLogCache.saveLogs(FromUserName, replyLog);
+//										}
 //									}
-//									
-//									ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
-//									if(null != replyLog) {
-//										ChatLogCache.saveLogs(FromUserName, replyLog);
-//									}
-//								}
-								flushChatView(FromUserName);
+									flushChatView(FromUserName);
+								}
+								
 								
 							}else {
 								ChatLog log = ChatLog.fromMap(msg);
-								ChatLogCache.saveLogs(FromUserName, log);
-								String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
-								String ctt = Content.replace("<br/>", "\n");
-								System.out.println(sender + " 说：" + ctt);
-//								if(!Constant.noReply.contains(FromUserName)) {
-//									String reply = AutoReply.call(ctt, sender);
-//									ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
-//									if(null != replyLog) {
-//										ChatLogCache.saveLogs(FromUserName, replyLog);
+								if(null != log) {
+									ChatLogCache.saveLogs(FromUserName, log);
+//									String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
+//									String ctt = Content.replace("<br/>", "\n");
+//									System.out.println(sender + " 说：" + ctt);
+//									if(!Constant.noReply.contains(FromUserName)) {
+//										String reply = AutoReply.call(ctt, sender);
+//										ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
+//										if(null != replyLog) {
+//											ChatLogCache.saveLogs(FromUserName, replyLog);
+//										}
+//										
 //									}
-//									
-//								}
-								flushChatView(FromUserName);
-								
-							}
-						}else if(3 == MsgType || 47 == MsgType) {
-							if(null != Content && !Content.isEmpty()) {
-								String MsgId = (String) msg.get("MsgId");
-								ImageLoader loader = WeChatUtil.loadImage(MsgId, null);
-								if(null != loader) {
-									File file = new File("msgimages", MsgId + Constant.FORMATS[loader.format]);
-									file.getParentFile().mkdirs();
-									FileOutputStream out = new FileOutputStream(file); 
-									loader.save(out, loader.format);
-									out.close();
+									flushChatView(FromUserName);
 								}
+								
 							}
 						}
 					}
