@@ -24,19 +24,26 @@ import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.impl.client.AbstractHttpClient;
+import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 
 
 public class HTTPUtil {
-	public CloseableHttpClient httpClient = HttpClientUtils.createSSLClientDefault();
+	private CookieStore cookieStore = new BasicCookieStore(); 
+	public CloseableHttpClient httpClient = HttpClientUtils.createSSLClientDefault(cookieStore);
 	public static String cid=null;
 	private static HTTPUtil instance;
 	
@@ -50,6 +57,19 @@ public class HTTPUtil {
 	
 	private HTTPUtil(){
 		
+		
+	}
+	
+	public String getCookie(String key) {
+		if(key == null) {
+			return null;
+		}
+		for(Cookie cookie : cookieStore.getCookies()) {
+			if(key.equals(cookie.getName())) {
+				return cookie.getValue();
+			}
+		}
+		return null;
 	}
 	
 	public void close(){
@@ -60,6 +80,43 @@ public class HTTPUtil {
 			e.printStackTrace();
 		}
 	}
+	
+	public String httpPostFile(String url, Map<String, String> params, Map<String, File> files) {
+		try {
+			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			if (null != files) {
+				for (String key : files.keySet()) {
+					builder.addBinaryBody(key, files.get(key));
+				}
+			}
+			if (null != params) {
+				for (String key : params.keySet()) {
+					System.out.println(key);
+					builder.addTextBody(key, params.get(key));
+				}
+			}
+			HttpEntity entity = builder.build();
+			HttpPost httppost = new HttpPost(url);
+			httppost.setEntity(entity);
+			CloseableHttpResponse resp = httpClient.execute(httppost);
+			int status = resp.getStatusLine().getStatusCode();
+			if (302 == status) {
+				String redirect = resp.getHeaders("Location")[0].getValue();
+				resp.close();
+				if (null != redirect) {
+					return redirect;
+				}
+			}
+			HttpEntity resEntity = resp.getEntity();
+			String respContent = EntityUtils.toString(resEntity, "UTF-8").trim();
+			httppost.abort();
+			return respContent;
+		} catch (Exception e) {
+			e.printStackTrace();
+			return "";
+		}
+	}
+	
 	
 	public String getHtml(String url){
 		StringBuffer result=new StringBuffer();
@@ -271,7 +328,7 @@ public class HTTPUtil {
 			while ((temp = br.readLine()) != null) {  
 				result.append(temp);  
 			}  
-		}  
+		} 
 		httppost.releaseConnection();
 		response.close();
 		return result.toString();

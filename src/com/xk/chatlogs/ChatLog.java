@@ -44,9 +44,12 @@ public class ChatLog {
 		
 		if(log.fromId.startsWith("@@") && !Constant.user.UserName.equals(log.fromId)) {
 			String[] splt = log.content.split(":<br/>");
-			if(null != splt && splt.length == 2) {
+			if(null != splt && splt.length > 0) {
 				log.fromId = splt[0];//ContactsStruct.getGroupMember(splt[0], Constant.contacts.get(log.fromId));
-				log.content = splt[1];
+				if(splt.length > 1) {
+					log.content = splt[1];
+				}
+				
 			}
 			
 		}

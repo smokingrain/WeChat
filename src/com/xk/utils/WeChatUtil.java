@@ -1,10 +1,12 @@
 package com.xk.utils;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,101 @@ import com.xk.uiLib.MyList;
 
 public class WeChatUtil {
 
+	
+	private static String uploadImage(File file) {
+		HTTPUtil hu = HTTPUtil.getInstance();
+		String name = file.getName();
+		String minaType = Constant.imgTypes.get(name.substring(name.lastIndexOf(".") + 1).toLowerCase());
+		Long flen = file.length();
+		Date lastModify = new Date(file.lastModified());
+		Map<String, Object> bodyInner = new HashMap<String, Object>();
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
+		Map<String, Object> req = new HashMap<String, Object>();
+		req.put("BaseRequest", bodyInner);
+		req.put("ClientMediaId", System.currentTimeMillis());
+		req.put("TotalLen", flen);
+		req.put("StartPos", 0);
+		req.put("DataLen", flen);
+		req.put("MediaType", 4);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("f", "json");
+		params.put("id", "WU_FILE_" + Constant.file_index++);
+		params.put("type", minaType);
+		params.put("lastModifiedDate", lastModify.toString());
+		params.put("size", String.valueOf(flen));
+		params.put("mediatype", "pic");
+		params.put("uploadmediarequest", JSONUtil.toJson(req));
+		params.put("webwx_data_ticket", hu.getCookie("webwx_data_ticket"));
+		params.put("pass_ticket", Constant.sign.pass_ticket);
+		Map<String, File> files = new HashMap<String, File>();
+		files.put("filename", file);
+		String result = hu.httpPostFile(Constant.UPLOAD_MEDIA, params, files);
+		Map<String, Object> rst = JSONUtil.fromJson(result);
+		if(null != rst) {
+			return (String) rst.get("MediaId");
+		}
+		return null;
+	}
+	
+	
+	public static ChatLog sendImg(File img, String to) {
+		String mediaId = uploadImage(img);
+		if(null == mediaId) {
+			return null;
+		}
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("fun", "async");
+		params.put("f", "json");
+		try {
+			params.put("pass_ticket", URLEncoder.encode(Constant.sign.pass_ticket, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Map<String, Object> body = new HashMap<String, Object>();
+		Map<String, Object> bodyInner = new HashMap<String, Object>();
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
+		body.put("BaseRequest", bodyInner);
+		body.put("Scene", 0);
+		Map<String, Object> msgMap = new HashMap<>();
+		long cur = System.currentTimeMillis();
+		msgMap.put("ClientMsgId", cur);
+		msgMap.put("MediaId", mediaId);
+		msgMap.put("Type", 3);
+		msgMap.put("ToUserName", to);
+		msgMap.put("FromUserName", Constant.user.UserName);
+		msgMap.put("LocalID", cur);
+		body.put("Msg", msgMap);
+		HTTPUtil hu = HTTPUtil.getInstance();
+		try {
+			String result = hu.postBody(Constant.SEND_IMG, params, JSONUtil.toJson(body));
+			Map<String, Object> rstMap= JSONUtil.fromJson(result);
+			Map<String, Object> obj = (Map<String, Object>) rstMap.get("BaseResponse");
+			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {
+				ChatLog log = new ChatLog();
+				log.createTime = System.currentTimeMillis();
+				log.toId = to;
+				log.fromId = Constant.user.UserName;
+				log.msgid = rstMap.get("MsgID").toString();
+				log.newMsgId = Long.parseLong(rstMap.get("LocalID").toString());
+				log.msgType = 3;
+				log.img = ImageCache.getChatImage(log.msgid, img);
+				log.content = "[图片]";
+				return log;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
 	
 	/**
 	 * 用途：发送消息

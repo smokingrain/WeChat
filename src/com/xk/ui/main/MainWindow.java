@@ -1,7 +1,5 @@
 package com.xk.ui.main;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -24,13 +22,14 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseTrackListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
+import com.sun.jna.Pointer;
+import com.sun.jna.platform.win32.User32;
+import com.sun.jna.platform.win32.WinNT.HANDLE;
+import com.sun.jna.platform.win32.WinUser.FLASHWINFO;
 import com.xk.bean.ContactsStruct;
-import com.xk.bean.User;
-import com.xk.bean.WeChatSign;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
 import com.xk.ui.items.ContactItem;
@@ -43,9 +42,7 @@ import com.xk.uiLib.MyText;
 import com.xk.uiLib.MyText.DeleteListener;
 import com.xk.uiLib.listeners.ItemSelectionEvent;
 import com.xk.uiLib.listeners.ItemSelectionListener;
-import com.xk.utils.AutoReply;
 import com.xk.utils.Constant;
-import com.xk.utils.DateUtil;
 import com.xk.utils.HTTPUtil;
 import com.xk.utils.ImageCache;
 import com.xk.utils.JSONUtil;
@@ -87,7 +84,7 @@ public class MainWindow {
 		final Color back = SWTResourceManager.getColor(234, 234, 234);
 		final Color red = SWTResourceManager.getColor(SWT.COLOR_RED);
 		final Color dark = SWTResourceManager.getColor(220, 220, 220);
-		shell = new Shell(SWT.FILL_WINDING);
+		shell = new Shell(SWT.NO_TRIM);
 		shell.setBackground(back);
 		shell.setSize(850, 590);
 		shell.setBackgroundMode(SWT.INHERIT_DEFAULT);
@@ -564,6 +561,15 @@ public class MainWindow {
 					}
 				}
 				convers.flush();
+				User32 user32 = User32.INSTANCE;
+				HANDLE handle = new HANDLE();
+				handle.setPointer(Pointer.createConstant(shell.handle));//获取窗口句柄
+				FLASHWINFO info = new FLASHWINFO();
+				info.hWnd = handle;
+				info.dwFlags = User32.FLASHW_TRAY | User32.FLASHW_TIMERNOFG;//闪烁直到窗口前端显示
+				info.dwTimeout = 0;
+				info.uCount = 100000;
+				user32.FlashWindowEx(info);//闪烁窗口
 				return ;
 			
 			}

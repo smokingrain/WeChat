@@ -74,19 +74,19 @@ public class ConvItem extends ListItem {
 			gc.drawImage(silenceImage, width - MyList.BAR_WIDTH - 35, start + 37);
 		}
 		if(null != lastMsg){
-			Color fg = gc.getForeground();
-			gc.setForeground(SWTResourceManager.getColor(0xBD, 0xBD, 0xBD));
+			Color fg = gc.getBackground();
+			gc.setBackground(SWTResourceManager.getColor(0xBD, 0xBD, 0xBD));
 			Path temp = new Path(null);
 			temp.addString(FileUtils.getLimitString(FileUtils.getLimitString(lastMsg, 7), 10), 15 + 58f, start + 37F, font);
-			gc.drawPath(temp);
-			gc.setForeground(fg);
+			gc.fillPath(temp);
+			gc.setBackground(fg);
 			temp.dispose();
 		}
 		if(null != lastTime) {
 			path.addString(DateUtil.getChatTime(lastTime), width - MyList.BAR_WIDTH - 50f, start + 15f, font);
 		}
-		
-		gc.drawPath(path);
+		gc.setBackground(SWTResourceManager.getColor(0x11, 0x11, 0x11));
+		gc.fillPath(path);
 		path.dispose();
 		if(unread > 0) {
 			Color bk = gc.getBackground();

@@ -16,6 +16,7 @@ import com.xk.utils.WeChatUtil;
 
 import org.eclipse.swt.widgets.Label;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,6 +38,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.CoolItem;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.FileDialog;
 
 public class ChatComp extends Composite {
 
@@ -69,11 +71,40 @@ public class ChatComp extends Composite {
 		chatList = new MyList<ChatItem>(this, 550, 350);
 		chatList.setLocation(0, 50);
 		
-		Image temp = SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png");
+		Image tempEmoj = SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png");
 		
 		CLabel emojL = new CLabel(this, SWT.CENTER);
 		emojL.setBounds(0, 400, 30, 30);
-		emojL.setBackground(SWTTools.scaleImage(temp.getImageData(), 30, 30));
+		emojL.setBackground(SWTTools.scaleImage(tempEmoj.getImageData(), 30, 30));
+		
+		Image tempPic = SWTResourceManager.getImage(ChatComp.class, "/images/select.png");
+		
+		CLabel picL = new CLabel(this, SWT.CENTER);
+		picL.setBounds(32, 400, 30, 30);
+		picL.setBackground(tempPic);
+		
+		picL.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseUp(MouseEvent mouseevent) {
+				if(null != convId) {
+					FileDialog fd = new FileDialog(getShell());
+					fd.setText("选择图片");
+					fd.setFilterExtensions(new String[]{"*.png", "*.jpg", "*.bmp"});
+					fd.setFilterNames(new String[]{"png图片", "jpg图片", "bmp图片"});
+					String path = fd.open();
+					if(null != path) {
+						File file = new File(path);
+						ChatLog log = WeChatUtil.sendImg(file, convId);
+						if(null != log) {
+							ChatLogCache.saveLogs(convId, log);
+							flush(item);
+						}
+					}
+				}
+			}
+			
+		});
 		
 		text = new Text(this, SWT.MULTI);
 		text.setBounds(0, 430, 549, 115);

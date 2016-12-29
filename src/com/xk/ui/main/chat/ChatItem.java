@@ -130,7 +130,7 @@ public class ChatItem extends ListItem {
 			Point nameSize = gc.stringExtent(user);
 			namePath.addString(user, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + nameSize.x + MyList.BAR_WIDTH + MARGIN), start + LINE_SPACE_HEIGHT, ft);
 			gc.fillPath(namePath);
-			gc.drawPath(namePath);
+//			gc.drawPath(namePath);
 			gc.drawImage(head,width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + MyList.BAR_WIDTH), start + LINE_SPACE_HEIGHT);
 			gc.setBackground(SWTResourceManager.getColor(0x9E, 0xEE, 0x6B));
 			gc.setForeground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
@@ -199,7 +199,7 @@ public class ChatItem extends ListItem {
 					}
 				}
 			}
-			gc.drawPath(contentPath);
+//			gc.drawPath(contentPath);
 			gc.fillPath(contentPath);
 		} else {
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
@@ -207,7 +207,7 @@ public class ChatItem extends ListItem {
 			Path namePath = new Path(null);
 			namePath.addString(user,HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2, start + LINE_SPACE_HEIGHT, ft);
 			gc.fillPath(namePath);
-			gc.drawPath(namePath);
+//			gc.drawPath(namePath);
 			gc.drawImage(head,LINE_SPACE_HEIGHT, start + LINE_SPACE_HEIGHT);
 			gc.setBackground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
 			gc.setForeground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
@@ -275,7 +275,7 @@ public class ChatItem extends ListItem {
 					}
 				}
 			}
-			gc.drawPath(contentPath);
+//			gc.drawPath(contentPath);
 			gc.fillPath(contentPath);
 		}
 		trans.translate(0, -HEAD_FOOT_SAPCE);

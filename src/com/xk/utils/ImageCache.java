@@ -63,6 +63,30 @@ public class ImageCache {
 		System.out.println("load " + count + " caches!!");
 	}
 	
+	public static Image getChatImage(String msgId, File file) {
+		Image temp = chatImages.get(msgId);
+		if(null != temp && !temp.isDisposed()) {
+			return temp;
+		}
+		Image image = new Image(null, file.getAbsolutePath());
+		if(image.getImageData().width > 200 || image.getImageData().height > 200) {
+			if(image.getImageData().width > image.getImageData().height) {
+				Integer w = 200;
+				Integer h = (int) (image.getImageData().height * 200D / image.getImageData().width);
+				Image tmp = SWTTools.scaleImage(image.getImageData(), w, h);
+				chatImages.put(msgId, tmp);
+				return tmp;
+			}else {
+				Integer h = 200;
+				Integer w = (int) (image.getImageData().width * 200D / image.getImageData().height);
+				Image tmp = SWTTools.scaleImage(image.getImageData(), w, h);
+				chatImages.put(msgId, tmp);
+				return tmp;
+			}
+		}
+		
+		return image;
+	}
 	
 	
 	public static Image getChatImage(String msgId, String url, Map<String, String> params,Integer width, Integer height) {

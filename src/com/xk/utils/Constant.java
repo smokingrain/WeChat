@@ -29,13 +29,17 @@ public class Constant {
 	public static final String BASE_URL = "https://wx.qq.com/";
 	public static final String LOGOUT_URL = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxlogout?redirect=1&type=1&skey={SKEY}";
 	public static final String LOAD_IMG = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxgetmsgimg";
+	public static final String UPLOAD_MEDIA = "https://file.wx.qq.com/cgi-bin/mmwebwx-bin/webwxuploadmedia";
+	public static final String SEND_IMG = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendmsgimg";
 	
 	public static final String[] FORMATS = {".bmp", ".bmp", ".gif", ".ico", ".jpg", ".png", ".tiff", ".bmp"};
 	
+	public static Map<String, String> imgTypes = new HashMap<String, String>();
 	public static User user;
 	public static Set<String> noReply = new HashSet<String>();
 	public static WeChatSign sign;
 	public static Map<String, ContactsStruct> contacts = new HashMap<>();
+	public static Integer file_index = 0;
 	
 	// 特殊用户 须过滤
 	public static final List<String> FILTER_USERS = Arrays.asList("newsapp", "fmessage", "filehelper", "weibo", "qqmail", 
@@ -44,4 +48,10 @@ public class Constant {
 			"weixin", "brandsessionholder", "weixinreminder", "wxid_novlwrv3lqwv11", "gh_22b87fa7cb3c", "officialaccounts",
 			"notification_messages", "wxid_novlwrv3lqwv11", "gh_22b87fa7cb3c", "wxitil", "userexperience_alarm", 
 			"notification_messages");
+	
+	static {
+		imgTypes.put("png", "image/png");
+		imgTypes.put("jpg", "image/jpeg");
+		imgTypes.put("bmp", "image/bmp");
+	}
 }
