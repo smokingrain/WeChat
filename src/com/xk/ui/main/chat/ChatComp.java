@@ -223,7 +223,12 @@ public class ChatComp extends Composite {
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
-				nameL.setText(item.getName());
+				if(null != item.getData().MemberCount && item.getData().MemberCount > 0){
+					nameL.setText(item.getName() + "(" + item.getData().MemberCount + ")");
+				}else {
+					nameL.setText(item.getName());
+				}
+				
 				chatList.scrollToBottom();
 				chatList.flush();
 			}
