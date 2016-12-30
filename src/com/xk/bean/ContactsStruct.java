@@ -8,6 +8,12 @@ import org.eclipse.swt.graphics.Image;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.xk.utils.JSONUtil;
 
+/**
+ * 用途：联系人数据
+ *
+ * @author xiaokui
+ * @date 2016年12月30日
+ */
 public class ContactsStruct {
 	public Long Uin;
 	public String UserName;
@@ -87,6 +93,12 @@ public class ContactsStruct {
 		EncryChatRoomId = encryChatRoomId;
 	}
 	
+	/**
+	 * 用途：微信服务器获取的数据
+	 * @date 2016年12月30日
+	 * @param map
+	 * @return
+	 */
 	public static ContactsStruct fromMap(Map<String, Object> map) {
 		String json = JSONUtil.toJson(map);
 		ContactsStruct conv = JSONUtil.toBean(json, ContactsStruct.class);

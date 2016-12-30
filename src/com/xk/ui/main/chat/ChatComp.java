@@ -76,13 +76,14 @@ public class ChatComp extends Composite {
 		CLabel emojL = new CLabel(this, SWT.CENTER);
 		emojL.setBounds(0, 400, 30, 30);
 		emojL.setBackground(SWTTools.scaleImage(tempEmoj.getImageData(), 30, 30));
+		emojL.setToolTipText("发送表情");
 		
 		Image tempPic = SWTResourceManager.getImage(ChatComp.class, "/images/select.png");
 		
 		CLabel picL = new CLabel(this, SWT.CENTER);
 		picL.setBounds(32, 400, 30, 30);
 		picL.setBackground(tempPic);
-		
+		picL.setToolTipText("发送图片");
 		picL.addMouseListener(new MouseAdapter() {
 
 			@Override
@@ -90,8 +91,8 @@ public class ChatComp extends Composite {
 				if(null != convId) {
 					FileDialog fd = new FileDialog(getShell());
 					fd.setText("选择图片");
-					fd.setFilterExtensions(new String[]{"*.png", "*.jpg", "*.bmp"});
-					fd.setFilterNames(new String[]{"png图片", "jpg图片", "bmp图片"});
+					fd.setFilterExtensions(new String[]{"*.png;*.jpg;*.bmp"});
+					fd.setFilterNames(new String[]{"图片"});
 					String path = fd.open();
 					if(null != path) {
 						File file = new File(path);

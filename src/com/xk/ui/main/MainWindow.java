@@ -332,7 +332,11 @@ public class MainWindow {
 	}
 	
 	
-	
+	/**
+	 * 用途：发心跳包，获取微信状态是否有新消息
+	 * @date 2016年12月30日
+	 * @param conItem
+	 */
 	private void syncData(final TypeItem conItem) {
 		final HTTPUtil hu = HTTPUtil.getInstance();
 		timer = new Timer();
@@ -390,6 +394,12 @@ public class MainWindow {
 		}, 1000, 1000);
 	}
 
+	
+	/**
+	 * 用途：同步到数据的时候刷新数据
+	 * @date 2016年12月30日
+	 * @param conItem
+	 */
 	private void webwxsync(final TypeItem conItem) {
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Map<String,Object> bodyMap = new HashMap<String,Object>();
@@ -439,7 +449,7 @@ public class MainWindow {
 								ChatLog log = ChatLog.fromMap(msg);
 								if(null != log) {
 									ChatLogCache.saveLogs(ToUserName, log);
-									flushChatView(ToUserName);
+									flushChatView(ToUserName, false );
 									System.out.println("来自手机端自己的消息：" + Content);
 								}
 								
@@ -462,7 +472,7 @@ public class MainWindow {
 //											ChatLogCache.saveLogs(FromUserName, replyLog);
 //										}
 //									}
-									flushChatView(FromUserName);
+									flushChatView(FromUserName, true);
 								}
 								
 								
@@ -481,7 +491,7 @@ public class MainWindow {
 //										}
 //										
 //									}
-									flushChatView(FromUserName);
+									flushChatView(FromUserName, true);
 								}
 								
 							}
@@ -498,6 +508,12 @@ public class MainWindow {
 		
 	}
 	
+	/**
+	 * 用途：添加会话
+	 * @date 2016年12月30日
+	 * @param convs 会话对象属性
+	 * @return
+	 */
 	public ConvItem addConversition(ContactsStruct convs) {
 		if(null == convs) {
 			return null;
@@ -526,7 +542,13 @@ public class MainWindow {
 		return ci;
 	}
 	
-	private void flushChatView (final String conv) {
+	/**
+	 * 用途：刷新聊天界面
+	 * @date 2016年12月30日
+	 * @param conv
+	 * @param flush
+	 */
+	private void flushChatView (final String conv, final boolean flush) {
 		Display.getDefault().asyncExec(new Runnable() {
 			
 			@Override
@@ -561,15 +583,18 @@ public class MainWindow {
 					}
 				}
 				convers.flush();
-				User32 user32 = User32.INSTANCE;
-				HANDLE handle = new HANDLE();
-				handle.setPointer(Pointer.createConstant(shell.handle));//获取窗口句柄
-				FLASHWINFO info = new FLASHWINFO();
-				info.hWnd = handle;
-				info.dwFlags = User32.FLASHW_TRAY | User32.FLASHW_TIMERNOFG;//闪烁直到窗口前端显示
-				info.dwTimeout = 0;
-				info.uCount = 100000;
-				user32.FlashWindowEx(info);//闪烁窗口
+				//来自自己的消息不闪烁
+				if(flush) {
+					User32 user32 = User32.INSTANCE;
+					HANDLE handle = new HANDLE();
+					handle.setPointer(Pointer.createConstant(shell.handle));//获取窗口句柄
+					FLASHWINFO info = new FLASHWINFO();
+					info.hWnd = handle;
+					info.dwFlags = User32.FLASHW_TRAY | User32.FLASHW_TIMERNOFG;//闪烁直到窗口前端显示
+					info.dwTimeout = 0;
+					info.uCount = 100000;
+					user32.FlashWindowEx(info);//闪烁窗口
+				}
 				return ;
 			
 			}
