@@ -74,7 +74,7 @@ public class ChatItem extends ListItem {
 					}
 				}else if(content instanceof String) {
 					String str = ((String) content).replace("\n", "").replace("\r", "");
-					Point point = gc.stringExtent(str);
+					Point point = gc.textExtent(str);
 					if(maxWidth < point.x) {
 						maxWidth = point.x + str.length() + 10;//字间距
 					}
@@ -96,7 +96,7 @@ public class ChatItem extends ListItem {
 			Font ft = SWTResourceManager.getFont("宋体", 12, SWT.NORMAL);
 			GC nameGC = new GC(getParent());
 			nameGC.setFont(ft);
-			nameHeight = nameGC.stringExtent("test").y;
+			nameHeight = nameGC.textExtent("test").y;
 			nameGC.dispose();
 			//首尾间隙,行间距
 			allHeight += maxHeight + HEAD_FOOT_SAPCE ;
@@ -127,7 +127,7 @@ public class ChatItem extends ListItem {
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			gc.setForeground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			Path namePath = new Path(null);
-			Point nameSize = gc.stringExtent(user);
+			Point nameSize = gc.textExtent(user);
 			namePath.addString(user, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + nameSize.x + MyList.BAR_WIDTH + MARGIN), start + LINE_SPACE_HEIGHT, ft);
 			gc.fillPath(namePath);
 //			gc.drawPath(namePath);
@@ -165,7 +165,7 @@ public class ChatItem extends ListItem {
 					}
 				} else if(content instanceof String) {
 					String str = ((String) content).replace("\n", "").replace("\r", "");
-					Point point = gc.stringExtent(str);
+					Point point = gc.textExtent(str);
 					int temp = cLineWidth;
 					cLineWidth += point.x + str.length();//字间距
 					if(cLineWidth < ITEM_AREA_WIDTH) {
@@ -241,7 +241,7 @@ public class ChatItem extends ListItem {
 					}
 				} else if(content instanceof String) {
 					String str = ((String) content).replace("\n", "").replace("\r", "");
-					Point point = gc.stringExtent(str);
+					Point point = gc.textExtent(str);
 					int temp = cLineWidth;
 					cLineWidth += point.x + str.length();//字间距
 					if(cLineWidth < ITEM_AREA_WIDTH) {
