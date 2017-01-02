@@ -83,7 +83,7 @@ public class ChatItem extends ListItem {
 						maxWidth = ITEM_AREA_WIDTH + 10;
 						int num = allLength / ITEM_AREA_WIDTH;
 						lineNum += num;
-						allHeight += maxHeight + point.y * num + num * LINE_SPACE_HEIGHT * 2 + MARGIN;
+						allHeight += maxHeight + point.y * num + num * LINE_SPACE_HEIGHT * 2 + MARGIN + MARGIN;
 						maxHeight = 0;
 						continue;
 					}
