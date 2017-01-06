@@ -58,7 +58,7 @@ public class WeChatUtil {
 		params.put("type", minaType);
 		params.put("lastModifiedDate", lastModify.toString());
 		params.put("size", String.valueOf(flen));
-		params.put("mediatype", "pic");
+		params.put("mediatype", name.toLowerCase().endsWith(".gif") ? "doc" : "pic");
 		params.put("uploadmediarequest", JSONUtil.toJson(req));
 		params.put("webwx_data_ticket", hu.getCookie("webwx_data_ticket"));
 		params.put("pass_ticket", Constant.sign.pass_ticket);
@@ -84,8 +84,9 @@ public class WeChatUtil {
 		if(null == mediaId) {
 			return null;
 		}
+		boolean gif = img.getName().toLowerCase().endsWith(".gif");
 		Map<String, String> params = new HashMap<String, String>();
-		params.put("fun", "async");
+		params.put("fun", gif ? "sys" : "async");
 		params.put("f", "json");
 		try {
 			params.put("pass_ticket", URLEncoder.encode(Constant.sign.pass_ticket, "UTF-8"));
@@ -105,14 +106,14 @@ public class WeChatUtil {
 		long cur = System.currentTimeMillis();
 		msgMap.put("ClientMsgId", cur);
 		msgMap.put("MediaId", mediaId);
-		msgMap.put("Type", 3);
+		msgMap.put("Type", gif ? 47 : 3);
 		msgMap.put("ToUserName", to);
 		msgMap.put("FromUserName", Constant.user.UserName);
 		msgMap.put("LocalID", cur);
 		body.put("Msg", msgMap);
 		HTTPUtil hu = HTTPUtil.getInstance();
 		try {
-			String result = hu.postBody(Constant.SEND_IMG, params, JSONUtil.toJson(body));
+			String result = hu.postBody(gif ? Constant.SEND_GIF : Constant.SEND_IMG, params, JSONUtil.toJson(body));
 			Map<String, Object> rstMap= JSONUtil.fromJson(result);
 			Map<String, Object> obj = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {

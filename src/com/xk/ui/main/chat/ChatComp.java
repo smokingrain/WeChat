@@ -11,6 +11,7 @@ import com.xk.ui.items.ConvItem;
 import com.xk.uiLib.MyList;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
+import com.xk.utils.ImojCache;
 import com.xk.utils.SWTTools;
 import com.xk.utils.WeChatUtil;
 
@@ -21,6 +22,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -158,7 +161,7 @@ public class ChatComp extends Composite {
 		if(null != convId) {
 			FileDialog fd = new FileDialog(getShell());
 			fd.setText("选择图片");
-			fd.setFilterExtensions(new String[]{"*.png;*.jpg;*.bmp"});
+			fd.setFilterExtensions(new String[]{"*.png;*.jpg;*.bmp;*.gif"});
 			fd.setFilterNames(new String[]{"图片"});
 			String path = fd.open();
 			if(null != path) {
@@ -236,7 +239,24 @@ public class ChatComp extends Composite {
 						chatContent.add(log.content);
 					}
 				}else {
-					chatContent.add(log.content);
+					boolean hasImoj = false;
+					String reg = "\\[(\\w+|[\u4E00-\u9FA5]+)\\]";
+					Pattern patternNode = Pattern.compile(reg);
+					Matcher matcherNode = patternNode.matcher(log.content);
+					String[] splt = log.content.split(reg);
+					int index = 0;
+					while (matcherNode.find()) {
+						hasImoj = true;
+						if(index < splt.length) {
+							chatContent.add(splt[index++]);
+						}
+						String match = matcherNode.group();
+						chatContent.add(getContent(match));
+					}
+					if(!hasImoj) {
+						chatContent.add(log.content);
+					} 
+					
 					
 				}
 				
@@ -260,6 +280,15 @@ public class ChatComp extends Composite {
 		});
 	}
 
+	private Object getContent(String content) {
+		if(null == content) {
+			return "";
+		}
+		String name = content.replace("[", "").replace("]", "");
+		Image img = ImojCache.qqface.get(name);
+		return null == img ? content : img;
+	}
+	
 	@Override
 	protected void checkSubclass() {
 		// Disable the check that prevents subclassing of SWT components

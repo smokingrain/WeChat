@@ -31,6 +31,7 @@ public class Constant {
 	public static final String LOAD_IMG = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxgetmsgimg";
 	public static final String UPLOAD_MEDIA = "https://file.wx.qq.com/cgi-bin/mmwebwx-bin/webwxuploadmedia";
 	public static final String SEND_IMG = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendmsgimg";
+	public static final String SEND_GIF = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendemoticon";
 	
 	public static final String[] FORMATS = {".bmp", ".bmp", ".gif", ".ico", ".jpg", ".png", ".tiff", ".bmp"};
 	
@@ -53,5 +54,6 @@ public class Constant {
 		imgTypes.put("png", "image/png");
 		imgTypes.put("jpg", "image/jpeg");
 		imgTypes.put("bmp", "image/bmp");
+		imgTypes.put("gif", "image/gif");
 	}
 }

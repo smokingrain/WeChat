@@ -65,7 +65,8 @@ public class ChatItem extends ListItem {
 						maxWidth = width + 10 + MARGIN;
 					}
 					int height = img.getImageData().height;
-					allLength += width;
+					allLength += width + LINE_SPACE_HEIGHT;
+					maxWidth = allLength;
 					if(allLength > ITEM_AREA_WIDTH) {
 						maxWidth = ITEM_AREA_WIDTH + 10;
 						allHeight += maxHeight + LINE_SPACE_HEIGHT * 2 + LINE_SPACE_HEIGHT * 2;
@@ -155,7 +156,7 @@ public class ChatItem extends ListItem {
 					Image img = (Image) content;
 					int imgWidth = img.getImageData().width;
 					int imgHeight = img.getImageData().height;
-					cLineWidth += imgWidth;
+					cLineWidth += imgWidth + LINE_SPACE_HEIGHT;
 					if(cLineWidth > ITEM_AREA_WIDTH) {
 						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
 						cHeight += cMaxHeight;
@@ -163,7 +164,7 @@ public class ChatItem extends ListItem {
 						cLineWidth = 0;
 						continue;
 					} else {
-						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + cLineWidth - imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth - cLineWidth-  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
 					}
 					if(imgHeight > cMaxHeight) {
 						cMaxHeight = imgHeight;
