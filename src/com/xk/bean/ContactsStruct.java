@@ -105,6 +105,14 @@ public class ContactsStruct {
 		return conv;
 	}
 	
+	
+	/**
+	 * 用途：获取指定群成员显示名称
+	 * @date 2017年1月3日
+	 * @param user
+	 * @param con
+	 * @return
+	 */
 	public static String getGroupMember(String user, ContactsStruct con) {
 		String name = "匿名";
 		if(null != con && con.UserName.startsWith("@@")) {
@@ -122,6 +130,13 @@ public class ContactsStruct {
 		return name;
 	}
 	
+	
+	/**
+	 * 用途：获取显示名
+	 * @date 2017年1月3日
+	 * @param con
+	 * @return
+	 */
 	public static String getContactName(ContactsStruct con) {
 		String name = "匿名";
 		if (null != con.RemarkName && !con.RemarkName.trim().isEmpty()) {

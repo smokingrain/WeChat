@@ -13,7 +13,12 @@ import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.wb.swt.SWTResourceManager;
 
-
+/**
+ * 用途：我的头像悬浮窗面板
+ *
+ * @author xiaokui
+ * @date 2017年1月5日
+ */
 public class MyInfoComp extends Composite implements ICallable {
 
 	private ICallback callBack;
@@ -29,6 +34,7 @@ public class MyInfoComp extends Composite implements ICallable {
 		setBackground(SWTResourceManager.getColor(255, 255, 255));
 		setBounds(0, 0, 180, 255);
 		
+		//清晰的大头像
 		Composite composite = new Composite(this, SWT.NONE);
 		composite.setBounds(0, 0, 180, 180);
 		if(null != user && null != user.head) {
@@ -37,7 +43,7 @@ public class MyInfoComp extends Composite implements ICallable {
 			composite.setBackgroundImage(SWTResourceManager.getImage(ContactItem.class, "/images/head.png"));
 		}
 		
-		
+		//分割线
 		Label label = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
 		label.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BACKGROUND));
 		label.setBounds(0, 220, 180, 1);
@@ -70,6 +76,7 @@ public class MyInfoComp extends Composite implements ICallable {
 		});
 	}
 	
+	//窗口被关闭
 	public void killed() {
 		if(null != callBack) {
 			callBack.callback(0);

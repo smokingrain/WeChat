@@ -19,13 +19,20 @@ import com.xk.utils.SWTTools;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 
+
+/**
+ * 用途：悬浮窗口
+ *
+ * @author xiaokui
+ * @date 2017年1月5日
+ */
 public class FloatWindow implements ICallback{
 
 	public Shell shell;
 	private Object result;
 	
 	private Long timeOut = 2000L;//鼠标两秒不在焦点就消失
-	private Timer timer;
+	private Timer timer;//失去焦点计时器
 
 	private static class WindowHolder{
 		private static FloatWindow instance = new FloatWindow();
@@ -84,6 +91,11 @@ public class FloatWindow implements ICallback{
 		shell.setLayout(stackLayout);
 	}
 	
+	/**
+	 * 用途：设置窗体内部显示面板
+	 * @date 2017年1月5日
+	 * @param comp
+	 */
 	public void add(Composite comp) {
 		StackLayout lo = (StackLayout)(shell.getLayout());
 		if(null != lo.topControl && !lo.topControl.isDisposed()) {
@@ -96,6 +108,11 @@ public class FloatWindow implements ICallback{
 		}
 	}
 
+	/**
+	 * 关闭悬浮窗
+	 * 用途：
+	 * @date 2017年1月5日
+	 */
 	public void kill() {
 		if(shell != null && !shell.isDisposed()) {
 			shell.dispose();
@@ -112,6 +129,12 @@ public class FloatWindow implements ICallback{
 		return obj;
 	}
 
+	/**
+	 * 用途：计时器关闭悬浮窗
+	 *
+	 * @author xiaokui
+	 * @date 2017年1月5日
+	 */
 	private class DisposeTask extends TimerTask {
 
 		@Override
@@ -119,11 +142,11 @@ public class FloatWindow implements ICallback{
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					POINT pt = new POINT();
-					OS.GetCursorPos(pt);
-					RECT rect = new RECT ();
-					OS.GetClientRect (shell.handle, rect);
+					OS.GetCursorPos(pt);//获取鼠标位置
+					RECT rect = new RECT();
+					OS.GetClientRect (shell.handle, rect);//获取窗口范围
 					OS.MapWindowPoints (shell.handle, 0, rect, 2);
-					if(!OS.PtInRect (rect, pt)){
+					if(!OS.PtInRect (rect, pt)){//鼠标不在窗口内，关闭窗口
 						kill();
 					}
 				}

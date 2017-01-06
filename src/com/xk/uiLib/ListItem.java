@@ -10,8 +10,21 @@ public abstract class ListItem {
 	protected boolean selected=false;
 	protected boolean focused=false;
 	
+	/**
+	 * 用途：获取此单元格实际高度
+	 * @date 2017年1月4日
+	 * @return 此单元格实际高度
+	 */
 	public abstract int getHeight();
 	
+	/**
+	 * 用途：绘制此单元格方法
+	 * @date 2017年1月3日
+	 * @param gc 画笔
+	 * @param start 单元格起始绘制点，y轴
+	 * @param width list宽度
+	 * @param index 单元格位置
+	 */
 	public abstract void draw(GC gc,int start,int width,int index);
 	
 	/**

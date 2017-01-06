@@ -81,6 +81,14 @@ public class HTTPUtil {
 		}
 	}
 	
+	/**
+	 * 用途：http图片上传
+	 * @date 2017年1月5日
+	 * @param url
+	 * @param params
+	 * @param files
+	 * @return
+	 */
 	public String httpPostFile(String url, Map<String, String> params, Map<String, File> files) {
 		try {
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();

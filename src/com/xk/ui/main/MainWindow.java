@@ -54,11 +54,18 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.wb.swt.SWTResourceManager;
 import org.eclipse.swt.widgets.Label;
 
+/**
+ * 
+ * 用途：主窗口
+ *
+ * @author xiaokui
+ * @date 2017年1月5日
+ */
 public class MainWindow {
 
-	private Timer timer;
+	private Timer timer;//心跳包，轮询拉消息的计时器
 	protected Shell shell;
-	public Map<ListItem, MyList> lists = new HashMap<ListItem, MyList>();
+	public Map<ListItem, MyList<? extends ListItem>> lists = new HashMap<ListItem, MyList<? extends ListItem>>();
 	private MyText text;
 	private ChatComp cc;
 	private MyList<ConvItem> convers;
@@ -94,19 +101,20 @@ public class MainWindow {
 			
 			@Override
 			public void widgetDisposed(DisposeEvent arg0) {
-				WeChatUtil.exitWeChat();
+				WeChatUtil.exitWeChat();//主窗口关闭的时候通知服务器我退出了
 				System.exit(0);
 			}
 		});
-		SWTTools.enableTrag(shell);
+		SWTTools.enableTrag(shell);//允许拖拽窗体
 
 		
-		
+		//左侧面板
 		Composite composite = new Composite(shell, SWT.NONE);
 		composite.setBackground(SWTResourceManager.getColor(62, 62, 64));
 		composite.setBounds(0, 0, 50, 590);
 		composite.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		
+		//我的头像
 		final Label me = new Label(composite, SWT.NONE);
 		me.setBounds(10, 10, 30, 30);
 		me.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
@@ -129,6 +137,7 @@ public class MainWindow {
 			
 		});
 		
+		//功能列表
 		final MyList<TypeItem> types = new MyList<TypeItem>(composite ,50 , 490);
 		types.setMask(10);
 		types.setLocation(0, 50);
@@ -139,6 +148,7 @@ public class MainWindow {
 		TypeItem ctItem = new TypeItem(chatImg, chatImgSele);
 		types.addItem(ctItem);
 		
+		//会话列表
 		convers = new MyList<ConvItem>(shell, 250, 540);
 		convers.setMask(120);
 		convers.setLocation(50, 50);
@@ -151,7 +161,7 @@ public class MainWindow {
 		TypeItem conItem = new TypeItem(contactImg, contactImgSele);
 		types.addItem(conItem);
 		
-		
+		//好友列表
 		MyList<ContactItem> contacts = new MyList<ContactItem>(shell, 250, 540);
 		contacts.setMask(120);
 		contacts.setLocation(50, 50);
@@ -161,7 +171,7 @@ public class MainWindow {
 		
 		types.add(new ItemSelectionListener<TypeItem>() {
 			
-			MyList current;
+			MyList<? extends ListItem> current;
 			
 			@Override
 			public void selected(ItemSelectionEvent<TypeItem> e) {
@@ -176,7 +186,7 @@ public class MainWindow {
 		types.select(ctItem, false);
 		
 		
-		
+		//搜索，暂未实现
 		Image search=SWTResourceManager.getImage(MainWindow.class, "/images/search.png");
 		text = new MyText(shell, SWT.BORDER|SWT.SINGLE);
 		text.setForeground(SWTResourceManager.getColor(0, 0, 0));
@@ -202,6 +212,7 @@ public class MainWindow {
 			
 		});
 		
+		//添加，暂未实现
 		Label label = new Label(shell, SWT.NONE);
 		label.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		label.setBackground(dark);
@@ -210,6 +221,7 @@ public class MainWindow {
 		label.setBounds(262, 16, 29, 24);
 		label.setText("+");
 		
+		//右侧聊天面板
 		cc = new ChatComp(shell, SWT.NONE);
 		SWTTools.enableTrag(cc);
 		
@@ -239,6 +251,7 @@ public class MainWindow {
 			}
 		});
 		
+		//最小化按钮
 		final CLabel minL = new CLabel(cc, SWT.CENTER);
 		minL.setOrientation(SWT.RIGHT_TO_LEFT);
 		minL.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
@@ -275,7 +288,7 @@ public class MainWindow {
 			
 		});
 		
-		
+		//关闭按钮
 		final CLabel closeL = new CLabel(cc, SWT.CENTER);
 		closeL.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		closeL.setText("X");
@@ -312,17 +325,17 @@ public class MainWindow {
 			
 		});
 		
-		//头像缓存
+		//头像缓存，然并卵，微信每次返回用户id不一样缓存不了
 		ImageCache.loadHeadCache();
 		
-		List<String> g = WeChatUtil.loadConvers(ctItem, this);
-		WeChatUtil.startNotify();
-		WeChatUtil.loadGroups(conItem, g, this);
-		syncData(conItem);
-		List<String> group = WeChatUtil.loadContacts(conItem, this);
-		WeChatUtil.loadGroups(conItem,group, this);
+		List<String> g = WeChatUtil.loadConvers(ctItem, this);//先加载最近会话
+		WeChatUtil.startNotify();//通知服务器我准备收消息了
+		WeChatUtil.loadGroups(conItem, g, this);//拉取最近会话中的群组
+		syncData(conItem);//开始发送心跳包，拉消息
+		List<String> group = WeChatUtil.loadContacts(conItem, this);//拉取联系人
+		WeChatUtil.loadGroups(conItem,group, this);//拉取联系人中的群组
 		
-		
+		//加载自己的头像
 		Image img = null;
 		String headUrl = Constant.BASE_URL + Constant.user.HeadImgUrl + "&type=big";
 		Image temp = ImageCache.getUserHeadCache(Constant.user.UserName, headUrl, null, 180, 180);

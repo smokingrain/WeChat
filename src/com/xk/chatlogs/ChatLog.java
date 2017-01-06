@@ -1,21 +1,22 @@
 package com.xk.chatlogs;
 
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageLoader;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.xk.bean.ContactsStruct;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
-import com.xk.utils.WeChatUtil;
 
+/**
+ * 用途：聊天记录
+ *
+ * @author xiaokui
+ * @date 2017年1月3日
+ */
 public class ChatLog {
 
 	public String msgid;
@@ -32,6 +33,12 @@ public class ChatLog {
 	public Integer voiceLength;
 	
 	
+	/**
+	 * 用途：从服务器返回的数据转化成记录
+	 * @date 2017年1月3日
+	 * @param msg
+	 * @return
+	 */
 	public static ChatLog fromMap(Map<String, Object> msg) {
 		ChatLog log = new ChatLog();
 		log.msgid = (String) msg.get("MsgId");
@@ -42,6 +49,7 @@ public class ChatLog {
 		log.toId = (String) msg.get("ToUserName");
 		log.createTime = System.currentTimeMillis();
 		
+		//获取群消息发送者
 		if(log.fromId.startsWith("@@") && !Constant.user.UserName.equals(log.fromId)) {
 			String[] splt = log.content.split(":<br/>");
 			if(null != splt && splt.length > 0) {
@@ -54,6 +62,7 @@ public class ChatLog {
 			
 		}
 		
+		//获取图片
 		if(log.msgType == 3 || log.msgType == 47) {
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("MsgID", log.msgid);

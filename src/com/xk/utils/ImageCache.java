@@ -178,7 +178,6 @@ public class ImageCache {
 	public static Image getUserHeadCache(String userName,String url, Map<String, String> params, Integer width, Integer height) {
 		Image temp = userHeads.get(userName);
 		if(null != temp && !temp.isDisposed()) {
-			System.out.println(userName + " find cache!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
 			if(temp.getImageData().width != width || temp.getImageData().height != height) {
 				Image img = SWTTools.scaleImage(temp.getImageData(), width, height);
 				userHeads.put(userName, img);

@@ -28,7 +28,12 @@ import com.xk.uiLib.MyList;
 
 public class WeChatUtil {
 
-	
+	/**
+	 * 用途：上传聊天图片
+	 * @date 2017年1月5日
+	 * @param file
+	 * @return
+	 */
 	private static String uploadImage(File file) {
 		HTTPUtil hu = HTTPUtil.getInstance();
 		String name = file.getName();
@@ -67,7 +72,13 @@ public class WeChatUtil {
 		return null;
 	}
 	
-	
+	/**
+	 * 用途：发送聊天图片
+	 * @date 2017年1月5日
+	 * @param img
+	 * @param to
+	 * @return
+	 */
 	public static ChatLog sendImg(File img, String to) {
 		String mediaId = uploadImage(img);
 		if(null == mediaId) {

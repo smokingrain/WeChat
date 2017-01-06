@@ -7,6 +7,12 @@ import org.eclipse.swt.graphics.Image;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.xk.utils.JSONUtil;
 
+/**
+ * 用途：登陆用户结构体
+ *
+ * @author xiaokui
+ * @date 2017年1月3日
+ */
 public class User {
 
 	public Long Uin;

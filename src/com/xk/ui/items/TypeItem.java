@@ -6,6 +6,12 @@ import org.eclipse.swt.graphics.Image;
 
 import com.xk.uiLib.ListItem;
 
+/**
+ * 用途：最左侧列表
+ *
+ * @author xiaokui
+ * @date 2017年1月3日
+ */
 public class TypeItem extends ListItem {
 
 	private Image back;

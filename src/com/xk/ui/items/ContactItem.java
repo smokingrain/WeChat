@@ -14,6 +14,12 @@ import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 import com.xk.utils.FileUtils;
 
+/**
+ * 用途：联系人单元格
+ *
+ * @author xiaokui
+ * @date 2017年1月3日
+ */
 public class ContactItem extends ListItem {
 
 	private ContactsStruct data;

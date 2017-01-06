@@ -40,6 +40,12 @@ import org.eclipse.swt.widgets.CoolItem;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 
+/**
+ * 用途：聊天面板
+ *
+ * @author xiaokui
+ * @date 2017年1月4日
+ */
 public class ChatComp extends Composite {
 
 	private CLabel nameL;
@@ -61,6 +67,7 @@ public class ChatComp extends Composite {
 		setSize(550, 590);
 		setBackground(SWTResourceManager.getColor(245, 245, 245));
 		
+		//聊天会话对象名字
 		nameL = new CLabel(this, SWT.CENTER);
 		nameL.setFont(SWTResourceManager.getFont("微软雅黑", 11, SWT.NORMAL));
 		nameL.setBackground(getBackground());
@@ -68,18 +75,19 @@ public class ChatComp extends Composite {
 		nameL.setBounds(0, 0, 470, 49);
 		SWTTools.enableTrag(nameL);
 		
+		//聊天记录内容
 		chatList = new MyList<ChatItem>(this, 550, 350);
 		chatList.setLocation(0, 50);
 		
 		Image tempEmoj = SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png");
-		
+		//发送表情按钮
 		CLabel emojL = new CLabel(this, SWT.CENTER);
 		emojL.setBounds(0, 400, 30, 30);
 		emojL.setBackground(SWTTools.scaleImage(tempEmoj.getImageData(), 30, 30));
 		emojL.setToolTipText("发送表情");
 		
 		Image tempPic = SWTResourceManager.getImage(ChatComp.class, "/images/select.png");
-		
+		//发送图片按钮
 		CLabel picL = new CLabel(this, SWT.CENTER);
 		picL.setBounds(32, 400, 30, 30);
 		picL.setBackground(tempPic);
@@ -88,25 +96,12 @@ public class ChatComp extends Composite {
 
 			@Override
 			public void mouseUp(MouseEvent mouseevent) {
-				if(null != convId) {
-					FileDialog fd = new FileDialog(getShell());
-					fd.setText("选择图片");
-					fd.setFilterExtensions(new String[]{"*.png;*.jpg;*.bmp"});
-					fd.setFilterNames(new String[]{"图片"});
-					String path = fd.open();
-					if(null != path) {
-						File file = new File(path);
-						ChatLog log = WeChatUtil.sendImg(file, convId);
-						if(null != log) {
-							ChatLogCache.saveLogs(convId, log);
-							flush(item);
-						}
-					}
-				}
+				sendImage();
 			}
 			
 		});
 		
+		//内容输入框
 		text = new Text(this, SWT.MULTI);
 		text.setBounds(0, 430, 549, 115);
 		text.addKeyListener(new KeyAdapter() {
@@ -121,6 +116,7 @@ public class ChatComp extends Composite {
 			
 		});
 		
+		//发送按钮
 		lbls = new CLabel(this, SWT.CENTER);
 		lbls.setCursor(SWTResourceManager.getCursor(SWT.CURSOR_HAND));
 		lbls.setBounds(479, 551, 60, 29);
@@ -135,6 +131,7 @@ public class ChatComp extends Composite {
 			
 			
 		});
+		//绘制边框
 		lbls.addPaintListener(new PaintListener() {
 			
 			@Override
@@ -152,6 +149,34 @@ public class ChatComp extends Composite {
 		
 	}
 
+	/**
+	 * 发送图片
+	 * 用途：
+	 * @date 2017年1月5日
+	 */
+	private void sendImage() {
+		if(null != convId) {
+			FileDialog fd = new FileDialog(getShell());
+			fd.setText("选择图片");
+			fd.setFilterExtensions(new String[]{"*.png;*.jpg;*.bmp"});
+			fd.setFilterNames(new String[]{"图片"});
+			String path = fd.open();
+			if(null != path) {
+				File file = new File(path);
+				ChatLog log = WeChatUtil.sendImg(file, convId);
+				if(null != log) {
+					ChatLogCache.saveLogs(convId, log);
+					flush(item);
+				}
+			}
+		}
+	}
+	
+	/**
+	 * 发送文本消息
+	 * 用途：
+	 * @date 2017年1月5日
+	 */
 	private void sendMsg() {
 		String msg = text.getText().trim();
 		if(!"".equals(msg) && null != convId) {

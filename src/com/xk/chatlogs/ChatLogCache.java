@@ -8,6 +8,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+/**
+ * 用途：聊天记录
+ *
+ * @author xiaokui
+ * @date 2017年1月3日
+ */
 public class ChatLogCache {
 
 	private static final String LOG_PATH = "chatlogs";

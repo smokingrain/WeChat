@@ -15,7 +15,12 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 
-
+/**
+ * 用途：聊天气泡
+ *
+ * @author xiaokui
+ * @date 2017年1月5日
+ */
 public class ChatItem extends ListItem {
 
 	private static final Integer ITEM_AREA_WIDTH = 450;
@@ -24,11 +29,11 @@ public class ChatItem extends ListItem {
 	private static final Integer HEAD_IMG_HEIGHT = 50;
 	private static final Integer MARGIN = 5;
 	
-	private String user;
-	private Image head;
-	private List<Object> chatContent;
-	private boolean fromSelf;
-	private Font font;
+	private String user;//聊天发送者
+	private Image head;//发送者头像
+	private List<Object> chatContent;//聊天内容
+	private boolean fromSelf;//是不是自己发送的 
+	private Font font;//文本字体
 	private int height = -1;//总高度
 	private int lineNum = 0;
 	private int maxWidth = 0;//气泡宽度
@@ -123,13 +128,13 @@ public class ChatItem extends ListItem {
 		Transform trans = new Transform(null);//向下偏移15像素，预留每条聊天记录空间
 		trans.translate(0, HEAD_FOOT_SAPCE);
 		gc.setTransform(trans);
-		if(fromSelf) {
+		if(fromSelf) {//如果是自己，从右往左
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			gc.setForeground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			Path namePath = new Path(null);
 			Point nameSize = gc.textExtent(user);
 			namePath.addString(user, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + nameSize.x + MyList.BAR_WIDTH + MARGIN), start + LINE_SPACE_HEIGHT, ft);
-			gc.fillPath(namePath);
+			gc.fillPath(namePath);//绘制发送者
 //			gc.drawPath(namePath);
 			gc.drawImage(head,width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + MyList.BAR_WIDTH), start + LINE_SPACE_HEIGHT);
 			gc.setBackground(SWTResourceManager.getColor(0x9E, 0xEE, 0x6B));
@@ -140,13 +145,13 @@ public class ChatItem extends ListItem {
 			gc.setFont(font);
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			gc.setForeground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
-			
+			//气泡绘制完毕
 			int cLineWidth = 0;
 			int cHeight = 0;
 			int cMaxHeight = 0;
 			Path contentPath = new Path(null);
 			for(Object content : chatContent) {
-				if(content instanceof Image) {
+				if(content instanceof Image) {//绘制图片
 					Image img = (Image) content;
 					int imgWidth = img.getImageData().width;
 					int imgHeight = img.getImageData().height;
@@ -163,12 +168,12 @@ public class ChatItem extends ListItem {
 					if(imgHeight > cMaxHeight) {
 						cMaxHeight = imgHeight;
 					}
-				} else if(content instanceof String) {
-					String str = ((String) content).replace("\n", "").replace("\r", "");
+				} else if(content instanceof String) {//绘制文字
+					String str = ((String) content).replace("\n", "").replace("\r", "");//先去掉换行，懒得计算换行了
 					Point point = gc.textExtent(str);
 					int temp = cLineWidth;
 					cLineWidth += point.x + str.length();//字间距
-					if(cLineWidth < ITEM_AREA_WIDTH) {
+					if(cLineWidth < ITEM_AREA_WIDTH) {//聊天内容比较短，只有一行
 						contentPath.addString(str,  width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + MARGIN, font);
 					}else {
 						int lines = cLineWidth / ITEM_AREA_WIDTH;//有多少行
@@ -189,7 +194,7 @@ public class ChatItem extends ListItem {
 							}
 							cHeight += point.y + LINE_SPACE_HEIGHT *2;
 						}
-						
+						//重置宽高
 						cMaxHeight = 0;
 						cLineWidth = 0;
 						continue;
@@ -201,7 +206,7 @@ public class ChatItem extends ListItem {
 			}
 //			gc.drawPath(contentPath);
 			gc.fillPath(contentPath);
-		} else {
+		} else {//逻辑同上，不过是从左往右计算
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			gc.setForeground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			Path namePath = new Path(null);

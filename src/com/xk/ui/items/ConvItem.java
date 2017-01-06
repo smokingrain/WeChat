@@ -20,6 +20,12 @@ import com.xk.utils.Constant;
 import com.xk.utils.DateUtil;
 import com.xk.utils.FileUtils;
 
+/**
+ * 用途：会话单元格
+ *
+ * @author xiaokui
+ * @date 2017年1月3日
+ */
 public class ConvItem extends ListItem {
 
 	private ContactsStruct data;

@@ -1,5 +1,11 @@
 package com.xk.bean;
 
+/**
+ * 用途：群成员结构
+ *
+ * @author xiaokui
+ * @date 2017年1月3日
+ */
 public class MemberStruct {
 
 	public Long Uin;

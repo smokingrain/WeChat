@@ -22,6 +22,11 @@ public class SWTTools {
 		OS.SetWindowPos(shell.handle , OS.HWND_TOPMOST, shell.getLocation().x , shell.getLocation().y , shell.getSize().x , shell.getSize().y , SWT.NULL);
 	}
 	
+	/**
+	 * 用途：允许拖拽
+	 * @date 2017年1月5日
+	 * @param ctrl
+	 */
 	public static void enableTrag(Control ctrl) {
 		final Composite composite=ctrl.getShell();
 		
@@ -46,6 +51,12 @@ public class SWTTools {
 		
 	}
 	
+	
+	/**
+	 * 用途：窗体居中显示
+	 * @date 2017年1月5日
+	 * @param shell
+	 */
 	public static void centerWindow(Shell shell){
 		Rectangle rect=Display.getDefault().getClientArea();
 		int x=rect.width/2-shell.getSize().x/2;
@@ -53,6 +64,15 @@ public class SWTTools {
 		shell.setLocation(x,y);
 	}
 	
+
+	/**
+	 * 用途：图片缩放
+	 * @date 2017年1月5日
+	 * @param source
+	 * @param width
+	 * @param height
+	 * @return
+	 */
 	public static Image scaleImage(ImageData source,int width,int height){
 		Image img=new Image(null,source);
 		ImageData dest = new ImageData(1, 1, source.depth, source.palette);

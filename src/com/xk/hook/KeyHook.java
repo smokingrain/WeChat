@@ -14,6 +14,12 @@ import com.sun.jna.platform.win32.WinUser.KBDLLHOOKSTRUCT;
 import com.sun.jna.platform.win32.WinUser.LowLevelKeyboardProc;
 import com.sun.jna.platform.win32.WinUser.MSG;
 
+/**
+ * 用途：全局键盘钩子，做快捷键用
+ *
+ * @author xiaokui
+ * @date 2017年1月3日
+ */
 public class KeyHook {
 	
     private HHOOK hhk;

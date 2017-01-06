@@ -28,6 +28,13 @@ import com.xk.utils.HTTPUtil;
 import com.xk.utils.SWTTools;
 import com.xk.utils.XMLUtils;
 
+
+/**
+ * 用途：二维码扫描登陆，程序入口
+ *
+ * @author xiaokui
+ * @date 2017年1月5日
+ */
 public class QRLoginWindow {
 
 	protected Shell shell;
@@ -126,10 +133,12 @@ public class QRLoginWindow {
 		nameL.setBounds(20, 18, 29, 17);
 		nameL.setText("微信");
 		
+		//二维码
 		qrImage = new Label(shell, SWT.NONE);
 		qrImage.setBounds(48, 80, 186, 186);
 		qrImage.setBackground(back);
 		
+		//提示
 		tips = new Label(shell, SWT.NONE);
 		tips.setForeground(SWTResourceManager.getColor(112, 128, 144));
 		tips.setBackground(back);
@@ -172,7 +181,7 @@ public class QRLoginWindow {
 	}
 	
 	/**
-	 * 用途：
+	 * 用途：获取当前状态
 	 * @date 2016年12月13日
 	 */
 	private void loopGetState(String uuid) {
