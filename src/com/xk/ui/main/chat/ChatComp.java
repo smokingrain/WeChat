@@ -225,7 +225,7 @@ public class ChatComp extends Composite {
 					}
 					user = ContactsStruct.getGroupMember(log.fromId, Constant.contacts.get(convId));
 				}else if(Constant.user.UserName.equals(user)){
-					head = ImageCache.getUserHeadCache(user, Constant.contacts.get(user).HeadImgUrl, null, 50, 50);
+					head = ImageCache.getUserHeadCache(user, Constant.user.HeadImgUrl, null, 50, 50);
 					user = Constant.user.NickName;
 				}else {
 					head = ImageCache.getUserHeadCache(user, Constant.contacts.get(user).HeadImgUrl, null, 50, 50);

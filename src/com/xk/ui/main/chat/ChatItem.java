@@ -61,17 +61,18 @@ public class ChatItem extends ListItem {
 				if(content instanceof Image) {
 					Image img = (Image) content;
 					int width = img.getImageData().width;
+					allLength += width + LINE_SPACE_HEIGHT;
 					if(maxWidth < width) {
 						maxWidth = width + 10 + MARGIN;
+					}else {
+						maxWidth += width + LINE_SPACE_HEIGHT;
 					}
 					int height = img.getImageData().height;
-					allLength += width + LINE_SPACE_HEIGHT;
-					maxWidth = allLength;
+					
 					if(allLength > ITEM_AREA_WIDTH) {
 						maxWidth = ITEM_AREA_WIDTH + 10;
 						allHeight += maxHeight + LINE_SPACE_HEIGHT * 2 + LINE_SPACE_HEIGHT * 2;
 						lineNum++;
-						allLength = width;
 						maxHeight = 0;
 						continue;
 					}
@@ -83,6 +84,8 @@ public class ChatItem extends ListItem {
 					Point point = gc.textExtent(str);
 					if(maxWidth < point.x) {
 						maxWidth = point.x + str.length() + 10;//字间距
+					}else {
+						maxWidth +=point.x + str.length() + LINE_SPACE_HEIGHT;
 					}
 					allLength += point.x + str.length();//字间距
 					if(allLength > ITEM_AREA_WIDTH) {
@@ -158,13 +161,13 @@ public class ChatItem extends ListItem {
 					int imgHeight = img.getImageData().height;
 					cLineWidth += imgWidth + LINE_SPACE_HEIGHT;
 					if(cLineWidth > ITEM_AREA_WIDTH) {
-						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
-						cHeight += cMaxHeight;
+						cHeight += cMaxHeight + LINE_SPACE_HEIGHT;
+						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
 						cMaxHeight = 0;
-						cLineWidth = 0;
+						cLineWidth = imgWidth + LINE_SPACE_HEIGHT;
 						continue;
 					} else {
-						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth - cLineWidth-  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
 					}
 					if(imgHeight > cMaxHeight) {
 						cMaxHeight = imgHeight;
@@ -175,7 +178,7 @@ public class ChatItem extends ListItem {
 					int temp = cLineWidth;
 					cLineWidth += point.x + str.length();//字间距
 					if(cLineWidth < ITEM_AREA_WIDTH) {//聊天内容比较短，只有一行
-						contentPath.addString(str,  width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + MARGIN, font);
+						contentPath.addString(str,  width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth - temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + MARGIN, font);
 					}else {
 						int lines = cLineWidth / ITEM_AREA_WIDTH;//有多少行
 						double wordWidth = (point.x + str.length()) / (double)str.length();//【平均一个子长度
