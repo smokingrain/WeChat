@@ -25,6 +25,10 @@ public class ImojCache {
 		init();
 	}
 	
+	/**
+	 * 用途：初始化表情图片
+	 * @date 2017年1月10日
+	 */
 	private static void init() {
 		BufferedImage buff = null;
 		InputStream in = ImojCache.class.getResourceAsStream("/images/qqfacePanel31e225.png");
@@ -142,6 +146,16 @@ public class ImojCache {
 		
 	}
 	
+	/**
+	 * 用途：从原图截取单个表情
+	 * @date 2017年1月10日
+	 * @param base
+	 * @param name
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 */
 	private static void splitImage(BufferedImage base, String name, int x, int y, int width, int height) {
 		BufferedImage sub = base.getSubimage(x * width + x, y * height + y, width, height);
 		Image target = AWTImg2SWTImg(sub, name);
@@ -151,6 +165,14 @@ public class ImojCache {
 		qqface.put(name, target);
 	}
 	
+	
+	/**
+	 * 用途：由SWING的图片换成SWT的图片对象
+	 * @date 2017年1月10日
+	 * @param base
+	 * @param name
+	 * @return
+	 */
 	private static Image AWTImg2SWTImg(BufferedImage base, String name) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
