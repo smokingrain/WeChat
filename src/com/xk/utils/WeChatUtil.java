@@ -327,7 +327,6 @@ public class WeChatUtil {
 						String nick = convs.NickName;
 						String remark = convs.RemarkName;
 						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
-						System.out.println("load contact " + name + "   " + convs.UserName);
 						ContactItem ci = new ContactItem(convs, false, name);
 						MyList list = window.lists.get(ctItem);
 						list.addItem(ci);
@@ -458,7 +457,6 @@ public class WeChatUtil {
 						String nick = convs.NickName;
 						String remark = convs.RemarkName;
 						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
-						System.out.println("load group " + name + convs.UserName);
 						ContactItem ci = new ContactItem(convs, false, name);
 						MyList list = window.lists.get(ctItem);
 						list.addItem(ci);
