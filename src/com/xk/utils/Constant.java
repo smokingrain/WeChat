@@ -39,7 +39,7 @@ public class Constant {
 	public static User user;
 	public static Set<String> noReply = new HashSet<String>();
 	public static WeChatSign sign;
-	public static Map<String, ContactsStruct> contacts = new HashMap<>();
+	public static Map<String, ContactsStruct> contacts = new HashMap<String, ContactsStruct>();
 	public static Integer file_index = 0;
 	
 	// 特殊用户 须过滤

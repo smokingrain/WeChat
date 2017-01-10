@@ -69,6 +69,7 @@ public class MainWindow {
 	private MyText text;
 	private ChatComp cc;
 	private MyList<ConvItem> convers;
+	private MyList<TypeItem> types;
 	private boolean syncGroup = false;
 
 	public MainWindow() {
@@ -138,7 +139,7 @@ public class MainWindow {
 		});
 		
 		//功能列表
-		final MyList<TypeItem> types = new MyList<TypeItem>(composite ,50 , 490);
+		types = new MyList<TypeItem>(composite ,50 , 490);
 		types.setMask(10);
 		types.setLocation(0, 50);
 		types.setSimpleSelect(true);
@@ -198,7 +199,7 @@ public class MainWindow {
 			
 			@Override
 			public void deleteClicked() {
-				
+				searchUser();
 			}
 		});
 		text.addKeyListener(new KeyAdapter() {
@@ -206,7 +207,7 @@ public class MainWindow {
 			@Override
 			public void keyPressed(KeyEvent e) {
 				if(e.keyCode==SWT.CR){
-					
+					searchUser();
 				}
 			}
 			
@@ -344,6 +345,29 @@ public class MainWindow {
 		me.setImage(img);
 	}
 	
+	
+	/**
+	 * 搜索联系人
+	 */
+	private void searchUser() {
+		String name = text.getText().trim();
+		if(!name.isEmpty()) {
+			for(ContactsStruct convs : Constant.contacts.values()) {
+				if((null != convs.RemarkName && convs.RemarkName.contains(name)) || (null != convs.NickName && convs.NickName.contains(name))) {
+					ConvItem itm = addConversition(convs);
+					ConvItem temp = convers.removeItem(itm);
+					if(null != temp) {
+						convers.addItem(0, temp);
+						convers.select(temp, false);
+					}
+					break;
+				}
+			}
+			types.select(0, false);
+		}
+		
+		
+	}
 	
 	/**
 	 * 用途：发心跳包，获取微信状态是否有新消息
