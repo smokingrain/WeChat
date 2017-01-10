@@ -290,7 +290,7 @@ public class ChatItem extends ListItem {
 
 	@Override
 	public boolean oncliek(MouseEvent e, int itemHeight, int index) {
-		// TODO Auto-generated method stub
+		
 		return false;
 	}
 
