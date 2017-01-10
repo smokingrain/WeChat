@@ -253,9 +253,14 @@ public class ChatComp extends Composite {
 						String match = matcherNode.group();
 						chatContent.add(getContent(match));
 					}
-					if(!hasImoj) {
+					
+					if(hasImoj) {
+						for(int i = index ;i < splt.length ; i++) {
+							chatContent.add(splt[i]);
+						}
+					}else {
 						chatContent.add(log.content);
-					} 
+					}
 					
 					
 				}

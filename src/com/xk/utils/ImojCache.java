@@ -71,6 +71,75 @@ public class ImojCache {
 		splitImage(buff, "流汗", 12, 1, IMG_WIDTH, IMG_WIDTH);
 		splitImage(buff, "憨笑", 13, 1, IMG_WIDTH, IMG_WIDTH);
 		splitImage(buff, "悠闲", 14, 1, IMG_WIDTH, IMG_WIDTH);
+		
+		splitImage(buff, "奋斗", 0, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "咒骂", 1, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "疑问", 2, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "嘘", 3, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "晕", 4, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "狂躁", 5, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "衰", 6, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "骷髅", 7, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "敲打", 8, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "再见", 9, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "擦汗", 10, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "抠鼻", 11, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "鼓掌", 12, 2, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "坏笑", 14, 2, IMG_WIDTH, IMG_WIDTH);
+		
+		splitImage(buff, "左哼哼", 0, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "右哼哼", 1, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "哈欠", 2, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "鄙视", 3, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "委屈", 4, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "快哭了", 5, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "阴险", 6, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "亲亲", 7, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "可怜", 9, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "菜刀", 10, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "西瓜", 11, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "啤酒", 12, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "篮球", 13, 3, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "乒乓球", 14, 3, IMG_WIDTH, IMG_WIDTH);
+		
+		splitImage(buff, "咖啡", 0, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "饭", 1, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "猪头", 2, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "玫瑰", 3, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "凋谢", 4, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "嘴唇", 5, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "爱心", 6, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "心碎", 7, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "蛋糕", 8, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "闪电", 9, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "炸弹", 10, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "小刀", 11, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "足球", 12, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "爬虫", 13, 4, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "便便", 14, 4, IMG_WIDTH, IMG_WIDTH);
+		
+		splitImage(buff, "月亮", 0, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "太阳", 1, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "礼物", 2, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "拥抱", 3, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "强", 4, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "弱", 5, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "握手", 6, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "胜利", 7, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "抱拳", 8, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "勾引", 9, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "拳头", 10, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "爱你", 12, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "NO", 13, 5, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "OK", 14, 5, IMG_WIDTH, IMG_WIDTH);
+		
+		splitImage(buff, "恋爱", 0, 6, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "飞吻", 1, 6, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "跳跳", 2, 6, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "发抖", 3, 6, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "怄火", 4, 6, IMG_WIDTH, IMG_WIDTH);
+		splitImage(buff, "转圈", 5, 6, IMG_WIDTH, IMG_WIDTH);
+		
 	}
 	
 	private static void splitImage(BufferedImage base, String name, int x, int y, int width, int height) {
