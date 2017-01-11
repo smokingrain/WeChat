@@ -40,8 +40,11 @@ import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 import com.xk.uiLib.MyText;
 import com.xk.uiLib.MyText.DeleteListener;
+import com.xk.uiLib.listeners.ItemEvent;
+import com.xk.uiLib.listeners.ItemListener;
 import com.xk.uiLib.listeners.ItemSelectionEvent;
 import com.xk.uiLib.listeners.ItemSelectionListener;
+import com.xk.utils.AutoReply;
 import com.xk.utils.Constant;
 import com.xk.utils.HTTPUtil;
 import com.xk.utils.ImageCache;
@@ -248,6 +251,18 @@ public class MainWindow {
 				ConvItem item = e.item;
 				System.out.println(item.getName() + " selected!!!");
 				cc.flush(item);
+				
+			}
+		});
+		//删除聊天会话
+		convers.addItemListener(new ItemListener<ConvItem>() {
+			
+			@Override
+			public void itemRemove(ItemEvent<ConvItem> e) {
+				if(e.item.equals(convers.getSelection())) {
+					cc.flush(null);
+				}
+				convers.flush();
 				
 			}
 		});
@@ -517,17 +532,17 @@ public class MainWindow {
 								ChatLog log = ChatLog.fromMap(msg);
 								if(null != log) {
 									ChatLogCache.saveLogs(FromUserName, log);
-//									String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
-//									String ctt = Content.replace("<br/>", "\n");
-//									System.out.println(sender + " 说：" + ctt);
-//									if(!Constant.noReply.contains(FromUserName)) {
-//										String reply = AutoReply.call(ctt, sender);
-//										ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
-//										if(null != replyLog) {
-//											ChatLogCache.saveLogs(FromUserName, replyLog);
-//										}
-//										
-//									}
+									String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
+									String ctt = Content.replace("<br/>", "\n");
+									System.out.println(sender + " 说：" + ctt);
+									if(!Constant.noReply.contains(FromUserName)) {
+										String reply = AutoReply.call(ctt, sender);
+										ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
+										if(null != replyLog) {
+											ChatLogCache.saveLogs(FromUserName, replyLog);
+										}
+										
+									}
 									flushChatView(FromUserName, true);
 								}
 								
@@ -603,10 +618,8 @@ public class MainWindow {
 					ContactsStruct struct = Constant.contacts.get(conv);
 					ci = addConversition(struct);
 				}
-				
-				ConvItem itm = convers.removeItem(ci);
+				ConvItem itm = convers.changeItemIndex(ci, 0);
 				if(null != itm) {//这时候还找不到的话，那就真的跪了，目测是新好友
-					convers.addItem(0, itm);
 					if(itm.equals(convers.getSelection())) {
 						cc.flush(itm);
 					} else {

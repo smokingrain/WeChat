@@ -48,7 +48,7 @@ public class MyList<T extends ListItem> extends Composite {
 	private int startY=0;//子组件开始渲染位置
 	private STATE state=STATE.NORMAL;//滚动条状态
 	private int downY=0;//鼠标按下位置(相对滚动条bar)
-	
+	private int itemLimit = -1;
 	private int mask = 255;//模糊背景
 	private boolean simpleSelect=false;//单击选中
 	
@@ -418,6 +418,7 @@ public class MyList<T extends ListItem> extends Composite {
 	
 	public void addItem(Integer index, T item) {
 		if(null != item && null != index){
+			checkLimit();
 			items.add(index, item);
 			item.setParent(this);
 			countHeight();
@@ -426,15 +427,45 @@ public class MyList<T extends ListItem> extends Composite {
 	
 	public void addItem(T item) {
 		if(null!=item){
+			checkLimit();
 			items.add(item);
 			item.setParent(this);
 			countHeight();
 		}
 	}
 	
+	/**
+	 * 用途：检查是不是到了单元格个数限制
+	 * @date 2017年1月11日
+	 */
+	private void checkLimit() {
+		if(itemLimit > 0 && items.size() >= itemLimit) {
+			items.remove(0);
+		}
+	}
+	
 	public void clearAll(){
 		items.clear();
 		countHeight();
+	}
+	
+	
+	/**
+	 * 用途：更改一个单元格的位置
+	 * @date 2017年1月11日
+	 * @param t
+	 * @param index
+	 */
+	public T changeItemIndex(T t, int index) {
+		if(null == t) {
+			return null;
+		}
+		if(items.indexOf(t) < 0) {
+			return null;
+		}
+		items.remove(t);
+		items.add(index, t);
+		return t;
 	}
 	
 	/**
@@ -445,7 +476,7 @@ public class MyList<T extends ListItem> extends Composite {
 	public T removeItem(int index) {
 		if (index < items.size() && index >= 0) {
 			T removed = items.get(index);
-			ItemEvent event = new ItemEvent();
+			ItemEvent<T> event = new ItemEvent<T>();
 			event.index = index;
 			event.item = removed;
 			for (ItemListener<T> listener : itemListeners) {
@@ -512,6 +543,10 @@ public class MyList<T extends ListItem> extends Composite {
 
 	public int getItemCount(){
 		return items.size();
+	}
+	
+	public void setItemLimit(int num) {
+		itemLimit = num;
 	}
 	
 	private enum STATE{

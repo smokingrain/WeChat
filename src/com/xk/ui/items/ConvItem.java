@@ -121,6 +121,17 @@ public class ConvItem extends ListItem {
 				menu.dispose();
 			}
 			
+			MenuItem remove=new MenuItem(m, SWT.NONE);
+			remove.setText("删除会话");
+			remove.addSelectionListener(new SelectionAdapter() {
+				
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					getParent().removeItem(ConvItem.this);
+				}
+				
+			});
+			
 			if(Constant.noReply.contains(data.UserName)) {
 				MenuItem noReply=new MenuItem(m, SWT.NONE);
 				noReply.setText("启用自动回复");

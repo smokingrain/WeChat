@@ -5,6 +5,6 @@ import com.xk.uiLib.ListItem;
 
 public interface ItemListener<T extends ListItem> {
 
-	public void itemRemove(ItemEvent e);
+	public void itemRemove(ItemEvent<T> e);
 	
 }

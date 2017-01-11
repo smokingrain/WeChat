@@ -81,6 +81,7 @@ public class ChatComp extends Composite {
 		//聊天记录内容
 		chatList = new MyList<ChatItem>(this, 550, 350);
 		chatList.setLocation(0, 50);
+		chatList.setItemLimit(15);
 		
 		Image tempEmoj = SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png");
 		//发送表情按钮
@@ -103,6 +104,12 @@ public class ChatComp extends Composite {
 			}
 			
 		});
+		
+		Image cutPic = SWTResourceManager.getImage(ChatComp.class, "/images/cutscreen.png");
+		CLabel cutScreen = new CLabel(this, SWT.CENTER);
+		cutScreen.setBounds(64, 400, 30, 30);
+		cutScreen.setBackground(cutPic);
+		cutScreen.setToolTipText("屏幕截图");
 		
 		//内容输入框
 		text = new Text(this, SWT.MULTI);
@@ -198,6 +205,15 @@ public class ChatComp extends Composite {
 	 */
 	public void flush(final ConvItem item) {
 		if(null == item) {
+			
+			Display.getDefault().asyncExec(new Runnable() {
+				public void run() {
+					nameL.setText("");
+					chatList.clearAll();
+					chatList.scrollToBottom();
+					chatList.flush();
+				}
+			});
 			return;
 		}
 		item.clearUnread();
@@ -266,7 +282,7 @@ public class ChatComp extends Composite {
 				}
 				
 				
-				ChatItem ci = new ChatItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL));
+				ChatItem ci = new ChatItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
 				chatList.addItem(ci);
 			}
 		}

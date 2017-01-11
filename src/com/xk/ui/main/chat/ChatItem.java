@@ -12,6 +12,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Transform;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.xk.chatlogs.ChatLog;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 
@@ -29,6 +30,7 @@ public class ChatItem extends ListItem {
 	private static final Integer HEAD_IMG_HEIGHT = 50;
 	private static final Integer MARGIN = 5;
 	
+	private ChatLog log;
 	private String user;//聊天发送者
 	private Image head;//发送者头像
 	private List<Object> chatContent;//聊天内容
@@ -40,12 +42,13 @@ public class ChatItem extends ListItem {
 	private int nameHeight = 0;//名字高度
 	private int allHeight = MARGIN;//气泡高度
 	
-	public ChatItem(String user,Image head, List<Object> chatContent, boolean fromSelf, Font font) {
+	public ChatItem(String user,Image head, List<Object> chatContent, boolean fromSelf, Font font, ChatLog log) {
 		this.user = user;
 		this.head = head;
 		this.chatContent = chatContent;
 		this.fromSelf = fromSelf;
 		this.font = font;
+		this.log = log;
 	}
 	
 	
@@ -304,7 +307,16 @@ public class ChatItem extends ListItem {
 
 	@Override
 	public boolean oncliek(MouseEvent e, int itemHeight, int index) {
-		
+		System.out.println("clicked!!" + e.count);
+		if(e.button == 3 && e.count == 1) {//右键
+			
+		}else if(e.button == 1 && e.count == 2) {//双击
+			if(log.msgType == 3 || log.msgType == 47) {
+				if(chatContent.get(0) instanceof Image) {
+					
+				}
+			}
+		}
 		return false;
 	}
 
