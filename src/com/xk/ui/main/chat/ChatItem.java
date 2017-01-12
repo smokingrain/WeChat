@@ -313,11 +313,10 @@ public class ChatItem extends ListItem {
 	}
 
 	@Override
-	public boolean oncliek(MouseEvent e, int itemHeight, int index) {
-		System.out.println("clicked!!" + e.count);
+	public boolean oncliek(MouseEvent e, int itemHeight, int index, int type) {
 		if(e.button == 3 && e.count == 1) {//右键
 			
-		}else if(e.button == 1 && e.count == 2) {//双击
+		}else if(e.button == 1 && e.count == 2 && type == MyList.CLICK_DOUBLE) {//双击
 			if(log.msgType == 3 || log.msgType == 47) {
 				if(chatContent.get(0) instanceof Image) {
 					ImageLoader loader = WeChatUtil.loadImage(log.msgid, null);

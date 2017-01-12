@@ -34,7 +34,7 @@ public abstract class ListItem {
 	 * @param itemHeight 当前itemY位移，包含本身高度
 	 * @return
 	 */
-	public abstract boolean oncliek(MouseEvent e,int itemHeight,int index);
+	public abstract boolean oncliek(MouseEvent e, int itemHeight, int index, int type);
 	
 	void focus(){
 		focused=true;

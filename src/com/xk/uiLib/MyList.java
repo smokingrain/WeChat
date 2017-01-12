@@ -31,6 +31,9 @@ import com.xk.uiLib.listeners.ItemSelectionListener;
 
 public class MyList<T extends ListItem> extends Composite {
 
+	public static final int CLICK_FOCUS = 1;//响应鼠标点击  -- 单击事件,获得焦点
+	public static final int CLICK_SINGLE = 2;//响应鼠标点击  -- 单击事件,选中
+	public static final int CLICK_DOUBLE = 3;//响应鼠标点击  -- 双击事件
 	public static final int BAR_WIDTH=8;//滚动条宽度
 	private static final int BAR_ARROW_HEIGHT=8;
 	private List<ItemListener<T>> itemListeners=new ArrayList<ItemListener<T>>();
@@ -100,9 +103,9 @@ public class MyList<T extends ListItem> extends Composite {
 			public void mouseUp(MouseEvent e) {
 				if(e.x<width-BAR_WIDTH){
 					if(simpleSelect){
-						checkSelection(e);
+						checkSelection(e, CLICK_SINGLE);
 					}else{
-						checkFocus(e);
+						checkFocus(e, CLICK_FOCUS);
 					}
 					
 				}
@@ -146,7 +149,7 @@ public class MyList<T extends ListItem> extends Composite {
 			public void mouseDoubleClick(MouseEvent e) {
 				if(e.x<width-BAR_WIDTH){
 					if(!simpleSelect){
-						checkSelection(e);
+						checkSelection(e, CLICK_DOUBLE);
 					}
 				}
 			}
@@ -213,14 +216,14 @@ public class MyList<T extends ListItem> extends Composite {
 		startY = (int) (0 - (allHeight - height) * per);
 	}
 	
-	private void checkFocus(MouseEvent e){
+	private void checkFocus(MouseEvent e, int type){
 		int realY=e.y+Math.abs(startY);//得到真实Y位移
 		int itemHeight=0;
 		int index=0;
 		for(T item:items){
 			itemHeight+=item.getHeight();
 			if(itemHeight>realY){
-				if(item.oncliek(e,itemHeight,index)){
+				if(item.oncliek(e, itemHeight, index, type)){
 					focusItem(item);
 				}
 				return;
@@ -233,14 +236,14 @@ public class MyList<T extends ListItem> extends Composite {
 	 * 检查选总item
 	 * @param y
 	 */
-	private void checkSelection(MouseEvent e){
+	private void checkSelection(MouseEvent e, int type){
 		int realY=e.y+Math.abs(startY);//得到真实Y位移
 		int itemHeight=0;
 		int index=0;
 		for(T item:items){
 			itemHeight+=item.getHeight();
 			if(itemHeight>realY){
-				if(item.oncliek(e,itemHeight,index)){
+				if(item.oncliek(e, itemHeight, index, type)){
 					select(item,false);
 				}
 				return;

@@ -113,7 +113,7 @@ public class ConvItem extends ListItem {
 	}
 
 	@Override
-	public boolean oncliek(MouseEvent e, int itemHeight, int index) {
+	public boolean oncliek(MouseEvent e, int itemHeight, int index, int type) {
 		if(e.button==3){
 			Menu m=new Menu(getParent());
 			Menu menu=getParent().getMenu();

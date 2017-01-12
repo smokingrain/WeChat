@@ -76,7 +76,7 @@ public class ContactItem extends ListItem {
 	}
 
 	@Override
-	public boolean oncliek(MouseEvent e, int itemHeight, int index) {
+	public boolean oncliek(MouseEvent e, int itemHeight, int index, int type) {
 		return !dir;
 	}
 
