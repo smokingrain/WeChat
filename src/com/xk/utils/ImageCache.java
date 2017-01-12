@@ -89,6 +89,17 @@ public class ImageCache {
 	}
 	
 	
+	
+	/**
+	 * 用途：获取聊天图片，有缓存优先加载缓存
+	 * @date 2017年1月12日
+	 * @param msgId
+	 * @param url
+	 * @param params
+	 * @param width
+	 * @param height
+	 * @return
+	 */
 	public static Image getChatImage(String msgId, String url, Map<String, String> params,Integer width, Integer height) {
 		Image temp = chatImages.get(msgId);
 		if(null != temp && !temp.isDisposed()) {

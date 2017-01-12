@@ -3,18 +3,25 @@ package com.xk.ui.main.chat;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Transform;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.xk.chatlogs.ChatLog;
+import com.xk.ui.main.FloatWindow;
+import com.xk.uiLib.ImageViewer;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
+import com.xk.utils.SWTTools;
+import com.xk.utils.WeChatUtil;
 
 /**
  * 用途：聊天气泡
@@ -67,7 +74,7 @@ public class ChatItem extends ListItem {
 					allLength += width + LINE_SPACE_HEIGHT;
 					if(lineNum == 0) {
 						if(maxWidth < width) {
-							maxWidth = width + 10 + MARGIN;
+							maxWidth += width + 10 + MARGIN;
 						}else {
 							maxWidth += width + LINE_SPACE_HEIGHT;
 						}
@@ -90,7 +97,7 @@ public class ChatItem extends ListItem {
 					Point point = gc.textExtent(str);
 					if(lineNum == 0) {
 						if(maxWidth < point.x) {
-							maxWidth = point.x + str.length() + 10;//字间距
+							maxWidth += point.x + str.length() + 10;//字间距
 						}else {
 							maxWidth +=point.x + str.length() + LINE_SPACE_HEIGHT;
 						}
@@ -313,7 +320,33 @@ public class ChatItem extends ListItem {
 		}else if(e.button == 1 && e.count == 2) {//双击
 			if(log.msgType == 3 || log.msgType == 47) {
 				if(chatContent.get(0) instanceof Image) {
-					
+					ImageLoader loader = WeChatUtil.loadImage(log.msgid, null);
+					if(null != loader) {
+						final FloatWindow fw = FloatWindow.getInstance();
+						fw.init();
+						int width = loader.logicalScreenWidth == 0 ? loader.data[0].width : loader.logicalScreenWidth;
+						int height = loader.logicalScreenHeight ==0 ? loader.data[0].height : loader.logicalScreenHeight;
+						fw.setSize(width + 2, height + 2);
+						ImageViewer iv = new ImageViewer(fw.shell);
+						iv.addMouseListener(new MouseAdapter() {
+
+							@Override
+							public void mouseDoubleClick(MouseEvent mouseevent) {
+								fw.kill();
+							}
+							
+						});
+						if(loader.data.length > 1) {
+							iv.setImages(loader.data, loader.repeatCount);
+						}else {
+							iv.setImage(loader.data[0]);
+						}
+						fw.add(iv);
+						fw.setTimeOut(-1L);
+						SWTTools.centerWindow(fw.shell);
+						SWTTools.enableTrag(iv);
+						fw.open(-1, -1);
+					}
 				}
 			}
 		}

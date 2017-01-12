@@ -89,6 +89,8 @@ public class ChatComp extends Composite {
 		emojL.setBounds(0, 400, 30, 30);
 		emojL.setBackground(SWTTools.scaleImage(tempEmoj.getImageData(), 30, 30));
 		emojL.setToolTipText("发送表情");
+		tempEmoj.dispose();
+		
 		
 		Image tempPic = SWTResourceManager.getImage(ChatComp.class, "/images/select.png");
 		//发送图片按钮
@@ -108,8 +110,9 @@ public class ChatComp extends Composite {
 		Image cutPic = SWTResourceManager.getImage(ChatComp.class, "/images/cutscreen.png");
 		CLabel cutScreen = new CLabel(this, SWT.CENTER);
 		cutScreen.setBounds(64, 400, 30, 30);
-		cutScreen.setBackground(cutPic);
+		cutScreen.setBackground(SWTTools.scaleImage(cutPic.getImageData(), 30, 30));
 		cutScreen.setToolTipText("屏幕截图");
+		cutPic.dispose();
 		
 		//内容输入框
 		text = new Text(this, SWT.MULTI);

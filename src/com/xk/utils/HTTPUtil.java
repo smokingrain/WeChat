@@ -3,6 +3,7 @@ package com.xk.utils;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -94,7 +95,7 @@ public class HTTPUtil {
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 			if (null != files) {
 				for (String key : files.keySet()) {
-					builder.addBinaryBody(key, files.get(key));
+					builder.addBinaryBody(key, new FileInputStream(files.get(key)));
 				}
 			}
 			if (null != params) {

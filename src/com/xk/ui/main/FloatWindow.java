@@ -17,6 +17,7 @@ import com.xk.uiLib.ICallback;
 import com.xk.utils.SWTTools;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 
 
@@ -58,11 +59,14 @@ public class FloatWindow implements ICallback{
 	public Object open(int x, int y) {
 		shell.open();
 		shell.layout();
-		shell.setLocation(x, y );
-		shell.setFocus();
+		if(x >= 0 && y >= 0) {
+			shell.setLocation(x, y);
+		}
 		SWTTools.topWindow(shell);
-		timer = new Timer();
-		timer.schedule(new DisposeTask(), timeOut, timeOut);
+		if(timeOut > 0){
+			timer = new Timer();
+			timer.schedule(new DisposeTask(), timeOut, timeOut);
+		}
 		Display display = Display.getDefault();
 		while (null != shell && !shell.isDisposed()) {
 			if (!display.readAndDispatch()) {
@@ -78,6 +82,10 @@ public class FloatWindow implements ICallback{
 
 	public void setTimeOut(Long timeOut) {
 		this.timeOut = timeOut;
+		if(timeOut < 0 && null != timer) {
+			timer.cancel();
+			timer = null;
+		}
 	}
 	
 	
@@ -86,7 +94,6 @@ public class FloatWindow implements ICallback{
 	 */
 	protected void createContents() {
 		shell = new Shell(SWT.FILL_WINDING);
-		shell.setSize(450, 300);
 		StackLayout stackLayout=new StackLayout();
 		shell.setLayout(stackLayout);
 	}
@@ -96,7 +103,7 @@ public class FloatWindow implements ICallback{
 	 * @date 2017年1月5日
 	 * @param comp
 	 */
-	public void add(Composite comp) {
+	public void add(Control comp) {
 		StackLayout lo = (StackLayout)(shell.getLayout());
 		if(null != lo.topControl && !lo.topControl.isDisposed()) {
 			lo.topControl.dispose();
@@ -126,6 +133,7 @@ public class FloatWindow implements ICallback{
 	@Override
 	public Object callback(Object obj) {
 		this.result = obj;
+		kill();
 		return obj;
 	}
 
