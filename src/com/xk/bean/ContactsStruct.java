@@ -45,6 +45,7 @@ public class ContactsStruct {
 	public Integer ChatRoomId;
 	public String KeyWord;
 	public String EncryChatRoomId;
+	public String IsOwner;
 	
 	@JsonIgnore
 	public Image head;
