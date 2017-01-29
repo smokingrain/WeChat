@@ -8,6 +8,7 @@ import com.xk.bean.MemberStruct;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
 import com.xk.ui.items.ConvItem;
+import com.xk.ui.main.CutScreen;
 import com.xk.uiLib.MyList;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
@@ -18,7 +19,9 @@ import com.xk.utils.WeChatUtil;
 import org.eclipse.swt.widgets.Label;
 
 import java.io.File;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +39,8 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.CoolBar;
@@ -112,6 +117,14 @@ public class ChatComp extends Composite {
 		cutScreen.setBounds(64, 400, 30, 30);
 		cutScreen.setBackground(SWTTools.scaleImage(cutPic.getImageData(), 30, 30));
 		cutScreen.setToolTipText("屏幕截图");
+		cutScreen.addMouseListener(new MouseAdapter() {
+			
+			@Override
+			public void mouseUp(MouseEvent mouseevent) {
+				cutScreen();
+			}
+			
+		});
 		cutPic.dispose();
 		
 		//内容输入框
@@ -199,6 +212,26 @@ public class ChatComp extends Composite {
 			flush(item);
 		}
 		text.setFocus();
+	}
+	
+	private void cutScreen() {
+		CutScreen cs = new CutScreen();
+		cs.open();
+		Image img = cs.img;
+		if(null != img) {
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
+			File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
+			file.getParentFile().mkdirs();
+			ImageLoader loader = new ImageLoader();
+			loader.data = new ImageData[]{img.getImageData()};
+			loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
+			ChatLog log = WeChatUtil.sendImg(file, convId);
+			if(null != log) {
+				ChatLogCache.saveLogs(convId, log);
+				flush(item);
+			}
+			file.delete();
+		}
 	}
 	
 	/**

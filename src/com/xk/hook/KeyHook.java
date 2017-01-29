@@ -108,8 +108,7 @@ public class KeyHook {
 //		}
 //		hook.uninstall();
     	
-    	Date date = new Date();
-    	System.out.println(date.toString());
+    	
 	}
 
 }
