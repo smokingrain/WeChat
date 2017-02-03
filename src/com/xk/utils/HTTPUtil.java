@@ -95,7 +95,7 @@ public class HTTPUtil {
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 			if (null != files) {
 				for (String key : files.keySet()) {
-					builder.addBinaryBody(key,files.get(key));
+					builder.addBinaryBody(key, files.get(key));
 				}
 			}
 			if (null != params) {

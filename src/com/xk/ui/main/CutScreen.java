@@ -7,13 +7,14 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import com.xk.uiLib.ICallback;
 import com.xk.utils.SWTTools;
 
-public class CutScreen {
+public class CutScreen implements ICallback{
 
 	protected Shell shell;
 	private Display display;
-
+	public Image img;
 	/**
 	 * Launch the application.
 	 * @param args
@@ -50,15 +51,22 @@ public class CutScreen {
 		shell = new Shell(SWT.FILL);
 		shell.setBounds(rect);
 		shell.setText("SWT Application");
-		SWTTools.topWindow(shell);
+//		SWTTools.topWindow(shell);
 		Rectangle di = display.getBounds();  
         Image temps = new Image(display, di.width, di.height);  
         GC gc = new GC(display);  
         gc.copyArea(temps, 0, 0);  
         gc.dispose();  
-        ScreenCanvas ts = new ScreenCanvas(shell, temps);
+        ScreenCanvas ts = new ScreenCanvas(shell, temps, this);
 		ts.setBounds(rect);
-		SWTTools.enableTrag(ts);
+//		SWTTools.enableTrag(ts);
+	}
+
+	@Override
+	public Object callback(Object obj) {
+		img = (Image) obj;
+		shell.dispose();
+		return img;
 	}
 
 }

@@ -535,14 +535,14 @@ public class MainWindow {
 									String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
 									String ctt = Content.replace("<br/>", "\n");
 									System.out.println(sender + " 说：" + ctt);
-									if(!Constant.noReply.contains(FromUserName)) {
-										String reply = AutoReply.call(ctt, sender);
-										ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
-										if(null != replyLog) {
-											ChatLogCache.saveLogs(FromUserName, replyLog);
-										}
-										
-									}
+//									if(!Constant.noReply.contains(FromUserName)) {
+//										String reply = AutoReply.call(ctt, sender);
+//										ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
+//										if(null != replyLog) {
+//											ChatLogCache.saveLogs(FromUserName, replyLog);
+//										}
+//										
+//									}
 									flushChatView(FromUserName, true);
 								}
 								

@@ -12,8 +12,8 @@
 	<classpathentry kind="lib" path="libs/jackson-annotations-2.0.4.jar"/>
 	<classpathentry kind="lib" path="libs/jackson-core-2.0.4.jar"/>
 	<classpathentry kind="lib" path="libs/jackson-databind-2.0.4.jar"/>
-	<classpathentry kind="lib" path="libs/swt.jar"/>
-	<classpathentry kind="lib" path="libs/jna-platform-4.2.2.jar"/>
 	<classpathentry kind="lib" path="libs/jna-4.2.2.jar"/>
+	<classpathentry kind="lib" path="libs/jna-platform-4.2.2.jar"/>
+	<classpathentry kind="lib" path="libs/swt32.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
