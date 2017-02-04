@@ -3,10 +3,13 @@ package com.xk.ui.main.chat;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.sun.jna.platform.win32.WinUser.MSG;
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.MemberStruct;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
+import com.xk.hook.HotKeyListener;
+import com.xk.hook.HotKeys;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.main.CutScreen;
 import com.xk.uiLib.MyList;
@@ -30,6 +33,8 @@ import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -54,7 +59,7 @@ import org.eclipse.swt.widgets.FileDialog;
  * @author xiaokui
  * @date 2017年1月4日
  */
-public class ChatComp extends Composite {
+public class ChatComp extends Composite implements HotKeyListener{
 
 	private CLabel nameL;
 	private MyList<ChatItem> chatList;
@@ -74,6 +79,16 @@ public class ChatComp extends Composite {
 		setLocation(300,0);
 		setSize(550, 590);
 		setBackground(SWTResourceManager.getColor(245, 245, 245));
+		addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent arg0) {
+				HotKeys keys = HotKeys.getInstance();
+				keys.unregister();
+				keys.remove(this);
+			}
+		});
+		
 		
 		//聊天会话对象名字
 		nameL = new CLabel(this, SWT.CENTER);
@@ -116,7 +131,7 @@ public class ChatComp extends Composite {
 		CLabel cutScreen = new CLabel(this, SWT.CENTER);
 		cutScreen.setBounds(64, 400, 30, 30);
 		cutScreen.setBackground(SWTTools.scaleImage(cutPic.getImageData(), 30, 30));
-		cutScreen.setToolTipText("屏幕截图");
+		cutScreen.setToolTipText("屏幕截图(ALT + J)");
 		cutScreen.addMouseListener(new MouseAdapter() {
 			
 			@Override
@@ -171,6 +186,7 @@ public class ChatComp extends Composite {
 			}
 		});
 		
+		registerHotKey();
 		
 		
 	}
@@ -218,7 +234,7 @@ public class ChatComp extends Composite {
 		CutScreen cs = new CutScreen();
 		cs.open();
 		Image img = cs.img;
-		if(null != img) {
+		if(null != img && null != convId) {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
 			File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
 			file.getParentFile().mkdirs();
@@ -346,8 +362,23 @@ public class ChatComp extends Composite {
 		return null == img ? content : img;
 	}
 	
+	private void registerHotKey() {
+		HotKeys keys = HotKeys.getInstance();
+		keys.registerHotKey();
+		keys.add(this);
+	}
+	
 	@Override
 	protected void checkSubclass() {
 		// Disable the check that prevents subclassing of SWT components
+	}
+
+	@Override
+	public void notify(MSG msg) {
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				cutScreen();
+			}
+		});
 	}
 }

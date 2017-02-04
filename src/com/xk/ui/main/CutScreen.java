@@ -1,8 +1,12 @@
 package com.xk.ui.main;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.ImageTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -49,9 +53,9 @@ public class CutScreen implements ICallback{
 	protected void createContents() {
 		Rectangle rect = display.getBounds();
 		shell = new Shell(SWT.FILL);
-		shell.setBounds(rect);
+		shell.setBounds(0, 0, rect.width, rect.height);
 		shell.setText("SWT Application");
-//		SWTTools.topWindow(shell);
+		SWTTools.topWindow(shell);
 		Rectangle di = display.getBounds();  
         Image temps = new Image(display, di.width, di.height);  
         GC gc = new GC(display);  
@@ -65,6 +69,11 @@ public class CutScreen implements ICallback{
 	@Override
 	public Object callback(Object obj) {
 		img = (Image) obj;
+		if(null != img) {
+			Clipboard board = new Clipboard(null);
+			board.setContents(new ImageData[]{img.getImageData()}, new Transfer[]{ImageTransfer.getInstance()});
+			board.dispose();
+		}
 		shell.dispose();
 		return img;
 	}

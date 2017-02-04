@@ -1,4 +1,5 @@
 package com.xk.hook;
+import java.awt.event.KeyEvent;
 import java.util.Date;
 
 import com.sun.jna.Pointer;
@@ -69,19 +70,18 @@ public class KeyHook {
 		        hhk = lib.SetWindowsHookEx(WinUser.WH_KEYBOARD_LL, keyboardHook, hMod, 0);
 		        int result;
 		        MSG msg = new MSG();
-		        while ((result = lib.GetMessage(msg, null, 0, 0)) != 0) {
+		        while (installed && (result = lib.GetMessage(msg, null, 0, 0)) != 0) {
 		            if (result == -1) {
 		                System.err.println("error in get message");
 		                break;
 		            }
 		            else {
-		                System.err.println("got message");
+		                System.err.println("got message" + msg);
 		                lib.TranslateMessage(msg);
 		                lib.DispatchMessage(msg);
 		            }
 		        }
-		        lib.UnhookWindowsHookEx(hhk);
-		        installed = false;
+		        uninstall();
 			}
     	};
     	new Thread(r).start();
@@ -97,15 +97,32 @@ public class KeyHook {
     	}
     }
     
+    public void registerHotKey() {
+    	boolean registed = lib.RegisterHotKey(null, 0xAAAA, User32.MOD_ALT, KeyEvent.VK_J);
+    	System.out.println("registed:" + registed);
+    	WinUser.MSG msg = new WinUser.MSG();
+    	while(true) {
+    		while(lib.PeekMessage(msg, null, 0, 0, 1)) {
+    			System.out.println("before　: " + msg);
+    			if(msg.message == User32.WM_HOTKEY) {
+    				System.out.println(msg);
+    			}
+    		}
+    		
+    	}
+    	
+    }
+    
     public static void main(String[] args) {
-//		KeyHook hook = KeyHook.getInstance();
+		KeyHook hook = KeyHook.getInstance();
 //		hook.install();
-//		try {
-//			Thread.sleep(10000);
-//		} catch (InterruptedException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
+		hook.registerHotKey();
+		try {
+			Thread.sleep(10000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 //		hook.uninstall();
     	
     	

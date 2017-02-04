@@ -313,7 +313,6 @@ public class WeChatUtil {
 		
 		try {
 			String result = hu.readJsonfromURL2(Constant.GET_CONTACT, params);
-			System.out.println(result);
 			Map<String, Object> rstMap = JSONUtil.fromJson(result);
 			Map<String, Object> baseResponse = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != baseResponse && new Integer(0).equals(baseResponse.get("Ret"))) {

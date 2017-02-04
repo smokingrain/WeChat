@@ -171,6 +171,7 @@ public class ImageCache {
 				}
 			}
 		} catch (Exception e) {
+			System.out.println(url);
 			e.printStackTrace();
 		} finally {
 			if(null != in) {
