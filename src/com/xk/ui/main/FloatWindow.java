@@ -43,7 +43,7 @@ public class FloatWindow implements ICallback{
 		return WindowHolder.instance;
 	}
 	
-	private FloatWindow() {
+	protected FloatWindow() {
 		
 	}
 	

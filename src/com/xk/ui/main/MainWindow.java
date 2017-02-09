@@ -130,6 +130,7 @@ public class MainWindow {
 				System.out.println(globPos.x  + "  " + globPos.y);
 				FloatWindow bb = FloatWindow.getInstance();
 				bb.init();
+				bb.setTimeOut(2000L);
 				bb.setSize(180, 255);
 				MyInfoComp mic = new MyInfoComp(bb.shell, SWT.NONE, Constant.user);
 				bb.add(mic);

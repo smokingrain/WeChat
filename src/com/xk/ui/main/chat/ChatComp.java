@@ -5,6 +5,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.sun.jna.platform.win32.WinUser.MSG;
 import com.xk.bean.ContactsStruct;
+import com.xk.bean.Imoj;
 import com.xk.bean.MemberStruct;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
@@ -12,6 +13,7 @@ import com.xk.hook.HotKeyListener;
 import com.xk.hook.HotKeys;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.main.CutScreen;
+import com.xk.ui.main.FloatWindow;
 import com.xk.uiLib.MyList;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
@@ -47,6 +49,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Path;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.CoolBar;
 import org.eclipse.swt.widgets.CoolItem;
@@ -105,10 +108,27 @@ public class ChatComp extends Composite implements HotKeyListener{
 		
 		Image tempEmoj = SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png");
 		//发送表情按钮
-		CLabel emojL = new CLabel(this, SWT.CENTER);
+		final CLabel emojL = new CLabel(this, SWT.CENTER);
 		emojL.setBounds(0, 400, 30, 30);
 		emojL.setBackground(SWTTools.scaleImage(tempEmoj.getImageData(), 30, 30));
 		emojL.setToolTipText("发送表情");
+		emojL.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseUp(MouseEvent mouseevent) {
+				Point loc = emojL.toDisplay(0, 0);
+				loc.x -= 30 * 15 / 2;
+				loc.y -= 215;
+				ImojWindow fw = ImojWindow.getInstance();
+				fw.setCc(ChatComp.this);
+				fw.init(loc.x, loc.y);
+				fw.shell.setSize(30 * 15 + MyList.BAR_WIDTH + 4, 215);
+				fw.setTimeOut(2000L);
+				fw.open(-1, -1);
+				
+				
+			}
+		});
 		tempEmoj.dispose();
 		
 		
@@ -221,13 +241,21 @@ public class ChatComp extends Composite implements HotKeyListener{
 	 */
 	private void sendMsg() {
 		String msg = text.getText().trim();
+		if(sendText(msg)) {
+			text.setText("");
+		}
+ 	}
+	
+	public boolean sendText(String msg) {
+		boolean sent = false;
 		if(!"".equals(msg) && null != convId) {
 			ChatLog log = WeChatUtil.sendMsg(msg, convId);
 			ChatLogCache.saveLogs(convId, log);
-			text.setText("");
 			flush(item);
+			sent = true;
 		}
 		text.setFocus();
+		return sent;
 	}
 	
 	private void cutScreen() {
@@ -257,7 +285,8 @@ public class ChatComp extends Composite implements HotKeyListener{
 	 */
 	public void flush(final ConvItem item) {
 		if(null == item) {
-			
+			convId = null;
+			this.item = null;
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
 					nameL.setText("");

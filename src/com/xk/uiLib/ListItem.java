@@ -29,9 +29,10 @@ public abstract class ListItem {
 	
 	/**
 	 * item被点击
-	 * @param x 相对父组件x坐标
-	 * @param y 相对父组件Y坐标
+	 * @param e 点击事件
 	 * @param itemHeight 当前itemY位移，包含本身高度
+	 * @param index 相对父组件Y坐标
+	 * @param type
 	 * @return
 	 */
 	public abstract boolean oncliek(MouseEvent e, int itemHeight, int index, int type);
