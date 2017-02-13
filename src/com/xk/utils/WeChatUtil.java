@@ -6,20 +6,25 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import org.apache.http.client.ClientProtocolException;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.widgets.Display;
 
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.User;
 import com.xk.bean.WeChatSign;
 import com.xk.chatlogs.ChatLog;
+import com.xk.chatlogs.ChatLogCache;
 import com.xk.ui.items.ContactItem;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.items.TypeItem;
@@ -28,6 +33,50 @@ import com.xk.uiLib.MyList;
 
 public class WeChatUtil {
 
+	private static Timer timer;
+	
+	/**
+	 * 用途：置顶取消置顶
+	 * @date 2017年2月10日
+	 * @param cs 用户对象
+	 * @param op 0 取消置顶，1 置顶
+	 * @return
+	 */
+	public static boolean OPlog(ContactsStruct cs, int op){
+		Map<String, String> params = new HashMap<>();
+		params.put("pass_ticket", Constant.sign.pass_ticket);
+		params.put("lang", "zh_CN");
+		Map<String, Object> body = new HashMap<>();
+		Map<String, Object> bodyInner = new HashMap<String, Object>();
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
+		body.put("BaseRequest", bodyInner);
+		body.put("CmdId", 3);
+		body.put("OP", op);
+		body.put("RemarkName", cs.RemarkName);
+		body.put("UserName", cs.UserName);
+		HTTPUtil hu = HTTPUtil.getInstance();
+		try {
+			String result = hu.postBody(Constant.OP_LOG, params, JSONUtil.toJson(body));
+			Map<String, Object> rstMap= JSONUtil.fromJson(result);
+			Map<String, Object> obj = (Map<String, Object>) rstMap.get("BaseResponse");
+			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {
+				System.out.println("置顶成功！！");
+				return true;
+			}
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+		
+	}
+	
 	/**
 	 * 用途：上传聊天图片
 	 * @date 2017年1月5日
@@ -320,6 +369,10 @@ public class WeChatUtil {
 				if(null != contactList) {
 					for(Map<String, Object> cmap : contactList) {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
+						boolean top = convs.ContactFlag == 2049 || convs.ContactFlag == 2051;
+						if(top) {
+							window.addConversition(convs);
+						}
 						Constant.contacts.put(convs.UserName, convs);
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
@@ -470,5 +523,209 @@ public class WeChatUtil {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * 用途：发心跳包，获取微信状态是否有新消息
+	 * @date 2016年12月30日
+	 * @param conItem
+	 */
+	public static void syncData(final TypeItem conItem) {
+		if(null != timer) {
+			return;
+		}
+		final HTTPUtil hu = HTTPUtil.getInstance();
+		timer = new Timer();
+		timer.schedule(new TimerTask() {
+			
+			@Override
+			public void run() {
+				Map<String, String> params = new HashMap<String, String>();
+				params.put("_", System.currentTimeMillis() + "");
+				params.put("r", (System.currentTimeMillis() + 91136) + "");
+				params.put("uin", Constant.sign.wxuin);
+				try {
+					params.put("sid", URLEncoder.encode(Constant.sign.wxsid, "UTF-8"));
+					params.put("skey", URLEncoder.encode(Constant.sign.skey, "UTF-8"));
+				} catch (UnsupportedEncodingException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				params.put("deviceid", Constant.sign.deviceid);
+				params.put("synckey", Constant.sign.synckey);
+				try {
+					String rst = hu.getJsonfromURL2(Constant.SYNC_CHECK, params);
+					if(null != rst && rst.contains("window.synccheck=")) {
+						String result = rst.replace("window.synccheck=", "");
+						System.out.println("checksync + " + result);
+						Map<String, String> map = JSONUtil.toBean(result, JSONUtil.getCollectionType(Map.class, String.class, String.class));
+						if("0".equals(map.get("retcode")) ) {
+							String selector = map.get("selector");
+							try {
+								Integer sele = Integer.parseInt(selector);
+								if(sele > 0) {
+									webwxsync(conItem);
+								}
+								
+							} catch (NumberFormatException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+						}else if("1101".equals(map.get("retcode"))) {
+							System.out.println("已在其它端登陆！！");
+							System.exit(0);
+						}
+						
+					}
+				} catch (ClientProtocolException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
+			}
+		}, 1000, 1000);
+	}
+	
+	
+	/**
+	 * 用途：同步到数据的时候刷新数据
+	 * @date 2016年12月30日
+	 * @param conItem
+	 */
+	private static void webwxsync(final TypeItem conItem) {
+		HTTPUtil hu = HTTPUtil.getInstance();
+		Map<String,Object> bodyMap = new HashMap<String,Object>();
+		Map<String,Object> bodyInner = new HashMap<String,Object>();
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
+		bodyMap.put("BaseRequest", bodyInner);
+		bodyMap.put("SyncKey", Constant.sign.syncKeyOringe);
+		bodyMap.put("rr", System.currentTimeMillis() / 1000 * -1);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("sid", Constant.sign.wxsid);
+		params.put("lang", "zh_CN");
+		params.put("skey", Constant.sign.skey);
+		params.put("pass_ticket", Constant.sign.pass_ticket);
+		try {
+			final MainWindow main = MainWindow.getInstance();
+			String result =  hu.postBody(Constant.GET_STATUS, params, JSONUtil.toJson(bodyMap));
+			Map<String, Object> rst = JSONUtil.fromJson(result);
+			List<Map<String, Object>> modContactList = (List<Map<String, Object>>) rst.get("ModContactList");
+			if(null != modContactList) {
+				changeUser(modContactList);
+			}
+			Map<String, Object> BaseResponse = (Map<String, Object>) rst.get("BaseResponse");
+			if(new Integer(0).equals(BaseResponse.get("Ret"))) {
+				Integer msgCount = (Integer) rst.get("AddMsgCount");
+				if(null != msgCount && msgCount > 0) {
+					List<Map<String, Object>> AddMsgList = (List<Map<String, Object>>) rst.get("AddMsgList");
+					for(Map<String, Object> msg : AddMsgList) {
+						Integer MsgType = (Integer) msg.get("MsgType");
+						String Content = (String) msg.get("Content");
+						String ToUserName = (String) msg.get("ToUserName");
+						String FromUserName = (String) msg.get("FromUserName");
+						if(51 == MsgType) {
+							String StatusNotifyUserName = (String) msg.get("StatusNotifyUserName");
+							if(null != StatusNotifyUserName && !main.syncGroup) {
+								String[] spl = StatusNotifyUserName.split(",");
+								List<String> groups = Arrays.asList(spl);
+								WeChatUtil.loadGroups(conItem, groups, main);
+								Display.getDefault().asyncExec(new Runnable() {
+									public void run() {
+										main.lists.get(conItem).flush();
+									}
+								});
+								main.syncGroup = true;
+							}
+						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType) {
+							if(Constant.FILTER_USERS.contains(FromUserName)) {
+								System.out.println("忽略特殊用户信息！！" + Content);
+							}else if(FromUserName.equals(Constant.user.UserName)){
+								ChatLog log = ChatLog.fromMap(msg);
+								if(null != log) {
+									ChatLogCache.saveLogs(ToUserName, log);
+									main.flushChatView(ToUserName, false );
+									System.out.println("来自手机端自己的消息：" + Content);
+								}
+								
+							}else if(FromUserName.startsWith("@@")) {
+								ChatLog log = ChatLog.fromMap(msg);
+								if(null != log) {
+									ChatLogCache.saveLogs(FromUserName, log);
+//									String[] splt = Content.split(":<br/>");
+//									String sender = ContactsStruct.getGroupMember(splt[0], Constant.contacts.get(FromUserName));
+//									String ctt = splt[1].replace("<br/>", "\n");
+//									if(ctt.contains("@" + Constant.user.NickName)) {
+//										String detail = ctt.replace("@" + Constant.user.NickName, "");
+//										String reply = "什么情况?";
+//										if(!detail.trim().isEmpty()) {
+//											reply = AutoReply.call(detail, sender);
+//										}
+//										
+//										ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
+//										if(null != replyLog) {
+//											ChatLogCache.saveLogs(FromUserName, replyLog);
+//										}
+//									}
+									main.flushChatView(FromUserName, true);
+								}
+								
+								
+							}else {
+								ChatLog log = ChatLog.fromMap(msg);
+								if(null != log) {
+									ChatLogCache.saveLogs(FromUserName, log);
+									String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
+									String ctt = Content.replace("<br/>", "\n");
+									System.out.println(sender + " 说：" + ctt);
+//									if(!Constant.noReply.contains(FromUserName)) {
+//										String reply = AutoReply.call(ctt, sender);
+//										ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
+//										if(null != replyLog) {
+//											ChatLogCache.saveLogs(FromUserName, replyLog);
+//										}
+//										
+//									}
+									main.flushChatView(FromUserName, true);
+								}
+								
+							}
+						}
+					}
+				}
+			}
+			Map<String, Object> SyncKey = (Map<String, Object>) rst.get("SyncKey");
+			WeChatUtil.flushSyncKey(SyncKey);
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	
+	/**
+	 * 用途：修改用户
+	 * @date 2017年2月13日
+	 * @param userList
+	 */
+	private static void changeUser(List<Map<String, Object>> userList) {
+		final MainWindow mw = MainWindow.getInstance();
+		for(Map<String, Object> map : userList) {
+			int ContactFlag = (int) map.get("ContactFlag");
+			String user = (String) map.get("UserName");
+			mw.topUser(user, ContactFlag == 2049 ? 1 : 0);
+		}
+		Display.getDefault().asyncExec(new Runnable() {
+			public void run() {
+				mw.convers.flush();
+			}
+		});
+		
 	}
 }

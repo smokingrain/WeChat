@@ -228,7 +228,7 @@ public class QRLoginWindow {
 									Display.getDefault().asyncExec(new Runnable() {
 										public void run() {
 											shell.setVisible(false);
-											MainWindow main = new MainWindow();
+											MainWindow main = MainWindow.getInstance();
 											main.open();
 										}
 									});

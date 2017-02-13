@@ -71,11 +71,19 @@ public class MainWindow {
 	public Map<ListItem, MyList<? extends ListItem>> lists = new HashMap<ListItem, MyList<? extends ListItem>>();
 	private MyText text;
 	private ChatComp cc;
-	private MyList<ConvItem> convers;
+	public MyList<ConvItem> convers;
 	private MyList<TypeItem> types;
-	private boolean syncGroup = false;
+	public boolean syncGroup = false;
+	
+	public static MainWindow getInstance() {
+		return WindowHolder.instance;
+	}
 
-	public MainWindow() {
+	private static class WindowHolder {
+		private static MainWindow instance = new MainWindow();
+	}
+	
+	private MainWindow() {
 	}
 	
 	/**
@@ -348,7 +356,7 @@ public class MainWindow {
 		List<String> g = WeChatUtil.loadConvers(ctItem, this);//先加载最近会话
 		WeChatUtil.startNotify();//通知服务器我准备收消息了
 		WeChatUtil.loadGroups(conItem, g, this);//拉取最近会话中的群组
-		syncData(conItem);//开始发送心跳包，拉消息
+		WeChatUtil.syncData(conItem);//开始发送心跳包，拉消息
 		List<String> group = WeChatUtil.loadContacts(conItem, this);//拉取联系人
 		WeChatUtil.loadGroups(conItem,group, this);//拉取联系人中的群组
 		
@@ -371,10 +379,8 @@ public class MainWindow {
 			for(ContactsStruct convs : Constant.contacts.values()) {
 				if((null != convs.RemarkName && convs.RemarkName.contains(name)) || (null != convs.NickName && convs.NickName.contains(name))) {
 					ConvItem itm = addConversition(convs);
-					ConvItem temp = convers.removeItem(itm);
-					if(null != temp) {
-						convers.addItem(0, temp);
-						convers.select(temp, false);
+					if(null != itm) {
+						convers.select(itm, false);
 					}
 					break;
 				}
@@ -386,177 +392,29 @@ public class MainWindow {
 	}
 	
 	/**
-	 * 用途：发心跳包，获取微信状态是否有新消息
-	 * @date 2016年12月30日
-	 * @param conItem
+	 * 用途：置顶或取消置顶
+	 * @date 2017年2月13日
+	 * @param user 用户id
+	 * @param type 类型 0，取消，1，置顶
 	 */
-	private void syncData(final TypeItem conItem) {
-		final HTTPUtil hu = HTTPUtil.getInstance();
-		timer = new Timer();
-		timer.schedule(new TimerTask() {
-			
-			@Override
-			public void run() {
-				Map<String, String> params = new HashMap<String, String>();
-				params.put("_", System.currentTimeMillis() + "");
-				params.put("r", (System.currentTimeMillis() + 91136) + "");
-				params.put("uin", Constant.sign.wxuin);
-				try {
-					params.put("sid", URLEncoder.encode(Constant.sign.wxsid, "UTF-8"));
-					params.put("skey", URLEncoder.encode(Constant.sign.skey, "UTF-8"));
-				} catch (UnsupportedEncodingException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-				params.put("deviceid", Constant.sign.deviceid);
-				params.put("synckey", Constant.sign.synckey);
-				try {
-					String rst = hu.getJsonfromURL2(Constant.SYNC_CHECK, params);
-					if(null != rst && rst.contains("window.synccheck=")) {
-						String result = rst.replace("window.synccheck=", "");
-						System.out.println("checksync + " + result);
-						Map<String, String> map = JSONUtil.toBean(result, JSONUtil.getCollectionType(Map.class, String.class, String.class));
-						if("0".equals(map.get("retcode")) ) {
-							String selector = map.get("selector");
-							try {
-								Integer sele = Integer.parseInt(selector);
-								if(sele > 0) {
-									webwxsync(conItem);
-								}
-								
-							} catch (NumberFormatException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							}
-							
-						}else if("1101".equals(map.get("retcode"))) {
-							System.out.println("已在其它端登陆！！");
-							System.exit(0);
-						}
-						
-					}
-				} catch (ClientProtocolException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				
-			}
-		}, 1000, 1000);
-	}
-
-	
-	/**
-	 * 用途：同步到数据的时候刷新数据
-	 * @date 2016年12月30日
-	 * @param conItem
-	 */
-	private void webwxsync(final TypeItem conItem) {
-		HTTPUtil hu = HTTPUtil.getInstance();
-		Map<String,Object> bodyMap = new HashMap<String,Object>();
-		Map<String,Object> bodyInner = new HashMap<String,Object>();
-		bodyInner.put("Uin", Constant.sign.wxuin);
-		bodyInner.put("Sid", Constant.sign.wxsid);
-		bodyInner.put("Skey", Constant.sign.skey);
-		bodyInner.put("DeviceID", Constant.sign.deviceid);
-		bodyMap.put("BaseRequest", bodyInner);
-		bodyMap.put("SyncKey", Constant.sign.syncKeyOringe);
-		bodyMap.put("rr", System.currentTimeMillis() / 1000 * -1);
-		Map<String, String> params = new HashMap<String, String>();
-		params.put("sid", Constant.sign.wxsid);
-		params.put("lang", "zh_CN");
-		params.put("skey", Constant.sign.skey);
-		params.put("pass_ticket", Constant.sign.pass_ticket);
-		try {
-			String result =  hu.postBody(Constant.GET_STATUS, params, JSONUtil.toJson(bodyMap));
-			Map<String, Object> rst = JSONUtil.fromJson(result);
-			Map<String, Object> BaseResponse = (Map<String, Object>) rst.get("BaseResponse");
-			if(new Integer(0).equals(BaseResponse.get("Ret"))) {
-				Integer msgCount = (Integer) rst.get("AddMsgCount");
-				if(null != msgCount && msgCount > 0) {
-					List<Map<String, Object>> AddMsgList = (List<Map<String, Object>>) rst.get("AddMsgList");
-					for(Map<String, Object> msg : AddMsgList) {
-						Integer MsgType = (Integer) msg.get("MsgType");
-						String Content = (String) msg.get("Content");
-						String ToUserName = (String) msg.get("ToUserName");
-						String FromUserName = (String) msg.get("FromUserName");
-						if(51 == MsgType) {
-							String StatusNotifyUserName = (String) msg.get("StatusNotifyUserName");
-							if(null != StatusNotifyUserName && !syncGroup) {
-								String[] spl = StatusNotifyUserName.split(",");
-								List<String> groups = Arrays.asList(spl);
-								WeChatUtil.loadGroups(conItem, groups, this);
-								Display.getDefault().asyncExec(new Runnable() {
-									public void run() {
-										lists.get(conItem).flush();
-									}
-								});
-								syncGroup = true;
-							}
-						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType) {
-							if(Constant.FILTER_USERS.contains(FromUserName)) {
-								System.out.println("忽略特殊用户信息！！" + Content);
-							}else if(FromUserName.equals(Constant.user.UserName)){
-								ChatLog log = ChatLog.fromMap(msg);
-								if(null != log) {
-									ChatLogCache.saveLogs(ToUserName, log);
-									flushChatView(ToUserName, false );
-									System.out.println("来自手机端自己的消息：" + Content);
-								}
-								
-							}else if(FromUserName.startsWith("@@")) {
-								ChatLog log = ChatLog.fromMap(msg);
-								if(null != log) {
-									ChatLogCache.saveLogs(FromUserName, log);
-//									String[] splt = Content.split(":<br/>");
-//									String sender = ContactsStruct.getGroupMember(splt[0], Constant.contacts.get(FromUserName));
-//									String ctt = splt[1].replace("<br/>", "\n");
-//									if(ctt.contains("@" + Constant.user.NickName)) {
-//										String detail = ctt.replace("@" + Constant.user.NickName, "");
-//										String reply = "什么情况?";
-//										if(!detail.trim().isEmpty()) {
-//											reply = AutoReply.call(detail, sender);
-//										}
-//										
-//										ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
-//										if(null != replyLog) {
-//											ChatLogCache.saveLogs(FromUserName, replyLog);
-//										}
-//									}
-									flushChatView(FromUserName, true);
-								}
-								
-								
-							}else {
-								ChatLog log = ChatLog.fromMap(msg);
-								if(null != log) {
-									ChatLogCache.saveLogs(FromUserName, log);
-									String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
-									String ctt = Content.replace("<br/>", "\n");
-									System.out.println(sender + " 说：" + ctt);
-//									if(!Constant.noReply.contains(FromUserName)) {
-//										String reply = AutoReply.call(ctt, sender);
-//										ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
-//										if(null != replyLog) {
-//											ChatLogCache.saveLogs(FromUserName, replyLog);
-//										}
-//										
-//									}
-									flushChatView(FromUserName, true);
-								}
-								
-							}
-						}
-					}
+	public void topUser(String user, int type) {
+		ContactsStruct cs = Constant.contacts.get(user);
+		ConvItem item = addConversition(cs);
+		if(null == item) {
+			return;
+		}
+		item.setTop(type == 1);
+		if(type == 1) {
+			convers.changeItemIndex(item, 0);
+		}else {
+			List<ConvItem> items = convers.getItems();
+			int index = 0;
+			for(ConvItem ci : items) {
+				if(ci.isTop()) {
+					index ++;
 				}
 			}
-			Map<String, Object> SyncKey = (Map<String, Object>) rst.get("SyncKey");
-			WeChatUtil.flushSyncKey(SyncKey);
-		} catch (Exception e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			convers.changeItemIndex(item, index);
 		}
 		
 	}
@@ -579,7 +437,7 @@ public class MainWindow {
 		System.out.println("load conver " + name);
 		Integer Statues = convs.Statues;
 		Integer ContactFlag = convs.ContactFlag;
-		boolean top = ContactFlag == 2051;
+		boolean top = ContactFlag == 2051 || ContactFlag == 2049;
 		List<ConvItem> items = convers.getItems();
 		for(ConvItem item : items) {
 			if(item.getData().UserName.equals(convs.UserName)) {
@@ -601,25 +459,30 @@ public class MainWindow {
 	 * @param conv
 	 * @param flush
 	 */
-	private void flushChatView (final String conv, final boolean flush) {
+	public void flushChatView (final String conv, final boolean flush) {
 		Display.getDefault().asyncExec(new Runnable() {
 			
 			@Override
 			public void run() {
-				List<ConvItem> items = convers.getItems();
-				ConvItem ci = null;
-				for(ConvItem temp : items) {
-					if(temp.getData().UserName.equals(conv)) {
-						ci = temp;
-						break;
-					}
-				}
+				ContactsStruct struct = Constant.contacts.get(conv);
+				ConvItem ci = addConversition(struct);
 				//此时没有在会话列表找到需要从好友中创建新的
 				if(null == ci) {
-					ContactsStruct struct = Constant.contacts.get(conv);
-					ci = addConversition(struct);
+					return;
 				}
-				ConvItem itm = convers.changeItemIndex(ci, 0);
+				List<ConvItem> items = convers.getItems();
+				int index = 0;
+				if(!ci.isTop()) {
+					for(ConvItem item : items) {
+						if(item.isTop()) {
+							index ++;
+						}else{
+							break;
+						}
+					}
+				}
+				
+				ConvItem itm = convers.changeItemIndex(ci, index);
 				if(null != itm) {//这时候还找不到的话，那就真的跪了，目测是新好友
 					if(itm.equals(convers.getSelection())) {
 						cc.flush(itm);

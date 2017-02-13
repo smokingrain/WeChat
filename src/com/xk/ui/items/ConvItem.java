@@ -14,11 +14,13 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.xk.bean.ContactsStruct;
+import com.xk.ui.main.MainWindow;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 import com.xk.utils.Constant;
 import com.xk.utils.DateUtil;
 import com.xk.utils.FileUtils;
+import com.xk.utils.WeChatUtil;
 
 /**
  * 用途：会话单元格
@@ -120,6 +122,22 @@ public class ConvItem extends ListItem {
 			if (menu != null) {
 				menu.dispose();
 			}
+			
+			MenuItem top=new MenuItem(m, SWT.NONE);
+			if(isTop()) {
+				top.setText("取消置顶");
+			}else {
+				top.setText("会话置顶");
+			}
+			
+			top.addSelectionListener(new SelectionAdapter() {
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					if(WeChatUtil.OPlog(data, isTop() ? 0 : 1)) {
+						MainWindow.getInstance().topUser(getData().UserName, isTop() ? 0 : 1);
+					}
+				}
+			});
 			
 			MenuItem remove=new MenuItem(m, SWT.NONE);
 			remove.setText("删除会话");

@@ -104,7 +104,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		//聊天记录内容
 		chatList = new MyList<ChatItem>(this, 550, 350);
 		chatList.setLocation(0, 50);
-		chatList.setItemLimit(15);
+//		chatList.setItemLimit(1500);
 		
 		Image tempEmoj = SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png");
 		//发送表情按钮
