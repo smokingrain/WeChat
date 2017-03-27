@@ -2,6 +2,7 @@ package com.xk.uiLib;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 
@@ -54,6 +55,7 @@ public class MyList<T extends ListItem> extends Composite {
 	private int itemLimit = -1;
 	private int mask = 255;//模糊背景
 	private boolean simpleSelect=false;//单击选中
+	private SortItem sort = new SortItem();
 	
 	/**
 	 * Create the composite.
@@ -422,6 +424,7 @@ public class MyList<T extends ListItem> extends Composite {
 	public void addItem(Integer index, T item) {
 		if(null != item && null != index){
 			checkLimit();
+			items.sort(sort);
 			items.add(index, item);
 			item.setParent(this);
 			countHeight();
@@ -432,6 +435,7 @@ public class MyList<T extends ListItem> extends Composite {
 		if(null!=item){
 			checkLimit();
 			items.add(item);
+			items.sort(sort);
 			item.setParent(this);
 			countHeight();
 		}
@@ -554,5 +558,14 @@ public class MyList<T extends ListItem> extends Composite {
 	
 	private enum STATE{
 		NORMAL , DRAGING
+	}
+	
+	private class SortItem implements Comparator<T> {
+
+		@Override
+		public int compare(T o1, T o2) {
+			return o1.compareTo(o2);
+		}
+		
 	}
 }

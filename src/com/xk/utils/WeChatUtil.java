@@ -227,7 +227,7 @@ public class WeChatUtil {
 				log.toId = to;
 				log.fromId = Constant.user.UserName;
 				log.msgid = rstMap.get("MsgID").toString();
-				log.newMsgId = Long.parseLong(rstMap.get("LocalID").toString());
+				log.newMsgId = Long.parseLong(rstMap.get("MsgID").toString());
 				log.msgType = 1;
 				log.content = msg;
 				return log;

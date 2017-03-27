@@ -3,8 +3,13 @@ package com.xk.ui.main.chat;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -13,6 +18,8 @@ import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Transform;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.xk.chatlogs.ChatLog;
@@ -57,7 +64,6 @@ public class ChatItem extends ListItem {
 		this.font = font;
 		this.log = log;
 	}
-	
 	
 	@Override
 	public int getHeight() {
@@ -284,10 +290,11 @@ public class ChatItem extends ListItem {
 						String first = str.substring(0, wordNum);
 						contentPath.addString(first, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + temp + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
 						cHeight += cMaxHeight + LINE_SPACE_HEIGHT *2;
-						
+						boolean full = false;
 						for(int i = 0; i < lines; i++) {
 							int fullNum = (int) (ITEM_AREA_WIDTH / wordWidth);//补齐一行需要
 							if(wordNum + fullNum > str.length()) {
+								full = true;
 								String fullStr = str.substring(wordNum, str.length());
 								cLineWidth = gc.textExtent(fullStr).x + fullStr.length();
 								contentPath.addString(fullStr, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
@@ -298,8 +305,9 @@ public class ChatItem extends ListItem {
 							}
 							cHeight += point.y + LINE_SPACE_HEIGHT *2;
 						}
-						
-						cLineWidth = 0;
+						if(!full) {
+							cLineWidth = 0;
+						}
 						continue;
 					}
 					
@@ -315,6 +323,37 @@ public class ChatItem extends ListItem {
 	@Override
 	public boolean oncliek(MouseEvent e, int itemHeight, int index, int type) {
 		if(e.button == 3 && e.count == 1) {//右键
+			Menu m=new Menu(getParent());
+			Menu menu=getParent().getMenu();
+			if (menu != null) {
+				menu.dispose();
+			}
+			
+			MenuItem cp=new MenuItem(m, SWT.NONE);//复制菜单
+			cp.setText("复制");
+			cp.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					StringBuffer sb = new StringBuffer();
+					for(Object obj : chatContent) {
+						if(obj instanceof String) {
+							sb.append(obj);
+						}
+					}
+					if(sb.length() > 0) {
+						Clipboard board = new Clipboard(null);
+						board.setContents(new String[]{sb.toString()}, new Transfer[]{TextTransfer.getInstance()});
+						board.dispose();
+						System.out.println("复制成功！！");
+					}
+				}
+				
+			});
+			getParent().setMenu(m);
+			m.setVisible(true);
+			
+			
 			
 		}else if(e.button == 1 && e.count == 2 && type == MyList.CLICK_DOUBLE) {//双击
 			if(log.msgType == 3 || log.msgType == 47) {

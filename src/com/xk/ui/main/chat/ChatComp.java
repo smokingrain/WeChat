@@ -5,7 +5,6 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.sun.jna.platform.win32.WinUser.MSG;
 import com.xk.bean.ContactsStruct;
-import com.xk.bean.Imoj;
 import com.xk.bean.MemberStruct;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
@@ -13,7 +12,6 @@ import com.xk.hook.HotKeyListener;
 import com.xk.hook.HotKeys;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.main.CutScreen;
-import com.xk.ui.main.FloatWindow;
 import com.xk.uiLib.MyList;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
@@ -21,7 +19,6 @@ import com.xk.utils.ImojCache;
 import com.xk.utils.SWTTools;
 import com.xk.utils.WeChatUtil;
 
-import org.eclipse.swt.widgets.Label;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -43,16 +40,12 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
-import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.CoolBar;
-import org.eclipse.swt.widgets.CoolItem;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
 
@@ -364,6 +357,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 				
 				
 				ChatItem ci = new ChatItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
+				ci.setWeight(log.createTime);
 				chatList.addItem(ci);
 			}
 		}

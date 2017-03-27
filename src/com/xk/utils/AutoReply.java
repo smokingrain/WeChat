@@ -38,7 +38,7 @@ public class AutoReply {
 		return "我居然不明白你说什么！！";
 	}
 	public static void main(String[] args) {
-		call("你好哦","test");
+		System.out.println(call("你好哦","test"));
 	}
  	
 }

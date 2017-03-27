@@ -3,12 +3,27 @@ package com.xk.uiLib;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.GC;
 
-public abstract class ListItem {
+
+public abstract class ListItem implements Comparable<ListItem>{
 	
 	private MyList parent;
-	
+	private Long weight = -1L;
 	protected boolean selected=false;
 	protected boolean focused=false;
+	
+	
+	
+	@Override
+	public int compareTo(ListItem o) {
+		if(weight < 0) {
+			return 1;
+		}
+		return weight.compareTo(o.weight);
+	}
+
+	public void setWeight(Long weight) {
+		this.weight = weight;
+	}
 	
 	/**
 	 * 用途：获取此单元格实际高度
