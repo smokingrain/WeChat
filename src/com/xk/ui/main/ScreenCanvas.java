@@ -2,6 +2,7 @@ package com.xk.ui.main;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseAdapter;
@@ -51,7 +52,7 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 	private Point downLoc;
 	private List<Rectangle> windows = new ArrayList<Rectangle>();
 	private Rectangle nowWindow;
-	private List<Drawable> options = new ArrayList<Drawable>();
+	private List<Drawable> options = new CopyOnWriteArrayList<Drawable>();
 	private ICallback callBack;
 	private Drawable option;
 	
@@ -128,6 +129,10 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 						selecting.y = downLoc.y;
 					}
 					redraw();
+				} else if(STATUS.OPTIONG_DOWN.equals(status) || STATUS.OPTIONG.equals(status)) {
+					status = STATUS.OPTIONG;
+					option.processEvent(e, 1);
+					redraw();
 				}
 				
 				
@@ -143,8 +148,10 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 				}else if(e.button != 1 && STATUS.DRAWED.equals(status)) {
 					if(selection.contains(e.x, e.y)) {
 						createMenu(e);
+						return;
 					}else {
 						callBack.callback(null);
+						return;
 					}
 				}
 				Point clickLoc = new Point(e.x, e.y);
@@ -169,6 +176,10 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 						return;
 					}
 					status = STATUS.DRAWED;
+				} else if(STATUS.OPTIONG.equals(status)) {
+					option.processEvent(e, 2);
+					status = STATUS.DRAWED;
+					options.add(option);
 				}
 				redraw();
 				
@@ -190,6 +201,9 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 					downLoc.y = clickLoc.y;
 					selection.x = clickLoc.x;
 					selection.y = clickLoc.y;
+				} else if(STATUS.OPTIONG_SELE.equals(status)) {
+					option.processEvent(e, 0);
+					status = STATUS.OPTIONG_DOWN;
 				}
 				
 			}
@@ -232,11 +246,12 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				// TODO Auto-generated method stub
-				super.widgetSelected(e);
+				option = new  BezierLine(new ArrayList<Pointd>());
+				status = STATUS.OPTIONG_SELE;
 			}
 			
 		});
+		m.setVisible(true);
 	}
 	
 	/**
@@ -280,6 +295,7 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 	@Override
 	public void paintControl(PaintEvent e) {
 		GC gc = e.gc;
+		gc.setAntialias(SWT.ON);
 		gc.drawImage(base, 0, 0);
 		if(STATUS.INITED.equals(status)) {
 			maskRect(gc, nowWindow, 2);
@@ -287,9 +303,10 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 			maskRect(gc, selecting, 1);
 		}else if(STATUS.DRAWED.equals(status)) {
 			maskRect(gc, selection, 1);
-		}else if(STATUS.OPTIONG.equals(status)) {
 			drawOptions(gc);
-		}else if(STATUS.OPTIONG_DONE.equals(status)) {
+		}else if(STATUS.OPTIONG.equals(status)) {
+			System.out.println("OPTIONG");
+			maskRect(gc, selection, 1);
 			drawOptions(gc);
 		}
 		gc.dispose();
@@ -297,17 +314,20 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 	}
 	
 	private void drawOptions(GC gc) {
-		Transform transform = new Transform(null);
-		transform.translate(selection.x, selection.y);
-		gc.setTransform(transform);
+//		Transform transform = new Transform(null);
+//		transform.translate(selection.x, selection.y);
+//		gc.setTransform(transform);
 		for(Drawable draw : options) {
 			draw.draw(gc);
 		}
-		transform.dispose();
-		transform = new Transform(null);
-		transform.translate(-selection.x, -selection.y);
-		gc.setTransform(transform);
-		transform.dispose();
+		if(null != option) {
+			option.draw(gc);
+		}
+//		transform.dispose();
+//		transform = new Transform(null);
+//		transform.translate(-selection.x, -selection.y);
+//		gc.setTransform(transform);
+//		transform.dispose();
 	}
 	
 	/**
@@ -367,9 +387,9 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 		DRAWING, //正在选取区域
 		DRAWED, //区域选取完
 		MOVING, //移动选区
+		OPTIONG_SELE,//选择操作模式
 		OPTIONG_DOWN,//操作开始（画形状，涂鸦）
 		OPTIONG,//操作中
-		OPTIONG_DONE,//操作完毕
 	}
 	
 	
@@ -384,10 +404,11 @@ public class ScreenCanvas extends Canvas implements PaintListener{
  */
 interface Drawable{
 	public void draw(GC gc);
+	public void processEvent(MouseEvent e, int type);
 }
 
 class BezierLine implements Drawable{
-	double t = 0.002;
+	double t = 0.2;
 	List<Pointd> points;
 	
 	public BezierLine(List<Pointd> points) {
@@ -397,33 +418,62 @@ class BezierLine implements Drawable{
 	@Override
 	public void draw(GC gc) {
 		Pointd last = null;
-		for(int i = 0; i < points.size() ; i += 3) {
-        	if(i == points.size() - 1) {
-        		break;
-        	}
-        	List<Pointd>points = new ArrayList<Pointd>();
-        	
-        	points.add(points.get(i));
-        	if(i + 1 < points.size()) {
-        		points.add(points.get(i + 1));
-        	}
-        	if(i + 2 < points.size()) {
-        		points.add(points.get(i + 2));
-        	}
-        	if(i + 3 < points.size()) {
-        		points.add(points.get(i + 3));
-        	}
-        	for(double k=t; k<=1+t; k+=t) {  
-        		Pointd point = BezierUtil.computLine(k, points.toArray(new Pointd[]{}));
-        		if(null == last) {
-        			gc.drawLine((int)point.x, (int)point.y, (int)point.x, (int)point.y);  
-        		}else {
-        			gc.drawLine((int)last.x, (int)last.y, (int)point.x, (int)point.y);  
-        		}
-        		last = point;
-        	}  
-        }
+		Pointd control = null;
+		Path path = new Path(null);
+		for(Pointd point : points) {
+			if(null == last) {
+				last = point;
+				path.moveTo((float)last.x, (float)last.y);
+				continue;
+			}else if(control == null) {
+				control = point;
+				continue;
+			}else {
+				System.out.println(last.x + " " + last.y + " " + point.x + " " + point.y);
+				if(!point.equals(last)) {
+					path.quadTo((float)control.x, (float)control.y, (float)point.x, (float)point.y);
+					last = point;
+					control = null;
+				}
+				
+//				break;
+			}
+		}
+		gc.drawPath(path);
+		path.dispose();
 		
+		
+//		for(int i = 0; i < points.size() ; i += 3) {
+//        	if(i >= points.size() - 1) {
+//        		break;
+//        	}
+//        	List<Pointd>ps = new ArrayList<Pointd>();
+//        	ps.add(points.get(i));
+//        	if(i + 1 < points.size()) {
+//        		ps.add(points.get(i + 1));
+//        	}
+//        	if(i + 2 < points.size()) {
+//        		ps.add(points.get(i + 2));
+//        	}
+//        	if(i + 3 < points.size()) {
+//        		ps.add(points.get(i + 3));
+//        	}
+//        	for(double k=t; k<=1+t; k+=t) {  
+//        		Pointd point = BezierUtil.computLine(k, ps.toArray(new Pointd[]{}));
+//        		if(null == last) {
+//        			gc.drawLine((int)point.x, (int)point.y, (int)point.x, (int)point.y);  
+//        		}else {
+//        			gc.drawLine((int)last.x, (int)last.y, (int)point.x, (int)point.y);  
+//        		}
+//        		last = point;
+//        	}  
+//        }
+		
+	}
+
+	@Override
+	public void processEvent(MouseEvent e, int type) {
+		this.points.add(new Pointd(e.x, e.y));
 	}
 }
 
@@ -439,6 +489,12 @@ class RectDraw implements Drawable {
 	public void draw(GC gc) {
 		gc.drawRectangle(rect);
 	}
+
+	@Override
+	public void processEvent(MouseEvent e, int type) {
+		// TODO Auto-generated method stub
+		
+	}
 }
 
 class CircleDraw implements Drawable {
@@ -453,6 +509,12 @@ class CircleDraw implements Drawable {
 	@Override
 	public void draw(GC gc) {
 		gc.drawOval(loc.x, loc.y, size.x, loc.y);
+		
+	}
+
+	@Override
+	public void processEvent(MouseEvent e, int type) {
+		// TODO Auto-generated method stub
 		
 	}
 	

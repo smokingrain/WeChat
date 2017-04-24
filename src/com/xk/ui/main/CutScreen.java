@@ -15,7 +15,7 @@ import com.xk.uiLib.ICallback;
 import com.xk.utils.SWTTools;
 
 public class CutScreen implements ICallback{
-
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       
 	protected Shell shell;
 	private Display display;
 	public Image img;
