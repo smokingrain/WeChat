@@ -89,10 +89,10 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 			public boolean callback(HWND hwnd, Pointer pointer) {
 				RECT rect = new RECT();
 				boolean hasrect = u32.GetWindowRect(hwnd, rect);
-				int handle =  u32.GetWindowLong(hwnd, User32.GWL_HINSTANCE);//32位系统用这个
-//				LONG_PTR handle = u32.GetWindowLongPtr(hwnd, User32.GWL_HINSTANCE);
+//				int handle =  u32.GetWindowLong(hwnd, User32.GWL_HINSTANCE);//32位系统用这个
+				LONG_PTR handle = u32.GetWindowLongPtr(hwnd, User32.GWL_HINSTANCE);
 				boolean visiable =u32.IsWindowVisible(hwnd);
-				if(hasrect && visiable && handle > 0) {
+				if(hasrect && visiable && handle.longValue() > 0) {
 					System.out.println("handle : " + handle);
 					Rectangle rec = new Rectangle(rect.left, rect.top, rect.right - rect.left, rect.bottom - rect.top);
 					windows.add(rec);
@@ -121,13 +121,7 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 				}else if(STATUS.DRAWING.equals(status)) {
 					int width = e.x - downLoc.x;
 					int height = e.y - downLoc.y;
-					selecting = new Rectangle(downLoc.x, downLoc.y, Math.abs(width), Math.abs(height));
-					if(width < 0) {
-						selecting.x = downLoc.x;
-					}
-					if(height < 0) {
-						selecting.y = downLoc.y;
-					}
+					selecting = new Rectangle(Math.min(downLoc.x, e.x), Math.min(downLoc.y, e.y), Math.abs(width), Math.abs(height));
 					redraw();
 				} else if(STATUS.OPTIONG_DOWN.equals(status) || STATUS.OPTIONG.equals(status)) {
 					status = STATUS.OPTIONG;
@@ -163,15 +157,13 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 					int height = clickLoc.y - selection.y;
 					selection.width = Math.abs(width);
 					selection.height = Math.abs(height);
-					if(width < 0){
-						selection.x = clickLoc.x;
-					}else if(width == 0) {
+					selection.x = Math.min(clickLoc.x, selection.x);
+					if(width == 0) {
 						reset();
 						return;
 					}
-					if(height < 0) {
-						selection.y = clickLoc.y;
-					}else if(height == 0) {
+					selection.y = Math.min(clickLoc.y, selection.y);
+					if(height == 0) {
 						reset();
 						return;
 					}
@@ -216,9 +208,13 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 				if(STATUS.DRAWED.equals(status)) {
 					Point loc = new Point(e.x, e.y);
 					if(selection.contains(loc)) {
+						GC baseGC = new GC(base);
+						drawOptions(baseGC);
+						baseGC.dispose();
 						Image img = new Image(null, selection.width, selection.height);
 						GC gc = new GC(img);
 						gc.drawImage(base, selection.x, selection.y, selection.width, selection.height, 0, 0, selection.width, selection.height);
+						
 						gc.dispose();
 						if(null != callBack) {
 							callBack.callback(img);
@@ -246,11 +242,36 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				option = new  BezierLine(new ArrayList<Pointd>());
+				option = new  BezierLine();
 				status = STATUS.OPTIONG_SELE;
 			}
 			
 		});
+		
+		MenuItem circle = new MenuItem(m, SWT.NONE);
+		circle.setText("画圈圈");
+		circle.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				option = new  CircleDraw();
+				status = STATUS.OPTIONG_SELE;
+			}
+			
+		});
+		
+		MenuItem rect = new MenuItem(m, SWT.NONE);
+		rect.setText("画框框");
+		rect.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				option = new  RectDraw();
+				status = STATUS.OPTIONG_SELE;
+			}
+			
+		});
+		
 		m.setVisible(true);
 	}
 	
@@ -295,9 +316,9 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 	@Override
 	public void paintControl(PaintEvent e) {
 		GC gc = e.gc;
-		gc.setAntialias(SWT.ON);
 		gc.drawImage(base, 0, 0);
 		if(STATUS.INITED.equals(status)) {
+			gc.drawImage(base, 0, 0);
 			maskRect(gc, nowWindow, 2);
 		}else if(STATUS.DRAWING.equals(status)) {
 			maskRect(gc, selecting, 1);
@@ -314,20 +335,13 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 	}
 	
 	private void drawOptions(GC gc) {
-//		Transform transform = new Transform(null);
-//		transform.translate(selection.x, selection.y);
-//		gc.setTransform(transform);
+		gc.setClipping(selection);
 		for(Drawable draw : options) {
 			draw.draw(gc);
 		}
 		if(null != option) {
 			option.draw(gc);
 		}
-//		transform.dispose();
-//		transform = new Transform(null);
-//		transform.translate(-selection.x, -selection.y);
-//		gc.setTransform(transform);
-//		transform.dispose();
 	}
 	
 	/**
@@ -405,69 +419,31 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 interface Drawable{
 	public void draw(GC gc);
 	public void processEvent(MouseEvent e, int type);
+	public Drawable newInstance();
+	
 }
 
 class BezierLine implements Drawable{
-	double t = 0.2;
-	List<Pointd> points;
+	double t = 0.01;
+	List<Pointd> points = new ArrayList<Pointd>();
 	
-	public BezierLine(List<Pointd> points) {
-		this.points = points;
+	public BezierLine() {
 	}
 	
 	@Override
 	public void draw(GC gc) {
+		Color old = gc.getForeground();
+		gc.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
 		Pointd last = null;
-		Pointd control = null;
-		Path path = new Path(null);
 		for(Pointd point : points) {
 			if(null == last) {
 				last = point;
-				path.moveTo((float)last.x, (float)last.y);
 				continue;
-			}else if(control == null) {
-				control = point;
-				continue;
-			}else {
-				System.out.println(last.x + " " + last.y + " " + point.x + " " + point.y);
-				if(!point.equals(last)) {
-					path.quadTo((float)control.x, (float)control.y, (float)point.x, (float)point.y);
-					last = point;
-					control = null;
-				}
-				
-//				break;
 			}
+			gc.drawLine((int)last.x, (int)last.y, (int)point.x, (int)point.y);
+			last = point;
 		}
-		gc.drawPath(path);
-		path.dispose();
-		
-		
-//		for(int i = 0; i < points.size() ; i += 3) {
-//        	if(i >= points.size() - 1) {
-//        		break;
-//        	}
-//        	List<Pointd>ps = new ArrayList<Pointd>();
-//        	ps.add(points.get(i));
-//        	if(i + 1 < points.size()) {
-//        		ps.add(points.get(i + 1));
-//        	}
-//        	if(i + 2 < points.size()) {
-//        		ps.add(points.get(i + 2));
-//        	}
-//        	if(i + 3 < points.size()) {
-//        		ps.add(points.get(i + 3));
-//        	}
-//        	for(double k=t; k<=1+t; k+=t) {  
-//        		Pointd point = BezierUtil.computLine(k, ps.toArray(new Pointd[]{}));
-//        		if(null == last) {
-//        			gc.drawLine((int)point.x, (int)point.y, (int)point.x, (int)point.y);  
-//        		}else {
-//        			gc.drawLine((int)last.x, (int)last.y, (int)point.x, (int)point.y);  
-//        		}
-//        		last = point;
-//        	}  
-//        }
+		gc.setForeground(old);
 		
 	}
 
@@ -475,25 +451,43 @@ class BezierLine implements Drawable{
 	public void processEvent(MouseEvent e, int type) {
 		this.points.add(new Pointd(e.x, e.y));
 	}
+
+	@Override
+	public Drawable newInstance() {
+		// TODO Auto-generated method stub
+		return new BezierLine();
+	}
 }
 
 class RectDraw implements Drawable {
 
-	Rectangle rect;
+	Point loc, size;
 	
-	public RectDraw(Rectangle rect) {
-		this.rect = rect;
+	public RectDraw() {
 	}
 	
 	@Override
 	public void draw(GC gc) {
-		gc.drawRectangle(rect);
+		Color old = gc.getForeground();
+		gc.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
+		gc.drawRectangle(Math.min(loc.x, size.x), Math.min(loc.y, size.y), Math.abs(size.x - loc.x), Math.abs(size.y - loc.y));
+		gc.setForeground(old);
 	}
 
 	@Override
 	public void processEvent(MouseEvent e, int type) {
-		// TODO Auto-generated method stub
+		if(null == loc) {
+			loc = new Point(e.x, e.y);
+		} else {
+			size = new Point(e.x, e.y);
+		}
 		
+	}
+
+	@Override
+	public Drawable newInstance() {
+		// TODO Auto-generated method stub
+		return new RectDraw();
 	}
 }
 
@@ -501,21 +495,31 @@ class CircleDraw implements Drawable {
 	
 	Point loc, size;
 	
-	public CircleDraw(Point loc, Point size) {
-		this.loc = loc;
-		this.size = size;
+	public CircleDraw() {
 	}
 	
 	@Override
 	public void draw(GC gc) {
-		gc.drawOval(loc.x, loc.y, size.x, loc.y);
-		
+		Color old = gc.getForeground();
+		gc.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
+		gc.drawOval(Math.min(loc.x, size.x), Math.min(loc.y, size.y), Math.abs(size.x - loc.x), Math.abs(size.y - loc.y));
+		gc.setForeground(old);
 	}
 
 	@Override
 	public void processEvent(MouseEvent e, int type) {
-		// TODO Auto-generated method stub
+		if(null == loc) {
+			loc = new Point(e.x, e.y);
+		} else {
+			size = new Point(e.x, e.y);
+		}
 		
+	}
+
+	@Override
+	public Drawable newInstance() {
+		// TODO Auto-generated method stub
+		return new CircleDraw();
 	}
 	
 }

@@ -53,7 +53,7 @@ public class CutScreen implements ICallback{
 	protected void createContents() {
 		Rectangle rect = display.getBounds();
 		shell = new Shell(SWT.FILL);
-		shell.setBounds(0, 0, rect.width, rect.height);
+		shell.setBounds(-1, -1, rect.width + 2, rect.height + 2);
 		shell.setText("SWT Application");
 		SWTTools.topWindow(shell);
 		Rectangle di = display.getBounds();  
