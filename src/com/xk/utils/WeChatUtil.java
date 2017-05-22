@@ -469,7 +469,7 @@ public class WeChatUtil {
 	 * @date 2016年12月14日
 	 * @param ctItem
 	 */
-	public static void loadGroups(TypeItem ctItem, List<String> groups, MainWindow window) {
+	public static void loadGroups(List<String> groups) {
 		if(null == groups || groups.size() == 0) {
 			return ;
 		}
@@ -506,12 +506,12 @@ public class WeChatUtil {
 						Constant.contacts.put(convs.UserName, convs);
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
-						String nick = convs.NickName;
-						String remark = convs.RemarkName;
-						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
-						ContactItem ci = new ContactItem(convs, false, name);
-						MyList list = window.lists.get(ctItem);
-						list.addItem(ci);
+//						String nick = convs.NickName;
+//						String remark = convs.RemarkName;
+//						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
+//						ContactItem ci = new ContactItem(convs, false, name);
+//						MyList list = window.lists.get(ctItem);
+//						list.addItem(ci);
 					}
 					System.out.println("load Group over!!");
 				}
@@ -564,7 +564,7 @@ public class WeChatUtil {
 							try {
 								Integer sele = Integer.parseInt(selector);
 								if(sele > 0) {
-									webwxsync(conItem);
+									webwxsync();
 								}
 								
 							} catch (NumberFormatException e) {
@@ -596,7 +596,7 @@ public class WeChatUtil {
 	 * @date 2016年12月30日
 	 * @param conItem
 	 */
-	private static void webwxsync(final TypeItem conItem) {
+	private static void webwxsync() {
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Map<String,Object> bodyMap = new HashMap<String,Object>();
 		Map<String,Object> bodyInner = new HashMap<String,Object>();
@@ -635,10 +635,10 @@ public class WeChatUtil {
 							if(null != StatusNotifyUserName && !main.syncGroup) {
 								String[] spl = StatusNotifyUserName.split(",");
 								List<String> groups = Arrays.asList(spl);
-								WeChatUtil.loadGroups(conItem, groups, main);
+								WeChatUtil.loadGroups(groups);
 								Display.getDefault().asyncExec(new Runnable() {
 									public void run() {
-										main.lists.get(conItem).flush();
+										main.lists.get(null).flush();
 									}
 								});
 								main.syncGroup = true;

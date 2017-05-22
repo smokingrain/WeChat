@@ -355,16 +355,15 @@ public class MainWindow {
 		
 		List<String> g = WeChatUtil.loadConvers(ctItem, this);//先加载最近会话
 		WeChatUtil.startNotify();//通知服务器我准备收消息了
-		WeChatUtil.loadGroups(conItem, g, this);//拉取最近会话中的群组
+		WeChatUtil.loadGroups(g);//拉取最近会话中的群组
 		WeChatUtil.syncData(conItem);//开始发送心跳包，拉消息
 		List<String> group = WeChatUtil.loadContacts(conItem, this);//拉取联系人
-		WeChatUtil.loadGroups(conItem,group, this);//拉取联系人中的群组
+		WeChatUtil.loadGroups(group);//拉取联系人中的群组
 		
 		//加载自己的头像
-		Image img = null;
 		String headUrl = Constant.BASE_URL + Constant.user.HeadImgUrl + "&type=big";
 		Image temp = ImageCache.getUserHeadCache(Constant.user.UserName, headUrl, null, 180, 180);
-		img = SWTTools.scaleImage(temp.getImageData(), 30, 30);
+		Image img = SWTTools.scaleImage(temp.getImageData(), 30, 30);
 		Constant.user.head = temp;
 		me.setImage(img);
 	}
@@ -452,6 +451,19 @@ public class MainWindow {
 		}
 		return ci;
 	}
+	
+	/**
+	 * 渲染
+	 * 
+	 * @author kui.xiao
+	 */
+	public void showGroupsAndFriends() {
+		
+		for(ContactsStruct convs : Constant.contacts.values()) {
+			
+		}
+	}
+	
 	
 	/**
 	 * 用途：刷新聊天界面

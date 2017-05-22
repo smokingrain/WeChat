@@ -43,6 +43,15 @@ public class Constant {
 	public static Map<String, ContactsStruct> contacts = new HashMap<String, ContactsStruct>();
 	public static Integer file_index = 0;
 	
+	public static final String[] SYNC_HOST = {
+		"webpush.weixin.qq.com",
+		"webpush2.weixin.qq.com",
+		"webpush.wechat.com",
+		"webpush1.wechat.com",
+		"webpush2.wechat.com",
+		"webpush1.wechatapp.com"
+	};
+	
 	// 特殊用户 须过滤
 	public static final List<String> FILTER_USERS = Arrays.asList("newsapp", "fmessage", "filehelper", "weibo", "qqmail", 
 			"fmessage", "tmessage", "qmessage", "qqsync", "floatbottle", "lbsapp", "shakeapp", "medianote", "qqfriend", 
