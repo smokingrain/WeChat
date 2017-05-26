@@ -94,6 +94,21 @@ public class ContactsStruct {
 		EncryChatRoomId = encryChatRoomId;
 	}
 	
+	public void fixMissProps(ContactsStruct newInstance) {
+		if(MemberCount == null || MemberCount == 0) {
+			MemberCount = newInstance.MemberCount;
+		}
+		if(MemberList == null || MemberList.isEmpty()) {
+			MemberList = newInstance.MemberList;
+		}
+		if(NickName == null || NickName.trim().isEmpty()) {
+			NickName = newInstance.NickName;
+		}
+		if(RemarkName == null || NickName.trim().isEmpty()) {
+			NickName = newInstance.NickName;
+		}
+	}
+	
 	/**
 	 * 用途：微信服务器获取的数据
 	 * @date 2016年12月30日
@@ -131,6 +146,27 @@ public class ContactsStruct {
 		return name;
 	}
 	
+	public static String getContactsStructName(ContactsStruct cs) {
+		String nick = cs.NickName;
+		String remark = cs.RemarkName;
+		String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
+		if((name == null || name.trim().isEmpty()) && cs.MemberCount > 0) {
+			StringBuffer sb = new StringBuffer();
+			int count = 3;
+			for(int i = 0; i < cs.MemberCount; i++) {
+				MemberStruct memb =cs.MemberList.get(i);
+				sb.append(memb.DisplayName.isEmpty() ? memb.NickName : memb.DisplayName);
+				if(count > 0 && i < cs.MemberCount - 1) {
+					count--;
+					sb.append("、");
+				}else {
+					break;
+				}
+			}
+			name = sb.toString();
+		}
+		return name;
+	}
 	
 	/**
 	 * 用途：获取显示名

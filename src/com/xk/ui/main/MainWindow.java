@@ -1,16 +1,10 @@
 package com.xk.ui.main;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Timer;
-import java.util.TimerTask;
 
-import org.apache.http.client.ClientProtocolException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.DisposeEvent;
@@ -30,6 +24,7 @@ import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.platform.win32.WinUser.FLASHWINFO;
 import com.xk.bean.ContactsStruct;
+import com.xk.bean.MemberStruct;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
 import com.xk.ui.items.ContactItem;
@@ -44,11 +39,9 @@ import com.xk.uiLib.listeners.ItemEvent;
 import com.xk.uiLib.listeners.ItemListener;
 import com.xk.uiLib.listeners.ItemSelectionEvent;
 import com.xk.uiLib.listeners.ItemSelectionListener;
-import com.xk.utils.AutoReply;
 import com.xk.utils.Constant;
-import com.xk.utils.HTTPUtil;
+import com.xk.utils.FileUtils;
 import com.xk.utils.ImageCache;
-import com.xk.utils.JSONUtil;
 import com.xk.utils.SWTTools;
 import com.xk.utils.WeChatUtil;
 
@@ -66,12 +59,12 @@ import org.eclipse.swt.widgets.Label;
  */
 public class MainWindow {
 
-	private Timer timer;//心跳包，轮询拉消息的计时器
 	protected Shell shell;
 	public Map<ListItem, MyList<? extends ListItem>> lists = new HashMap<ListItem, MyList<? extends ListItem>>();
 	private MyText text;
 	private ChatComp cc;
 	public MyList<ConvItem> convers;
+	public MyList<ContactItem> contacts;
 	private MyList<TypeItem> types;
 	public boolean syncGroup = false;
 	
@@ -175,7 +168,7 @@ public class MainWindow {
 		types.addItem(conItem);
 		
 		//好友列表
-		MyList<ContactItem> contacts = new MyList<ContactItem>(shell, 250, 540);
+		contacts = new MyList<ContactItem>(shell, 250, 540);
 		contacts.setMask(120);
 		contacts.setLocation(50, 50);
 		contacts.setSimpleSelect(false);
@@ -356,8 +349,8 @@ public class MainWindow {
 		List<String> g = WeChatUtil.loadConvers(ctItem, this);//先加载最近会话
 		WeChatUtil.startNotify();//通知服务器我准备收消息了
 		WeChatUtil.loadGroups(g);//拉取最近会话中的群组
-		WeChatUtil.syncData(conItem);//开始发送心跳包，拉消息
-		List<String> group = WeChatUtil.loadContacts(conItem, this);//拉取联系人
+		WeChatUtil.syncData();//开始发送心跳包，拉消息
+		List<String> group = WeChatUtil.loadContacts();//拉取联系人
 		WeChatUtil.loadGroups(group);//拉取联系人中的群组
 		
 		//加载自己的头像
@@ -430,9 +423,7 @@ public class MainWindow {
 		}
 		String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 		convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
-		String nick = convs.NickName;
-		String remark = convs.RemarkName;
-		String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
+		String name = ContactsStruct.getContactsStructName(convs);
 		System.out.println("load conver " + name);
 		Integer Statues = convs.Statues;
 		Integer ContactFlag = convs.ContactFlag;
@@ -443,7 +434,7 @@ public class MainWindow {
 				return item;
 			}
 		}
-		ConvItem ci = new ConvItem(convs, name, null, null, null, top, Statues == 0, 0);
+		ConvItem ci = new ConvItem(convs, name, null, null, null, top, (convs.MemberCount > 0 && Statues == 0) || (convs.MemberCount == 0 && ContactFlag == 513), 0);
 		if(top) {
 			convers.addItem(0, ci);
 		} else {
@@ -453,17 +444,71 @@ public class MainWindow {
 	}
 	
 	/**
-	 * 渲染
+	 * 渲染联系人，群组
 	 * 
 	 * @author kui.xiao
 	 */
 	public void showGroupsAndFriends() {
-		
+		Map<String, List<ContactsStruct>> friends = new HashMap<String, List<ContactsStruct>>();
+		//先按字母分组，群组另外分开
 		for(ContactsStruct convs : Constant.contacts.values()) {
-			
+			String name = ContactsStruct.getContactsStructName(convs);
+			if(convs.MemberCount > 1) {
+				String spell = "群组";
+				WeChatUtil.computeGroup(friends, spell, convs);
+			} else {
+				String spell = FileUtils.getFirstSpell(name);
+				if(null == spell) {
+					spell = "其他";
+				}
+				WeChatUtil.computeGroup(friends, spell, convs);
+			}
 		}
+		
+		//先渲染群组
+		renderContact("群组",friends);
+		
+		//找到A-Z的分组
+		for(char ch = 65; ch <= 90; ch++) {
+			renderContact(String.valueOf(ch), friends);
+		}
+		
+		//再渲染其它
+		renderContact("其他",friends);
+		
+		Display.getDefault().asyncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				contacts.flush();
+				convers.flush();
+			}
+		});
 	}
 	
+	/**
+	 * 渲染联系人，群组
+	 * @param gName
+	 * @param friends
+	 * @author o-kui.xiao
+	 */
+	private void renderContact(String gName, Map<String, List<ContactsStruct>> friends) {
+		List<ContactsStruct> friend = friends.get(gName);
+		if(null != friend) {
+			ContactItem ci = new ContactItem(null, true, gName);
+			contacts.addItem(ci);
+			for(ContactsStruct cs : friend) {
+				boolean top = cs.ContactFlag == 2049 || cs.ContactFlag == 2051;
+				if(top) {
+					addConversition(cs);
+				}
+				String name = ContactsStruct.getContactsStructName(cs);
+				ContactItem coni = new ContactItem(cs, false, name);
+				contacts.addItem(coni);
+				
+			}
+		}
+	}
 	
 	/**
 	 * 用途：刷新聊天界面
@@ -510,7 +555,7 @@ public class MainWindow {
 				}
 				convers.flush();
 				//来自自己的消息不闪烁
-				if(flush) {
+				if(flush && null != itm && !itm.isSilence()) {
 					User32 user32 = User32.INSTANCE;
 					HANDLE handle = new HANDLE();
 					handle.setPointer(Pointer.createConstant(shell.handle));//获取窗口句柄
