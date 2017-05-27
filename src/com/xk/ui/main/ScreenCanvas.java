@@ -183,6 +183,9 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 					return;
 				}
 				if(STATUS.INITED.equals(status)) {
+					if(null == nowWindow) {
+						return;
+					}
 					Point clickLoc = new Point(e.x, e.y);
 					if(nowWindow.contains(clickLoc)) {
 						status = STATUS.CLICKING;
