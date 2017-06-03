@@ -7,6 +7,8 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -350,7 +352,7 @@ public class WeChatUtil {
 	 * @date 2016年12月14日
 	 * @param ctItem
 	 */
-	public static List<String> loadContacts(TypeItem ctItem, MainWindow window) {
+	public static List<String> loadContacts() {
 		List<String> allGroups = new ArrayList<String>();
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Map<String, String> params = new HashMap<String, String>();
@@ -371,20 +373,17 @@ public class WeChatUtil {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
 						boolean top = convs.ContactFlag == 2049 || convs.ContactFlag == 2051;
 						if(top) {
-							window.addConversition(convs);
+							MainWindow.getInstance().addConversition(convs);
 						}
-						Constant.contacts.put(convs.UserName, convs);
+						if(Constant.contacts.containsKey(convs.UserName)) {
+							ContactsStruct old = Constant.contacts.get(convs.UserName);
+							System.out.println(convs.UserName + " " + convs.NickName + " " + convs.RemarkName);
+							old.fixMissProps(convs);
+						}else {
+							Constant.contacts.put(convs.UserName, convs);
+						}
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
-						String nick = convs.NickName;
-						String remark = convs.RemarkName;
-						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
-						ContactItem ci = new ContactItem(convs, false, name);
-						MyList list = window.lists.get(ctItem);
-						list.addItem(ci);
-						if(convs.UserName.indexOf("@@") > -1) {
-							allGroups.add(convs.UserName);
-						}
 					}
 					System.out.println("load contacts over!!");
 				}
@@ -469,7 +468,7 @@ public class WeChatUtil {
 	 * @date 2016年12月14日
 	 * @param ctItem
 	 */
-	public static void loadGroups(TypeItem ctItem, List<String> groups, MainWindow window) {
+	public static void loadGroups(List<String> groups) {
 		if(null == groups || groups.size() == 0) {
 			return ;
 		}
@@ -503,15 +502,15 @@ public class WeChatUtil {
 				if(null != contactList) {
 					for(Map<String, Object> cmap : contactList) {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
-						Constant.contacts.put(convs.UserName, convs);
+						if(Constant.contacts.containsKey(convs.UserName)) {
+							ContactsStruct old = Constant.contacts.get(convs.UserName);
+							System.out.println(convs.UserName + " " + convs.NickName + " " + convs.RemarkName);
+							old.fixMissProps(convs);
+						}else {
+							Constant.contacts.put(convs.UserName, convs);
+						}
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
-						String nick = convs.NickName;
-						String remark = convs.RemarkName;
-						String name = (null == remark || remark.trim().isEmpty()) ? nick : remark; 
-						ContactItem ci = new ContactItem(convs, false, name);
-						MyList list = window.lists.get(ctItem);
-						list.addItem(ci);
 					}
 					System.out.println("load Group over!!");
 				}
@@ -528,9 +527,8 @@ public class WeChatUtil {
 	/**
 	 * 用途：发心跳包，获取微信状态是否有新消息
 	 * @date 2016年12月30日
-	 * @param conItem
 	 */
-	public static void syncData(final TypeItem conItem) {
+	public static void syncData() {
 		if(null != timer) {
 			return;
 		}
@@ -564,7 +562,7 @@ public class WeChatUtil {
 							try {
 								Integer sele = Integer.parseInt(selector);
 								if(sele > 0) {
-									webwxsync(conItem);
+									webwxsync();
 								}
 								
 							} catch (NumberFormatException e) {
@@ -596,7 +594,7 @@ public class WeChatUtil {
 	 * @date 2016年12月30日
 	 * @param conItem
 	 */
-	private static void webwxsync(final TypeItem conItem) {
+	private static void webwxsync() {
 		HTTPUtil hu = HTTPUtil.getInstance();
 		Map<String,Object> bodyMap = new HashMap<String,Object>();
 		Map<String,Object> bodyInner = new HashMap<String,Object>();
@@ -635,12 +633,8 @@ public class WeChatUtil {
 							if(null != StatusNotifyUserName && !main.syncGroup) {
 								String[] spl = StatusNotifyUserName.split(",");
 								List<String> groups = Arrays.asList(spl);
-								WeChatUtil.loadGroups(conItem, groups, main);
-								Display.getDefault().asyncExec(new Runnable() {
-									public void run() {
-										main.lists.get(conItem).flush();
-									}
-								});
+								WeChatUtil.loadGroups(groups);
+								main.showGroupsAndFriends();
 								main.syncGroup = true;
 							}
 						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType) {
@@ -707,6 +701,30 @@ public class WeChatUtil {
 			e.printStackTrace();
 		}
 		
+	}
+	
+	
+	public static void computeGroup(Map<String, List<ContactsStruct>> friends, String spell, ContactsStruct convs) {
+		List<ContactsStruct> friend = friends.get(spell);
+		if(null == friend) {
+			friend = new ArrayList<ContactsStruct>();
+			friends.put(spell, friend);
+		}
+		friend.add(convs);
+		Collections.sort(friend, new Comparator<ContactsStruct>() {
+
+			@Override
+			public int compare(ContactsStruct o1, ContactsStruct o2) {
+				String nick1 = o1.NickName;
+				String remark1 = o1.RemarkName;
+				String name1 = (null == remark1 || remark1.trim().isEmpty()) ? nick1 : remark1; 
+				String nick2 = o2.NickName;
+				String remark2 = o2.RemarkName;
+				String name2 = (null == remark2 || remark2.trim().isEmpty()) ? nick2 : remark2; 
+				return name1.compareTo(name2);
+			}
+			
+		});
 	}
 	
 	/**

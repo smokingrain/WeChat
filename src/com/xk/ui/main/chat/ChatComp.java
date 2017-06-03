@@ -20,6 +20,14 @@ import com.xk.utils.SWTTools;
 import com.xk.utils.WeChatUtil;
 
 
+
+
+
+
+
+
+
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,6 +40,10 @@ import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
+import org.eclipse.swt.custom.PaintObjectEvent;
+import org.eclipse.swt.custom.PaintObjectListener;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -40,11 +52,15 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.VerifyEvent;
+import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.GlyphMetrics;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
@@ -59,7 +75,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 
 	private CLabel nameL;
 	private MyList<ChatItem> chatList;
-	private Text text;
+	private StyledText text;
 	private ConvItem item;
 	private CLabel lbls;
 	private String convId;//会话id
@@ -103,7 +119,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		//发送表情按钮
 		final CLabel emojL = new CLabel(this, SWT.CENTER);
 		emojL.setBounds(0, 400, 30, 30);
-		emojL.setBackground(tempEmoj);
+		emojL.setBackground(SWTTools.scaleImage(tempEmoj.getImageData(), 30, 30));
 		emojL.setToolTipText("发送表情");
 		emojL.addMouseListener(new MouseAdapter() {
 
@@ -143,7 +159,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		Image cutPic = SWTResourceManager.getImage(ChatComp.class, "/images/cutscreen.png");
 		CLabel cutScreen = new CLabel(this, SWT.CENTER);
 		cutScreen.setBounds(64, 400, 30, 30);
-		cutScreen.setBackground(cutPic);
+		cutScreen.setBackground(SWTTools.scaleImage(cutPic.getImageData() , 30, 30));
 		cutScreen.setToolTipText("屏幕截图(ALT + J)");
 		cutScreen.addMouseListener(new MouseAdapter() {
 			
@@ -156,7 +172,8 @@ public class ChatComp extends Composite implements HotKeyListener{
 		cutPic.dispose();
 		
 		//内容输入框
-		text = new Text(this, SWT.MULTI);
+		text = new StyledText(this, SWT.MULTI | SWT.V_SCROLL);
+		text.setBackground(SWTResourceManager.getColor(0xF5, 0xFF, 0xFA));
 		text.setBounds(0, 430, 549, 115);
 		text.addKeyListener(new KeyAdapter() {
 
@@ -168,6 +185,55 @@ public class ChatComp extends Composite implements HotKeyListener{
 				}
 			}
 			
+		});
+		
+		text.addVerifyListener(new VerifyListener() {
+			
+			@Override
+			public void verifyText(VerifyEvent event) {
+				if (event.start == event.end) return;
+				String str = text.getText(event.start, event.end - 1);
+				int index = str.indexOf('\uFFFC');
+				while (index != -1) {
+					StyleRange style = text.getStyleRangeAtOffset(event.start + index);
+					if (style != null) {
+						Image image = (Image)style.data;
+						if (image != null) image.dispose();
+					}
+					index = str.indexOf('\uFFFC', index + 1);
+				}
+				
+			}
+		});
+		
+		text.addPaintObjectListener(new PaintObjectListener() {
+			
+			@Override
+			public void paintObject(PaintObjectEvent event) {
+				StyleRange style = event.style;
+				Image image = (Image)style.data;
+				if (!image.isDisposed()) {
+					int x = event.x;
+					int y = event.y + event.ascent - style.metrics.ascent;
+					event.gc.drawImage(image, x, y);
+				}
+			}
+		});
+		
+		text.addDisposeListener(new DisposeListener() {
+			
+			@Override
+			public void widgetDisposed(DisposeEvent event) {
+				StyleRange[] styles = text.getStyleRanges();
+				for (int i = 0; i < styles.length; i++) {
+					StyleRange style = styles[i];
+					if (style.data != null) {
+						Image image = (Image)style.data;
+						if (image != null) image.dispose();
+					}
+				}
+				
+			}
 		});
 		
 		//发送按钮
@@ -204,6 +270,19 @@ public class ChatComp extends Composite implements HotKeyListener{
 		
 	}
 
+	public void addImage(Image image) {
+		int offset = text.getCaretOffset();
+		text.insert("\uFFFC");
+		StyleRange style = new StyleRange ();
+		style.start = offset;
+		style.length = 1;
+		style.data = image;
+		Rectangle rect = image.getBounds();
+		style.metrics = new GlyphMetrics(rect.height, 0, rect.width);
+		text.setStyleRange(style);
+	}
+	
+	
 	/**
 	 * 发送图片
 	 * 用途：
@@ -256,18 +335,19 @@ public class ChatComp extends Composite implements HotKeyListener{
 		cs.open();
 		Image img = cs.img;
 		if(null != img && null != convId) {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
-			File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
-			file.getParentFile().mkdirs();
-			ImageLoader loader = new ImageLoader();
-			loader.data = new ImageData[]{img.getImageData()};
-			loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
-			ChatLog log = WeChatUtil.sendImg(file, convId);
-			if(null != log) {
-				ChatLogCache.saveLogs(convId, log);
-				flush(item);
-			}
-			file.delete();
+			addImage(cs.img);
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
+//			File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
+//			file.getParentFile().mkdirs();
+//			ImageLoader loader = new ImageLoader();
+//			loader.data = new ImageData[]{img.getImageData()};
+//			loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
+//			ChatLog log = WeChatUtil.sendImg(file, convId);
+//			if(null != log) {
+//				ChatLogCache.saveLogs(convId, log);
+//				flush(item);
+//			}
+//			file.delete();
 		}
 	}
 	
