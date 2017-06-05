@@ -10,6 +10,7 @@ import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
@@ -55,6 +56,10 @@ public class ChatItem extends ListItem {
 	private int maxWidth = 0;//气泡宽度
 	private int nameHeight = 0;//名字高度
 	private int allHeight = MARGIN;//气泡高度
+	
+	ChatItem() {
+		
+	}
 	
 	public ChatItem(String user,Image head, List<Object> chatContent, boolean fromSelf, Font font, ChatLog log) {
 		this.user = user;
@@ -150,7 +155,13 @@ public class ChatItem extends ListItem {
 		if(null == head) {
 			head = SWTResourceManager.getImage(ChatItem.class, "/images/head.png");
 		}
+		//原来属性
+		Font oldFont = gc.getFont();
+		Color backOld = gc.getBackground();
+		Color foreOld = gc.getForeground();
+		
 		//名字字体
+		
 		Font ft = SWTResourceManager.getFont("宋体", 12, SWT.NORMAL);
 		gc.setFont(ft);
 		Transform trans = new Transform(null);//向下偏移15像素，预留每条聊天记录空间
@@ -318,6 +329,9 @@ public class ChatItem extends ListItem {
 		}
 		trans.translate(0, -HEAD_FOOT_SAPCE);
 		gc.setTransform(trans);
+		gc.setFont(oldFont);
+		gc.setBackground(backOld);
+		gc.setForeground(foreOld);
 	}
 
 	@Override

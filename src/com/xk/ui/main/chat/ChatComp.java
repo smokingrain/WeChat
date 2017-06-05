@@ -376,6 +376,9 @@ public class ChatComp extends Composite implements HotKeyListener{
 		chatList.clearAll();
 		List<ChatLog> logs = ChatLogCache.getLogs(convId);
 		if(null != logs) {
+			long current = 0;
+			long limitTime = 3 * 60 * 1000;//五分钟刷一次时间戳 
+			long limitCount = 10;//或者每十条刷一次时间戳
 			for(ChatLog log : logs) {
 				String user = log.fromId;
 				boolean fromSelf = user.equals(Constant.user.UserName);
@@ -434,6 +437,15 @@ public class ChatComp extends Composite implements HotKeyListener{
 					
 					
 				}
+				
+				if(log.createTime - current > limitTime || ++limitCount  >= 10) {
+					ChatItem time = new TimeItem(log.createTime);
+					time.setWeight(log.createTime - 1);
+					chatList.addItem(time);
+					current = log.createTime;
+					limitCount = 0;
+				}
+				
 				
 				
 				ChatItem ci = new ChatItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
