@@ -335,19 +335,19 @@ public class ChatComp extends Composite implements HotKeyListener{
 		cs.open();
 		Image img = cs.img;
 		if(null != img && null != convId) {
-			addImage(cs.img);
-//			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
-//			File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
-//			file.getParentFile().mkdirs();
-//			ImageLoader loader = new ImageLoader();
-//			loader.data = new ImageData[]{img.getImageData()};
-//			loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
-//			ChatLog log = WeChatUtil.sendImg(file, convId);
-//			if(null != log) {
-//				ChatLogCache.saveLogs(convId, log);
-//				flush(item);
-//			}
-//			file.delete();
+//			addImage(cs.img);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
+			File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
+			file.getParentFile().mkdirs();
+			ImageLoader loader = new ImageLoader();
+			loader.data = new ImageData[]{img.getImageData()};
+			loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
+			ChatLog log = WeChatUtil.sendImg(file, convId);
+			if(null != log) {
+				ChatLogCache.saveLogs(convId, log);
+				flush(item);
+			}
+			file.delete();
 		}
 	}
 	
