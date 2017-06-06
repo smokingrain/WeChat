@@ -703,6 +703,35 @@ public class WeChatUtil {
 		
 	}
 	
+	/**
+	 * 提醒已读未读
+	 * @param from
+	 * @param to
+	 * @author o-kui.xiao
+	 */
+	public static void statusNotify(String from, String to) {
+		HTTPUtil hu = HTTPUtil.getInstance();
+		Map<String,Object> bodyMap = new HashMap<String,Object>();
+		Map<String,Object> bodyInner = new HashMap<String,Object>();
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
+		bodyMap.put("BaseRequest", bodyInner);
+		bodyMap.put("ClientMsgId", System.currentTimeMillis());
+		bodyMap.put("Code", 1);
+		bodyMap.put("FromUserName", from);
+		bodyMap.put("ToUserName", to);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("pass_ticket", Constant.sign.pass_ticket);
+		try {
+			String result =  hu.postBody(Constant.STATUS_NOTIFY, params, JSONUtil.toJson(bodyMap));
+			System.out.println(result);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
 	
 	public static void computeGroup(Map<String, List<ContactsStruct>> friends, String spell, ContactsStruct convs) {
 		List<ContactsStruct> friend = friends.get(spell);

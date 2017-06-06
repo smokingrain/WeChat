@@ -370,11 +370,13 @@ public class ChatComp extends Composite implements HotKeyListener{
 			});
 			return;
 		}
+		
 		item.clearUnread();
 		convId = item.getData().UserName;
 		this.item = item;
 		chatList.clearAll();
 		List<ChatLog> logs = ChatLogCache.getLogs(convId);
+		WeChatUtil.statusNotify(Constant.user.UserName, convId);
 		if(null != logs) {
 			long current = 0;
 			long limitTime = 3 * 60 * 1000;//五分钟刷一次时间戳 
