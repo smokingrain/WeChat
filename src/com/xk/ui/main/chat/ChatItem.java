@@ -1,6 +1,8 @@
 package com.xk.ui.main.chat;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
@@ -18,7 +20,9 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.Transform;
+import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.wb.swt.SWTResourceManager;
@@ -28,6 +32,7 @@ import com.xk.ui.main.FloatWindow;
 import com.xk.uiLib.ImageViewer;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
+import com.xk.utils.Constant;
 import com.xk.utils.SWTTools;
 import com.xk.utils.WeChatUtil;
 
@@ -56,6 +61,7 @@ public class ChatItem extends ListItem {
 	private int maxWidth = 0;//气泡宽度
 	private int nameHeight = 0;//名字高度
 	private int allHeight = MARGIN;//气泡高度
+	private Map<Rectangle, ImageNode> imgs = new HashMap<Rectangle, ImageNode>();
 	
 	ChatItem() {
 		
@@ -79,8 +85,9 @@ public class ChatItem extends ListItem {
 			int maxHeight = 0;//本行最高高度
 			//计算每一行行高
 			for(Object content : chatContent) {
-				if(content instanceof Image) {
-					Image img = (Image) content;
+				if(content instanceof ImageNode) {
+					ImageNode node = (ImageNode) content;
+					Image img = node.img;
 					int width = img.getImageData().width;
 					allLength += width + LINE_SPACE_HEIGHT;
 					if(lineNum == 0) {
@@ -190,19 +197,28 @@ public class ChatItem extends ListItem {
 			int cMaxHeight = 0;
 			Path contentPath = new Path(null);
 			for(Object content : chatContent) {
-				if(content instanceof Image) {//绘制图片
-					Image img = (Image) content;
+				if(content instanceof ImageNode) {//绘制图片
+					ImageNode node = (ImageNode) content;
+					Image img = node.img;
 					int imgWidth = img.getImageData().width;
 					int imgHeight = img.getImageData().height;
 					cLineWidth += imgWidth + LINE_SPACE_HEIGHT;
 					if(cLineWidth > ITEM_AREA_WIDTH) {
 						cHeight += cMaxHeight + LINE_SPACE_HEIGHT;
 						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+						if(node.type == 1) {
+							Rectangle rect = new Rectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
+							imgs.put(rect, node);
+						}
 						cMaxHeight = 0;
 						cLineWidth = imgWidth + LINE_SPACE_HEIGHT;
 						continue;
 					} else {
 						gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+						if(node.type == 1) {
+							Rectangle rect = new Rectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
+							imgs.put(rect, node);
+						}
 					}
 					if(imgHeight > cMaxHeight) {
 						cMaxHeight = imgHeight;
@@ -267,19 +283,28 @@ public class ChatItem extends ListItem {
 			int cMaxHeight = 0;
 			Path contentPath = new Path(null);
 			for(Object content : chatContent) {
-				if(content instanceof Image) {
-					Image img = (Image) content;
+				if(content instanceof ImageNode) {
+					ImageNode node = (ImageNode) content;
+					Image img = node.img;
 					int imgWidth = img.getImageData().width;
 					int imgHeight = img.getImageData().height;
 					cLineWidth += imgWidth;
 					if(cLineWidth > ITEM_AREA_WIDTH) {
 						gc.drawImage(img, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 3  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+						if(node.type == 1) {
+							Rectangle rect = new Rectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 3  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
+							imgs.put(rect, node);
+						}
 						cHeight += cMaxHeight;
 						cMaxHeight = 0;
 						cLineWidth = 0;
 						continue;
 					} else {
 						gc.drawImage(img, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + cLineWidth - imgWidth + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 3  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+						if(node.type == 1) {
+							Rectangle rect = new Rectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + cLineWidth - imgWidth + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 3  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
+							imgs.put(rect, node);
+						}
 					}
 					if(imgHeight > cMaxHeight) {
 						cMaxHeight = imgHeight;
@@ -362,18 +387,51 @@ public class ChatItem extends ListItem {
 						System.out.println("复制成功！！");
 					}
 				}
-				
 			});
+			Point point = new Point(e.x, e.y);
+			for(Rectangle rect : imgs.keySet()) {
+				if(rect.contains(point)) {//图片右键另存为
+					if(!(chatContent.get(0) instanceof ImageNode)) {
+						break;
+					}
+					final ImageLoader loader = WeChatUtil.loadImage(log.msgid, null);
+					if(null == loader) {
+						break;
+					}
+					MenuItem saveAs = new MenuItem(m, SWT.NONE);
+					saveAs.setText("另存为");
+					saveAs.addSelectionListener(new SelectionAdapter() {
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							FileDialog fd = new FileDialog(getParent().getShell(), SWT.NONE);
+							fd.setText("另存为");
+							fd.setFilterExtensions(new String[]{"*.png", "*.jpg", "*.gif", "*.bmp"});
+							fd.setFilterNames(new String[]{"png图片", "jpg图片", "gif动图", "bmp图片"});
+							fd.setFileName("IMG_" + System.currentTimeMillis() + Constant.FORMATS[loader.format]);
+							String path = fd.open();
+							if(null != path && !path.isEmpty()) {
+								loader.save(path, loader.format);
+							}
+						}
+					});
+					break;
+				}
+			}
 			getParent().setMenu(m);
 			m.setVisible(true);
 			
-			
-			
 		}else if(e.button == 1 && e.count == 2 && type == MyList.CLICK_DOUBLE) {//双击
 			if(log.msgType == 3 || log.msgType == 47) {
-				if(chatContent.get(0) instanceof Image) {
-					ImageLoader loader = WeChatUtil.loadImage(log.msgid, null);
-					if(null != loader) {
+				Point point = new Point(e.x, e.y);
+				for(Rectangle rect : imgs.keySet()) {
+					if(rect.contains(point)) {
+						if(!(chatContent.get(0) instanceof ImageNode)) {
+							break;
+						}
+						ImageLoader loader = WeChatUtil.loadImage(log.msgid, null);
+						if(null == loader) {
+							break;
+						}
 						final FloatWindow fw = FloatWindow.getInstance();
 						fw.init();
 						int width = loader.logicalScreenWidth == 0 ? loader.data[0].width : loader.logicalScreenWidth;
@@ -398,11 +456,23 @@ public class ChatItem extends ListItem {
 						SWTTools.centerWindow(fw.shell);
 						SWTTools.enableTrag(iv);
 						fw.open(-1, -1);
+						break;
 					}
+					
 				}
+				
 			}
 		}
 		return false;
 	}
+}
 
+class ImageNode {
+	public int type;
+	public Image img;
+	
+	public ImageNode(int type, Image img) {
+		this.type = type;
+		this.img = img;
+	}
 }

@@ -28,6 +28,7 @@ import com.xk.utils.WeChatUtil;
 
 
 
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -409,7 +410,8 @@ public class ChatComp extends Composite implements HotKeyListener{
 				List<Object> chatContent = new ArrayList<>();
 				if(3 == log.msgType || 47 == log.msgType) {
 					if(null != log.img) {
-						chatContent.add(log.img);
+						ImageNode node = new ImageNode(1, log.img);
+						chatContent.add(node);
 					}else {
 						chatContent.add(log.content);
 					}
@@ -423,7 +425,10 @@ public class ChatComp extends Composite implements HotKeyListener{
 					while (matcherNode.find()) {
 						hasImoj = true;
 						if(index < splt.length) {
-							chatContent.add(splt[index++]);
+							String txt = splt[index++];
+							for(int i = 0; i < txt.length(); i++ ) {
+								chatContent.add(String.valueOf(txt.charAt(i)));
+							}
 						}
 						String match = matcherNode.group();
 						chatContent.add(getContent(match));
@@ -431,13 +436,17 @@ public class ChatComp extends Composite implements HotKeyListener{
 					
 					if(hasImoj) {
 						for(int i = index ;i < splt.length ; i++) {
-							chatContent.add(splt[i]);
+							String txt = splt[i];
+							for(int j = 0; j < txt.length(); j++ ) {
+								chatContent.add(String.valueOf(txt.charAt(j)));
+							}
 						}
 					}else {
-						chatContent.add(log.content);
+						String txt = log.content;
+						for(int i = 0; i < txt.length(); i++ ) {
+							chatContent.add(String.valueOf(txt.charAt(i)));
+						}
 					}
-					
-					
 				}
 				
 				if(log.createTime - current > limitTime || ++limitCount  >= 10) {
@@ -476,7 +485,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		}
 		String name = content.replace("[", "").replace("]", "");
 		Image img = ImojCache.qqface.get(name);
-		return null == img ? content : img;
+		return null == img ? content : new ImageNode(0, img);
 	}
 	
 	private void registerHotKey() {
