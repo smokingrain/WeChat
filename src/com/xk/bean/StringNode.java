@@ -1,11 +1,13 @@
 package com.xk.bean;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
 
 public class StringNode {
 	
 	public static final int SPACE = 2;
+	public static int DRAW_FLAGS = SWT.DRAW_MNEMONIC | SWT.DRAW_TAB | SWT.DRAW_TRANSPARENT | SWT.DRAW_DELIMITER;
 
 	public int type = 0;
 	public String base;

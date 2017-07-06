@@ -87,7 +87,7 @@ public class ConvItem extends ListItem {
 		for(StringNode node : name) {
 			if(node.type == 0) {
 				path.addString(node.base, offset, start + 15f, font);
-				offset += gc.stringExtent(node.base).x + StringNode.SPACE;
+				offset += gc.textExtent(node.base, StringNode.DRAW_FLAGS).x + StringNode.SPACE;
 			}else {
 				gc.drawImage(icons, 0, ImojCache.computeLoc(node.base).y, 20, 20, (int)offset, start + 15, 20, 20);
 				offset += 20 + StringNode.SPACE;
