@@ -52,6 +52,9 @@ public class ConvItem extends ListItem {
 		super();
 		this.data = data;
 		this.name = ImojCache.computeNode(name);
+		if(null != data.MemberCount && data.MemberCount > 0) {
+			this.name.add(new StringNode(0, "(" + data.MemberCount + ")"));
+		}
 		this.lastChat = lastChat;
 		this.lastMsg = lastMsg;
 		this.lastTime = lastTime;

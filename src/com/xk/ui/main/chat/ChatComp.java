@@ -469,13 +469,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
-				if(null != item.getData().MemberCount && item.getData().MemberCount > 0){
-					item.getName().add(new StringNode(0, "(" + item.getData().MemberCount + ")"));
-					nameL.setText(item.getName());
-				}else {
-					nameL.setText(item.getName());
-				}
-				
+				nameL.setText(item.getName());
 				chatList.scrollToBottom();
 				chatList.flush();
 			}
