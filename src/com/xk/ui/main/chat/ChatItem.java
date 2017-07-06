@@ -120,7 +120,7 @@ public class ChatItem extends ListItem {
 						if(maxWidth < point.x) {
 							maxWidth += point.x + str.length() + 10;//字间距
 						}else {
-							maxWidth +=point.x + str.length() + LINE_SPACE_HEIGHT;
+							maxWidth +=point.x + str.length();
 						}
 					}
 					int curLen = point.x + str.length();
