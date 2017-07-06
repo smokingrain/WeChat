@@ -6,6 +6,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
@@ -33,29 +34,46 @@ public class FileUtils {
 		}
 	}
 	
+	public static String readString(InputStream input) {
+		int len = 0;
+		StringBuffer str = new StringBuffer();
+		BufferedReader in = null;
+		try {
+			InputStreamReader isr = new InputStreamReader(input, StandardCharsets.UTF_8);
+			in = new BufferedReader(isr);
+			String line = null;
+			while ((line = in.readLine()) != null) {
+				if (len != 0) {
+					str.append("\r\n" + line);
+				} else {
+					str.append(line);
+				}
+				len++;
+			}
+			in.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}finally {
+			try {
+				input.close();
+				in.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		return str.toString();
+	}
+	
 	
 	public static String readString(File file){
-		int len=0;
-        StringBuffer str=new StringBuffer("");
-        try {
-            FileInputStream is=new FileInputStream(file);
-            InputStreamReader isr= new InputStreamReader(is,StandardCharsets.UTF_8);
-            BufferedReader in= new BufferedReader(isr);
-            String line=null;
-            while( (line=in.readLine())!=null ){
-                if(len != 0){
-                    str.append("\r\n"+line);
-                }else{
-                    str.append(line);
-                }
-                len++;
-            }
-            in.close();
-            is.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return str.toString();
+        FileInputStream is = null;
+		try {
+			is = new FileInputStream(file);
+		} catch (FileNotFoundException e) {
+			return null;
+		}
+        return readString(is);
 	}
 	
 	

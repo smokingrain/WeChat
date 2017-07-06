@@ -1,5 +1,7 @@
 package com.xk.ui.items;
 
+import java.util.List;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -14,12 +16,14 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.xk.bean.ContactsStruct;
+import com.xk.bean.StringNode;
 import com.xk.ui.main.MainWindow;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 import com.xk.utils.Constant;
 import com.xk.utils.DateUtil;
 import com.xk.utils.FileUtils;
+import com.xk.utils.ImojCache;
 import com.xk.utils.WeChatUtil;
 
 /**
@@ -31,7 +35,7 @@ import com.xk.utils.WeChatUtil;
 public class ConvItem extends ListItem {
 
 	private ContactsStruct data;
-	private String name;//会话名
+	private List<StringNode> name;//会话名
 	private String lastChat;//上一个发言人
 	private String lastMsg;//上一条消息
 	private Long lastTime;//上一条消息的时间
@@ -47,7 +51,7 @@ public class ConvItem extends ListItem {
 			boolean top, boolean silence, Integer unread) {
 		super();
 		this.data = data;
-		this.name = name;
+		this.name = ImojCache.computeNode(name);
 		this.lastChat = lastChat;
 		this.lastMsg = lastMsg;
 		this.lastTime = lastTime;
@@ -75,7 +79,17 @@ public class ConvItem extends ListItem {
 		Font font=SWTResourceManager.getFont("宋体", 10, SWT.NORMAL);
 		gc.drawImage((null == data.head || data.head.isDisposed()) ? headDefault : data.head, 15, start + 7);
 		Path path=new Path(null);
-		path.addString(FileUtils.getLimitString(name, 10), 15 + 58f, start + 15f, font);
+		float offset = 15 + 58f;
+		Image icons = SWTResourceManager.getImage(ContactItem.class, "/images/icons.png");
+		for(StringNode node : name) {
+			if(node.type == 0) {
+				path.addString(node.base, offset, start + 15f, font);
+				offset += gc.stringExtent(node.base).x + StringNode.SPACE;
+			}else {
+				gc.drawImage(icons, 0, ImojCache.computeLoc(node.base).y, 20, 20, (int)offset, start + 15, 20, 20);
+				offset += 20 + StringNode.SPACE;
+			}
+		}
 		if(top) {
 			gc.drawImage(topImage, width - MyList.BAR_WIDTH - 35, start + 37);
 		}else if(silence){
@@ -193,12 +207,12 @@ public class ConvItem extends ListItem {
 		this.data = data;
 	}
 
-	public String getName() {
+	public List<StringNode> getName() {
 		return name;
 	}
 
 	public void setName(String name) {
-		this.name = name;
+		this.name = ImojCache.computeNode(name);
 	}
 
 	public String getLastChat() {

@@ -6,9 +6,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
@@ -16,19 +19,85 @@ import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.xk.bean.Imoj;
+import com.xk.bean.StringNode;
 
 public class ImojCache {
 	private static final Integer IMG_WIDTH = 28;
 	public static final Map<String, Image> qqface = new ConcurrentHashMap<String, Image>();
 	public static List<List<Imoj>> imjs = new ArrayList<List<Imoj>>();
+	private static final Map<String, Point> iconLoc = new HashMap<String, Point>();
+	
+	
 	
 	
 	static{
 		init();
 	}
+	
+	/**
+	 * 将文字中的表情提取出来
+	 * @param base
+	 * @return
+	 * @author o-kui.xiao
+	 */
+	public static List<StringNode> computeNode(String base) {
+		String classReg = "\\<span\\sclass=\"emoji\\s\\w+\"\\>\\</span\\>";
+		Pattern patternClass = Pattern.compile(classReg);
+		Matcher matcherClass = patternClass.matcher(base);
+		String[] toShow = base.split(classReg);
+		List<StringNode> content = new ArrayList<StringNode>();
+		int index = 0;
+		boolean hasImoj = false;
+		while (matcherClass.find()) {
+			hasImoj = true;
+			String msg = matcherClass.group();
+			msg = msg.replace("<span class=\"emoji ", "").replace("\"></span>", "");
+			if(index < toShow.length) {
+				content.add(new StringNode(0, toShow[index++]));
+			}
+			content.add(new StringNode(1, msg));
+		}
+		if(hasImoj) {
+			for(int i = index; i<toShow.length; i++) {
+				content.add(new StringNode(0, toShow[i]));
+			}
+		} else {
+			content.add(new StringNode(0, base));
+		}
+		return content;
+	}
+	
+	/**
+	 * 计算这个表情位置
+	 * @param className
+	 * @return
+	 * @author o-kui.xiao
+	 */
+	public static Point computeLoc(String className) {
+		String text = FileUtils.readString(ImojCache.class.getResourceAsStream("/images/imoj.txt"));
+		Point point = iconLoc.get(className);
+		if(null != point) {
+			return point;
+		}
+		String reg = className + "\\{background\\-position:0\\s\\-\\d+px\\}";
+		Pattern patternNode = Pattern.compile(reg);
+		Matcher matcherNode = patternNode.matcher(text);
+
+		while (matcherNode.find()) {
+			String pix = matcherNode.group();
+			pix = pix.replace(className + "{background-position:0 -", "").replace("px}", "");
+			int y = Integer.parseInt(pix);
+			point = new Point(0, y);
+			iconLoc.put(className, point);
+			break;
+		}
+		return point;
+	}
+	
 	
 	/**
 	 * 用途：初始化表情图片

@@ -385,7 +385,7 @@ public class WeChatUtil {
 						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
 					}
-					System.out.println("load contacts over!!");
+					System.out.println("load contacts over!!count = " + Constant.contacts.size());
 				}
 			}
 		} catch (ClientProtocolException e) {

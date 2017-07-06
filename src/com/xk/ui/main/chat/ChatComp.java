@@ -6,6 +6,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.sun.jna.platform.win32.WinUser.MSG;
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.MemberStruct;
+import com.xk.bean.StringNode;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
 import com.xk.hook.HotKeyListener;
@@ -13,6 +14,7 @@ import com.xk.hook.HotKeys;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.main.CutScreen;
 import com.xk.uiLib.MyList;
+import com.xk.uiLib.XLabel;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
 import com.xk.utils.ImojCache;
@@ -74,7 +76,7 @@ import org.eclipse.swt.widgets.FileDialog;
  */
 public class ChatComp extends Composite implements HotKeyListener{
 
-	private CLabel nameL;
+	private XLabel nameL;
 	private MyList<ChatItem> chatList;
 	private StyledText text;
 	private ConvItem item;
@@ -104,7 +106,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		
 		
 		//聊天会话对象名字
-		nameL = new CLabel(this, SWT.CENTER);
+		nameL = new XLabel(this, SWT.CENTER);
 		nameL.setFont(SWTResourceManager.getFont("微软雅黑", 11, SWT.NORMAL));
 		nameL.setBackground(getBackground());
 		nameL.setAlignment(SWT.CENTER);
@@ -363,7 +365,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 			this.item = null;
 			Display.getDefault().asyncExec(new Runnable() {
 				public void run() {
-					nameL.setText("");
+					nameL.setText(null);
 					chatList.clearAll();
 					chatList.scrollToBottom();
 					chatList.flush();
@@ -468,7 +470,8 @@ public class ChatComp extends Composite implements HotKeyListener{
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
 				if(null != item.getData().MemberCount && item.getData().MemberCount > 0){
-					nameL.setText(item.getName() + "(" + item.getData().MemberCount + ")");
+					item.getName().add(new StringNode(0, "(" + item.getData().MemberCount + ")"));
+					nameL.setText(item.getName());
 				}else {
 					nameL.setText(item.getName());
 				}

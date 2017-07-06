@@ -349,9 +349,11 @@ public class MainWindow {
 		List<String> g = WeChatUtil.loadConvers(ctItem, this);//先加载最近会话
 		WeChatUtil.startNotify();//通知服务器我准备收消息了
 		WeChatUtil.loadGroups(g);//拉取最近会话中的群组
-		WeChatUtil.syncData();//开始发送心跳包，拉消息
+		
 		List<String> group = WeChatUtil.loadContacts();//拉取联系人
 		WeChatUtil.loadGroups(group);//拉取联系人中的群组
+		
+		WeChatUtil.syncData();//开始发送心跳包，拉消息
 		
 		//加载自己的头像
 		String headUrl = Constant.BASE_URL + Constant.user.HeadImgUrl + "&type=big";
@@ -453,6 +455,7 @@ public class MainWindow {
 		//先按字母分组，群组另外分开
 		for(ContactsStruct convs : Constant.contacts.values()) {
 			String name = ContactsStruct.getContactsStructName(convs);
+			System.out.println(name);
 			if(convs.MemberCount > 1) {
 				String spell = "群组";
 				WeChatUtil.computeGroup(friends, spell, convs);

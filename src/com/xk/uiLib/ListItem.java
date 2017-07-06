@@ -47,7 +47,7 @@ public abstract class ListItem implements Comparable<ListItem>{
 	 * @param e 点击事件
 	 * @param itemHeight 当前itemY位移，包含本身高度
 	 * @param index 相对父组件Y坐标
-	 * @param type
+	 * @param type 单击选中还是双击选中，或者单击获得焦点
 	 * @return
 	 */
 	public abstract boolean oncliek(MouseEvent e, int itemHeight, int index, int type);
