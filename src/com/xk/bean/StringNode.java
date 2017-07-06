@@ -1,5 +1,8 @@
 package com.xk.bean;
 
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Point;
+
 public class StringNode {
 	
 	public static final int SPACE = 2;
@@ -14,5 +17,22 @@ public class StringNode {
 	public StringNode(int type, String base) {
 		this.type = type;
 		this.base = base;
+	}
+	
+	
+	public static Point textExtent(java.util.List<StringNode> nodes, int flag, GC gc) {
+		int x = 0;
+		int y = 0;
+		for(StringNode node : nodes) {
+			if(node.type == 0) {
+				Point pt = gc.textExtent(node.base, flag);
+				x += pt.x + StringNode.SPACE;
+				y = pt.y;
+			}else {
+				x += 20 + StringNode.SPACE;
+				y = 20 + StringNode.SPACE;
+			}
+		}
+		return new Point(x, y);
 	}
 }

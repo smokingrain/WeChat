@@ -27,12 +27,15 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.xk.bean.StringNode;
 import com.xk.chatlogs.ChatLog;
+import com.xk.ui.items.ContactItem;
 import com.xk.ui.main.FloatWindow;
 import com.xk.uiLib.ImageViewer;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 import com.xk.utils.Constant;
+import com.xk.utils.ImojCache;
 import com.xk.utils.SWTTools;
 import com.xk.utils.WeChatUtil;
 
@@ -51,7 +54,7 @@ public class ChatItem extends ListItem {
 	private static final Integer MARGIN = 5;
 	
 	private ChatLog log;
-	private String user;//聊天发送者
+	private List<StringNode> user;//聊天发送者
 	private Image head;//发送者头像
 	private List<Object> chatContent;//聊天内容
 	private boolean fromSelf;//是不是自己发送的 
@@ -68,7 +71,7 @@ public class ChatItem extends ListItem {
 	}
 	
 	public ChatItem(String user,Image head, List<Object> chatContent, boolean fromSelf, Font font, ChatLog log) {
-		this.user = user;
+		this.user = ImojCache.computeNode(user);
 		this.head = head;
 		this.chatContent = chatContent;
 		this.fromSelf = fromSelf;
@@ -174,12 +177,24 @@ public class ChatItem extends ListItem {
 		Transform trans = new Transform(null);//向下偏移15像素，预留每条聊天记录空间
 		trans.translate(0, HEAD_FOOT_SAPCE);
 		gc.setTransform(trans);
+		int DRAW_FLAGS = SWT.DRAW_MNEMONIC | SWT.DRAW_TAB | SWT.DRAW_TRANSPARENT | SWT.DRAW_DELIMITER;
+		Image icons = SWTResourceManager.getImage(ContactItem.class, "/images/icons.png");
 		if(fromSelf) {//如果是自己，从右往左
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			gc.setForeground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			Path namePath = new Path(null);
-			Point nameSize = gc.textExtent(user);
-			namePath.addString(user, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + nameSize.x + MyList.BAR_WIDTH + MARGIN), start + LINE_SPACE_HEIGHT, ft);
+			Point nameSize = StringNode.textExtent(user, DRAW_FLAGS, gc);
+			float offset = width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + nameSize.x + MyList.BAR_WIDTH + MARGIN);
+			for(StringNode nd : user) {
+				if(nd.type == 0) {
+					namePath.addString(nd.base, offset, start + LINE_SPACE_HEIGHT, ft);
+					offset += gc.textExtent(nd.base).x + StringNode.SPACE;
+				}else {
+					gc.drawImage(icons, 0, ImojCache.computeLoc(nd.base).y, 20, 20, (int)offset, start + LINE_SPACE_HEIGHT, 20, 20);
+					offset += 20 + StringNode.SPACE;
+				}
+				
+			}
 			gc.fillPath(namePath);//绘制发送者
 //			gc.drawPath(namePath);
 			gc.drawImage(head,width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + MyList.BAR_WIDTH), start + LINE_SPACE_HEIGHT);
@@ -266,7 +281,17 @@ public class ChatItem extends ListItem {
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			gc.setForeground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			Path namePath = new Path(null);
-			namePath.addString(user,HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2, start + LINE_SPACE_HEIGHT, ft);
+			float offset = HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2;
+			for(StringNode nd : user) {
+				if(nd.type == 0) {
+					namePath.addString(nd.base, offset, start + LINE_SPACE_HEIGHT, ft);
+					offset += gc.textExtent(nd.base).x + StringNode.SPACE;
+				}else {
+					gc.drawImage(icons, 0, ImojCache.computeLoc(nd.base).y, 20, 20, (int)offset, start + LINE_SPACE_HEIGHT, 20, 20);
+					offset += 20 + StringNode.SPACE;
+				}
+				
+			}
 			gc.fillPath(namePath);
 //			gc.drawPath(namePath);
 			gc.drawImage(head,LINE_SPACE_HEIGHT, start + LINE_SPACE_HEIGHT);

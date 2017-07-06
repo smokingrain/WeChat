@@ -458,7 +458,7 @@ void onPaint(PaintEvent event) {
 		extent.x = 0;
 	    for(int i = 0; i < lines.length; i++) {
 	    	
-	    	Point e = textExtent(lines[i], DRAW_FLAGS, gc);
+	    	Point e = StringNode.textExtent(lines[i], DRAW_FLAGS, gc);
 	    	if (e.x > availableWidth) {
 	    		lines[i] = shortenText(gc, lines[i], availableWidth);
 	    		extent.x = Math.max(extent.x, getTotalSize(null, lines[i]).x);
@@ -605,11 +605,11 @@ void onPaint(PaintEvent event) {
 			int lineX = x;
 			if (lines.length > 1) {
 				if (align == SWT.CENTER) {
-					int lineWidth = textExtent(lines[i], DRAW_FLAGS, gc).x;
+					int lineWidth = StringNode.textExtent(lines[i], DRAW_FLAGS, gc).x;
 					lineX = x + Math.max(0, (extent.x - lineWidth) / 2);
 				}
 				if (align == SWT.RIGHT) {
-					int lineWidth = textExtent(lines[i], DRAW_FLAGS, gc).x;
+					int lineWidth = StringNode.textExtent(lines[i], DRAW_FLAGS, gc).x;
 					lineX = Math.max(x, rect.x + rect.width - rightMargin - lineWidth);
 				}
 			}
@@ -630,21 +630,6 @@ void onPaint(PaintEvent event) {
 	}
 }
 
-private Point textExtent(java.util.List<StringNode> nodes, int style, GC gc) {
-	int x = 0;
-	int y = 0;
-	for(StringNode node : nodes) {
-		if(node.type == 0) {
-			Point pt = gc.textExtent(node.base);
-			x += pt.x + StringNode.SPACE;
-			y = pt.y;
-		}else {
-			x += 20 + StringNode.SPACE;
-			y = 20 + StringNode.SPACE;
-		}
-	}
-	return new Point(x, y);
-}
 
 /**
  * Paint the Label's border.
