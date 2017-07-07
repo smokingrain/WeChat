@@ -195,18 +195,19 @@ public class MyList<T extends ListItem> extends Composite {
 				
 			}
 		});
-		back.addMouseTrackListener(new MouseTrackAdapter() {
-
-			@Override
-			public void mouseEnter(MouseEvent mouseevent) {
-				setFocus();//让自己获得焦点
-			}
-
-			@Override
-			public void mouseExit(MouseEvent mouseevent) {
-			}
-			
-		});
+		//这个体验有点坑，在输入内容的时候，鼠标全选然后发现失去焦点了。。。好尴尬
+//		back.addMouseTrackListener(new MouseTrackAdapter() {
+//
+//			@Override
+//			public void mouseEnter(MouseEvent mouseevent) {
+//				setFocus();//让自己获得焦点
+//			}
+//
+//			@Override
+//			public void mouseExit(MouseEvent mouseevent) {
+//			}
+//			
+//		});
 	}
 	
 	public void scrollToBottom() {
