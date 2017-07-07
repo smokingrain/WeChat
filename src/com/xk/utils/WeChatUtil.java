@@ -382,8 +382,8 @@ public class WeChatUtil {
 						}else {
 							Constant.contacts.put(convs.UserName, convs);
 						}
-						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
-						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
+//						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
+//						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
 					}
 					System.out.println("load contacts over!!count = " + Constant.contacts.size());
 				}
@@ -509,8 +509,8 @@ public class WeChatUtil {
 						}else {
 							Constant.contacts.put(convs.UserName, convs);
 						}
-						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
-						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
+//						String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
+//						convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
 					}
 					System.out.println("load Group over!!");
 				}

@@ -117,6 +117,7 @@ public class MyList<T extends ListItem> extends Composite {
 			
 			@Override
 			public void mouseDown(MouseEvent e) {
+				setFocus();
 				if(showScroll){
 					Rectangle rect=new Rectangle(width-BAR_WIDTH-1, barY+BAR_ARROW_HEIGHT, BAR_WIDTH, barY+barHeight);
 					if(rect.contains(e.x,e.y)){
@@ -195,18 +196,19 @@ public class MyList<T extends ListItem> extends Composite {
 				
 			}
 		});
-		back.addMouseTrackListener(new MouseTrackAdapter() {
-
-			@Override
-			public void mouseEnter(MouseEvent mouseevent) {
-				setFocus();//让自己获得焦点
-			}
-
-			@Override
-			public void mouseExit(MouseEvent mouseevent) {
-			}
-			
-		});
+		//这个体验有点坑，在输入内容的时候，鼠标全选然后发现失去焦点了。。。好尴尬
+//		back.addMouseTrackListener(new MouseTrackAdapter() {
+//
+//			@Override
+//			public void mouseEnter(MouseEvent mouseevent) {
+//				setFocus();//让自己获得焦点
+//			}
+//
+//			@Override
+//			public void mouseExit(MouseEvent mouseevent) {
+//			}
+//			
+//		});
 	}
 	
 	public void scrollToBottom() {

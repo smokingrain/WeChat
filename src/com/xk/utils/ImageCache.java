@@ -9,10 +9,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
+
+import com.xk.bean.ContactsStruct;
+import com.xk.uiLib.ICallback;
 
 public class ImageCache {
 
@@ -22,6 +27,33 @@ public class ImageCache {
 	
 	private static Map<String, Image> userHeads = new ConcurrentHashMap<String, Image>();
 	private static Map<String, Image> chatImages = new ConcurrentHashMap<String, Image>();
+	
+	private static ExecutorService service = Executors.newFixedThreadPool(20);
+	
+	public static void asyncLoadPicture(ContactsStruct convs, ICallback callBack) {
+		service.submit(new Runnable() {
+			
+			@Override
+			public void run() {
+				String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
+				if("你去那边吃屎".equals(convs.NickName)) {
+					System.out.println("url = " + headUrl);
+				}
+				try {
+					convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, null, null);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if("你去那边吃屎".equals(convs.NickName)) {
+					System.out.println(headUrl);
+					System.out.println(convs.head);
+				}
+				callBack.callback(convs);
+			}
+		});
+	}
+	
 	
 	public static void loadHeadCache() {
 		File cache = new File(HEAD_PATH);
@@ -190,7 +222,7 @@ public class ImageCache {
 	public static Image getUserHeadCache(String userName,String url, Map<String, String> params, Integer width, Integer height) {
 		Image temp = userHeads.get(userName);
 		if(null != temp && !temp.isDisposed()) {
-			if(temp.getImageData().width != width || temp.getImageData().height != height) {
+			if(null !=width && null != height && (temp.getImageData().width != width || temp.getImageData().height != height)) {
 				Image img = SWTTools.scaleImage(temp.getImageData(), width, height);
 				userHeads.put(userName, img);
 				return img;

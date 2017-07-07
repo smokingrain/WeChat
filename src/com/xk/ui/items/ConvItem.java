@@ -11,6 +11,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Path;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.wb.swt.SWTResourceManager;
@@ -18,11 +19,13 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.StringNode;
 import com.xk.ui.main.MainWindow;
+import com.xk.uiLib.ICallback;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 import com.xk.utils.Constant;
 import com.xk.utils.DateUtil;
 import com.xk.utils.FileUtils;
+import com.xk.utils.ImageCache;
 import com.xk.utils.ImojCache;
 import com.xk.utils.WeChatUtil;
 
@@ -61,6 +64,21 @@ public class ConvItem extends ListItem {
 		this.top = top;
 		this.silence = silence;
 		this.unread = unread;
+		ImageCache.asyncLoadPicture(data, new ICallback() {
+			
+			@Override
+			public Object callback(Object obj) {
+				Display.getDefault().asyncExec(new Runnable() {
+
+					@Override
+					public void run() {
+						getParent().flush();
+					}
+					
+				});
+				return null;
+			}
+		});
 	}
 
 	@Override
@@ -80,7 +98,8 @@ public class ConvItem extends ListItem {
 			gc.setBackground(bk);
 		}
 		Font font=SWTResourceManager.getFont("宋体", 10, SWT.NORMAL);
-		gc.drawImage((null == data.head || data.head.isDisposed()) ? headDefault : data.head, 15, start + 7);
+		Image showHead =(null == data.head || data.head.isDisposed()) ? headDefault : data.head;
+		gc.drawImage(showHead, 0, 0, showHead.getImageData().width, showHead.getImageData().height, 15, start + 7, 50, 50);
 		Path path=new Path(null);
 		float offset = 15 + 58f;
 		Image icons = SWTResourceManager.getImage(ContactItem.class, "/images/icons.png");

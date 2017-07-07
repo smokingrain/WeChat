@@ -9,13 +9,16 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Path;
+import org.eclipse.swt.widgets.Display;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.StringNode;
+import com.xk.uiLib.ICallback;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 import com.xk.utils.FileUtils;
+import com.xk.utils.ImageCache;
 import com.xk.utils.ImojCache;
 
 /**
@@ -37,6 +40,24 @@ public class ContactItem extends ListItem {
 		this.data = data;
 		this.dir = dir;
 		this.name = ImojCache.computeNode(name);
+		if(null != data && "你去那边吃屎".equals(data.NickName)) {
+			System.out.println(data.HeadImgUrl);
+		}
+		ImageCache.asyncLoadPicture(data, new ICallback() {
+			
+			@Override
+			public Object callback(Object obj) {
+				Display.getDefault().asyncExec(new Runnable() {
+
+					@Override
+					public void run() {
+						getParent().flush();
+					}
+					
+				});
+				return null;
+			}
+		});
 	}
 
 	@Override
@@ -76,7 +97,8 @@ public class ContactItem extends ListItem {
 			path.dispose();
 			gc.setForeground(fo);
 		}else {
-			gc.drawImage((null == data.head || data.head.isDisposed()) ? headDefault : data.head, 10, start + 5);
+			Image showHead = (null == data.head || data.head.isDisposed()) ? headDefault : data.head;
+			gc.drawImage(showHead, 0, 0, showHead.getImageData().width, showHead.getImageData().height, 10, start + 5, 50, 50);
 			Path path = new Path(null);
 			float offset = 15f + 60f;
 			Image icons = SWTResourceManager.getImage(ContactItem.class, "/images/icons.png");

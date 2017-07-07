@@ -423,8 +423,8 @@ public class MainWindow {
 		if(null == convs) {
 			return null;
 		}
-		String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
-		convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
+//		String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
+//		convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
 		String name = ContactsStruct.getContactsStructName(convs);
 		System.out.println("load conver " + name);
 		Integer Statues = convs.Statues;
@@ -455,7 +455,6 @@ public class MainWindow {
 		//先按字母分组，群组另外分开
 		for(ContactsStruct convs : Constant.contacts.values()) {
 			String name = ContactsStruct.getContactsStructName(convs);
-			System.out.println(name);
 			if(convs.MemberCount > 1) {
 				String spell = "群组";
 				WeChatUtil.computeGroup(friends, spell, convs);
