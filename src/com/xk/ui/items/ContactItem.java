@@ -51,7 +51,11 @@ public class ContactItem extends ListItem {
 
 					@Override
 					public void run() {
-						getParent().flush();
+						MyList<ListItem> parent = getParent();
+						if(null != parent) {
+							parent.flush();
+						}
+						
 					}
 					
 				});

@@ -30,7 +30,7 @@ public class ImageCache {
 	
 	private static ExecutorService service = Executors.newFixedThreadPool(20);
 	
-	public static void asyncLoadPicture(ContactsStruct convs, ICallback callBack) {
+	public static void asyncLoadPicture(final ContactsStruct convs, final ICallback callBack) {
 		service.submit(new Runnable() {
 			
 			@Override
