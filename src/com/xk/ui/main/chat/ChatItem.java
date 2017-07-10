@@ -411,6 +411,18 @@ public class ChatItem extends ListItem {
 				menu.dispose();
 			}
 			
+			if(fromSelf) {//撤回
+				MenuItem revoke=new MenuItem(m, SWT.NONE);//撤回菜单
+				revoke.setText("撤回");
+				revoke.addSelectionListener(new SelectionAdapter() {
+
+					@Override
+					public void widgetSelected(SelectionEvent e) {
+						WeChatUtil.revokeMsg(log);
+					}
+				});
+			}
+			
 			MenuItem cp=new MenuItem(m, SWT.NONE);//复制菜单
 			cp.setText("复制");
 			cp.addSelectionListener(new SelectionAdapter() {

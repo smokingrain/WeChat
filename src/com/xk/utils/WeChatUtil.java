@@ -721,6 +721,38 @@ public class WeChatUtil {
 		
 	}
 	
+	
+	/**
+	 * 撤回消息
+	 * @param log
+	 * @author o-kui.xiao
+	 */
+	public static void revokeMsg(ChatLog log) {
+		if(!Constant.user.UserName.equals(log.fromId) || log.recalled) {
+			return;
+		}
+		HTTPUtil hu = HTTPUtil.getInstance();
+		Map<String,Object> bodyMap = new HashMap<String,Object>();
+		Map<String,Object> bodyInner = new HashMap<String,Object>();
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
+		bodyMap.put("BaseRequest", bodyInner);
+		bodyMap.put("ClientMsgId", System.currentTimeMillis());
+		bodyMap.put("SvrMsgId", log.msgid);
+		bodyMap.put("ToUserName", log.toId);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("pass_ticket", Constant.sign.pass_ticket);
+		try {
+			String result =  hu.postBody(Constant.REVOKE_MSG, params, JSONUtil.toJson(bodyMap));
+			System.out.println(result);
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * 提醒已读未读
 	 * @param from
