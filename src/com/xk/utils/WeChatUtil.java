@@ -17,6 +17,8 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import org.apache.http.client.ClientProtocolException;
+import org.dom4j.Document;
+import org.dom4j.DocumentHelper;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
@@ -637,6 +639,22 @@ public class WeChatUtil {
 								main.showGroupsAndFriends();
 								main.syncGroup = true;
 							}
+						}else if(10002 == MsgType) {//撤回
+							ChatLog log = ChatLog.fromMap(msg);
+							String xml = log.content.replace("&lt;", "<").replace("&gt;", ">");
+							Document doc = DocumentHelper.parseText(xml);
+							String oldid = null;
+							try {
+								oldid = doc.getRootElement().element("revokemsg").element("msgid").getText();
+							} catch (Exception e) {
+							}
+							for(ChatLog his : ChatLogCache.getLogs(FromUserName)) {
+								if(his.msgid.equals(oldid)) {
+									his.recalled = true;
+									break;
+								}
+							}
+							main.flushChatView(FromUserName, true);
 						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType) {
 							if(Constant.FILTER_USERS.contains(FromUserName)) {
 								System.out.println("忽略特殊用户信息！！" + Content);

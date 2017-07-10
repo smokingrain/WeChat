@@ -277,6 +277,10 @@ public class ChatItem extends ListItem {
 			}
 //			gc.drawPath(contentPath);
 			gc.fillPath(contentPath);
+			if(log.recalled) {
+				drawXX(gc, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, allHeight, SWTResourceManager.getColor(0XFF, 0X00, 0X00));
+			}
+			
 		} else {//逻辑同上，不过是从左往右计算
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			gc.setForeground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
@@ -376,6 +380,9 @@ public class ChatItem extends ListItem {
 			}
 //			gc.drawPath(contentPath);
 			gc.fillPath(contentPath);
+			if(log.recalled) {
+				drawXX(gc, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT  + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, allHeight, SWTResourceManager.getColor(0XFF, 0X00, 0X00));
+			}
 		}
 		trans.translate(0, -HEAD_FOOT_SAPCE);
 		gc.setTransform(trans);
@@ -383,6 +390,17 @@ public class ChatItem extends ListItem {
 		gc.setBackground(backOld);
 		gc.setForeground(foreOld);
 	}
+	
+	private void drawXX(GC gc, int x ,int y ,int width, int height,Color back) {
+		Color base = gc.getForeground();
+		int line = gc.getLineWidth();
+		gc.setForeground(back);
+		gc.setLineWidth(2);
+		gc.drawLine(x, y, x + width, y + height);
+		gc.setForeground(base);
+		gc.setLineWidth(line);
+	}
+	
 
 	@Override
 	public boolean oncliek(MouseEvent e, int itemHeight, int index, int type) {

@@ -22,8 +22,7 @@ public class ChatLog {
 	public String msgid;
 	public Long newMsgId;
 	public Integer msgType;
-	@JsonIgnore
-	public Image img;
+	
 	public String imgPath;
 	public String voicePath;
 	public String content;
@@ -31,6 +30,12 @@ public class ChatLog {
 	public String toId;
 	public Long createTime;
 	public Integer voiceLength;
+	
+	@JsonIgnore
+	public Image img;
+	
+	@JsonIgnore
+	public boolean recalled = false;
 	
 	
 	/**

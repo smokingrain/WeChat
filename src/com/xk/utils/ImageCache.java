@@ -36,19 +36,7 @@ public class ImageCache {
 			@Override
 			public void run() {
 				String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
-				if("你去那边吃屎".equals(convs.NickName)) {
-					System.out.println("url = " + headUrl);
-				}
-				try {
-					convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, null, null);
-				} catch (Exception e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
-				if("你去那边吃屎".equals(convs.NickName)) {
-					System.out.println(headUrl);
-					System.out.println(convs.head);
-				}
+				convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, null, null);
 				callBack.callback(convs);
 			}
 		});
