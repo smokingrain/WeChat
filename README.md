@@ -1,5 +1,5 @@
 # WeChat
-![img](./src/images/example.png "预览图")<br>
+![img](./src/images/example.jpg "预览图")<br>
 java微信客户端<br>
 当前支持64位操作系统，如果需要在32位操作系统上使用，请将SWT.jar替换成32位的就行了 <br>
 SWT.jar与官方发版的包有一点点修改，不能直接使用官方jar,请移步https://github.com/smokingrain/KPlayer/tree/master/win32lib <br>
@@ -22,6 +22,7 @@ SWT.jar与官方发版的包有一点点修改，不能直接使用官方jar,请
 - [x] 置顶会话
 - [x] 设置置顶
 - [x] 复制文字
+- [x] 标识撤回消息
 
 
 #说明
