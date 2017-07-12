@@ -101,7 +101,7 @@ public class MainWindow {
 		shell.setSize(850, 590);
 		shell.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		shell.setText("微信");
-		shell.setImage(SWTResourceManager.getImage(MainWindow.class, "/images/wechat.jpg"));
+		shell.setImage(SWTResourceManager.getImage(MainWindow.class, "/images/wechat.png"));
 		shell.addDisposeListener(new DisposeListener() {
 			
 			@Override
