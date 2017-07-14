@@ -13,13 +13,23 @@ import com.xk.hook.HotKeyListener;
 import com.xk.hook.HotKeys;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.main.CutScreen;
+import com.xk.uiLib.ICallback;
 import com.xk.uiLib.MyList;
 import com.xk.uiLib.XLabel;
 import com.xk.utils.Constant;
+import com.xk.utils.FileUtils;
 import com.xk.utils.ImageCache;
 import com.xk.utils.ImojCache;
 import com.xk.utils.SWTTools;
 import com.xk.utils.WeChatUtil;
+
+
+
+
+
+
+
+
 
 
 
@@ -47,6 +57,12 @@ import org.eclipse.swt.custom.PaintObjectEvent;
 import org.eclipse.swt.custom.PaintObjectListener;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.dnd.DND;
+import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
+import org.eclipse.swt.dnd.DropTargetEvent;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -117,6 +133,24 @@ public class ChatComp extends Composite implements HotKeyListener{
 		chatList = new MyList<ChatItem>(this, 550, 350);
 		chatList.setLocation(0, 50);
 //		chatList.setItemLimit(1500);
+		
+		DropTarget dropTarget = new DropTarget(chatList, DND.DROP_NONE);
+		dropTarget.setTransfer(new Transfer[]{FileTransfer.getInstance()});
+		dropTarget.addDropListener(new DropTargetAdapter(){
+
+			@Override
+			public void drop(DropTargetEvent event) {
+				if(null == convId) {
+					return;
+				}
+				String[] pathes = (String[]) event.data;
+				for(String path : pathes) {
+					sendFile(path);
+				}
+				flush(item);
+			}
+			
+		});
 		
 		Image tempEmoj = SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png");
 		//发送表情按钮
@@ -295,16 +329,14 @@ public class ChatComp extends Composite implements HotKeyListener{
 		if(null != convId) {
 			FileDialog fd = new FileDialog(getShell());
 			fd.setText("选择图片");
-			fd.setFilterExtensions(new String[]{"*.png;*.jpg;*.bmp;*.gif"});
+			fd.setFilterExtensions(new String[]{"*.png;*.jpg;*.jpeg;*.bmp;*.gif"});
 			fd.setFilterNames(new String[]{"图片"});
 			String path = fd.open();
 			if(null != path) {
 				File file = new File(path);
-				ChatLog log = WeChatUtil.sendImg(file, convId);
-				if(null != log) {
-					ChatLogCache.saveLogs(convId, log);
-					flush(item);
-				}
+				ChatLog log = ChatLog.createImageLog(file, convId);
+				sendLog(log, false);
+				flush(item);
 			}
 		}
 	}
@@ -321,11 +353,70 @@ public class ChatComp extends Composite implements HotKeyListener{
 		}
  	}
 	
+	private ICallback createProcess(ChatLog log) {
+		ICallback callBack = new ICallback() {
+			private String convId = ChatComp.this.convId;
+			double length = log.file.length();
+			@Override
+			public Object callback(Object obj) {
+				if(null == obj || !(obj instanceof Long) || !convId.equals(ChatComp.this.convId)) {
+					return null;
+				}
+				Long current = (Long) obj;
+				int persent =((Double)(current / length * 100)).intValue();
+				if(persent != log.persent) {
+					log.persent = persent;
+					Display.getDefault().asyncExec(new Runnable() {
+						
+						@Override
+						public void run() {
+							chatList.flush();
+						}
+					});
+					
+				}
+				return null;
+			}
+		};
+		return callBack;
+	}
+	
+	private void sendLog(ChatLog log, final boolean del) {
+		ChatLogCache.saveLogs(convId, log);
+		ICallback callBack = new ICallback() {
+			private String convId = ChatComp.this.convId;
+			@Override
+			public Object callback(Object obj) {
+				if(null != obj && convId.equals(ChatComp.this.convId)) {
+					log.sent = true;
+					if(del) {
+						log.file.delete();
+					}
+				}
+				WeChatUtil.statusNotify(Constant.user.UserName, convId);
+				return null;
+			}
+		};
+		WeChatUtil.sendLog(log, 3 == log.msgType ? createProcess(log) : null, callBack);
+	}
+	
+	private boolean sendFile(String path) {
+		boolean sent = false;
+		if(!"".equals(path) && null != convId) {
+			File file = new File(path);
+			String ext = FileUtils.getFileExt(file);
+			ChatLog log = Constant.imgTypes.keySet().contains(ext) ? ChatLog.createImageLog(file, convId) : ChatLog.createFileLog(new File(path), convId);
+			sendLog(log, false);
+			sent = true;
+		}
+		return sent;
+	}
+	
 	public boolean sendText(String msg) {
 		boolean sent = false;
 		if(!"".equals(msg) && null != convId) {
-			ChatLog log = WeChatUtil.sendMsg(msg, convId);
-			ChatLogCache.saveLogs(convId, log);
+			ChatLog log = ChatLog.createSimpleLog(msg, convId);
+			sendLog(log, false);
 			flush(item);
 			sent = true;
 		}
@@ -345,12 +436,10 @@ public class ChatComp extends Composite implements HotKeyListener{
 			ImageLoader loader = new ImageLoader();
 			loader.data = new ImageData[]{img.getImageData()};
 			loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
-			ChatLog log = WeChatUtil.sendImg(file, convId);
-			if(null != log) {
-				ChatLogCache.saveLogs(convId, log);
-				flush(item);
-			}
-			file.delete();
+			ChatLog log = ChatLog.createImageLog(file, convId);
+			sendLog(log, true);
+			flush(item);
+			
 		}
 	}
 	

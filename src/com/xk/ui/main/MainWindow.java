@@ -492,7 +492,7 @@ public class MainWindow {
 	 * 渲染联系人，群组
 	 * @param gName
 	 * @param friends
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private void renderContact(String gName, Map<String, List<ContactsStruct>> friends) {
 		List<ContactsStruct> friend = friends.get(gName);

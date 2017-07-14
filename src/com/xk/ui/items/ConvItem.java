@@ -119,7 +119,13 @@ public class ConvItem extends ListItem {
 		}
 		if(null != lastMsg){
 			Color fg = gc.getBackground();
-			gc.setBackground(SWTResourceManager.getColor(0xBD, 0xBD, 0xBD));
+			Color back = null;
+			if(selected || focused) {
+				back = SWTResourceManager.getColor(0xF4, 0xF4, 0xF4);
+			} else {
+				back = SWTResourceManager.getColor(0xAD, 0xAD, 0xAD);
+			}
+			gc.setBackground(back);
 			Path temp = new Path(null);
 			temp.addString(FileUtils.getLimitString(FileUtils.getLimitString(lastMsg, 7), 10), 15 + 58f, start + 37F, font);
 			gc.fillPath(temp);

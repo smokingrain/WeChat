@@ -15,10 +15,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.http.client.ClientProtocolException;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
+import org.dom4j.Element;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
@@ -33,11 +36,32 @@ import com.xk.ui.items.ContactItem;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.items.TypeItem;
 import com.xk.ui.main.MainWindow;
+import com.xk.uiLib.ICallback;
 import com.xk.uiLib.MyList;
 
 public class WeChatUtil {
 
 	private static Timer timer;
+	
+	private static ExecutorService service = Executors.newFixedThreadPool(4);
+	
+	
+	public static void sendLog(final ChatLog log, final ICallback process, final ICallback callBack) {
+		service.submit(new Runnable() {
+			
+			@Override
+			public void run() {
+				if(1 == log.msgType) {
+					sendMsg(log, callBack);
+				} else if(3 == log.msgType) {
+					sendImg(log, process, callBack);
+				} else if(6 == log.msgType) {
+					sendFile(log, process, callBack);
+				}
+			}
+		});
+	}
+	
 	
 	/**
 	 * 用途：置顶取消置顶
@@ -87,7 +111,7 @@ public class WeChatUtil {
 	 * @param file
 	 * @return
 	 */
-	private static String uploadImage(File file) {
+	private static String uploadFile(File file, ICallback callBack) {
 		HTTPUtil hu = HTTPUtil.getInstance();
 		String name = file.getName();
 		String minaType = Constant.imgTypes.get(name.substring(name.lastIndexOf(".") + 1).toLowerCase());
@@ -108,16 +132,16 @@ public class WeChatUtil {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("f", "json");
 		params.put("id", "WU_FILE_" + Constant.file_index++);
-		params.put("type", minaType);
+		params.put("type", null == minaType ? "application/octet-stream" : minaType);
 		params.put("lastModifiedDate", lastModify.toString());
 		params.put("size", String.valueOf(flen));
-		params.put("mediatype", name.toLowerCase().endsWith(".gif") ? "doc" : "pic");
+		params.put("mediatype", null == minaType ? "doc" : (name.toLowerCase().endsWith(".gif") ? "doc" : "pic"));
 		params.put("uploadmediarequest", JSONUtil.toJson(req));
 		params.put("webwx_data_ticket", hu.getCookie("webwx_data_ticket"));
 		params.put("pass_ticket", Constant.sign.pass_ticket);
 		Map<String, File> files = new HashMap<String, File>();
 		files.put("filename", file);
-		String result = hu.httpPostFile(Constant.UPLOAD_MEDIA, params, files);
+		String result = hu.httpPostFile(Constant.UPLOAD_MEDIA, params, files, callBack);
 		Map<String, Object> rst = JSONUtil.fromJson(result);
 		if(null != rst) {
 			return (String) rst.get("MediaId");
@@ -126,18 +150,92 @@ public class WeChatUtil {
 	}
 	
 	/**
-	 * 用途：发送聊天图片
-	 * @date 2017年1月5日
-	 * @param img
+	 * 用途：发送文件
+	 * @param file
 	 * @param to
 	 * @return
+	 * @author xiaokui
 	 */
-	public static ChatLog sendImg(File img, String to) {
-		String mediaId = uploadImage(img);
+	public static ChatLog sendFile(ChatLog log, ICallback process, ICallback callBack) {
+		String mediaId = uploadFile(log.file, process);
 		if(null == mediaId) {
+			callBack.callback(null);
 			return null;
 		}
-		boolean gif = img.getName().toLowerCase().endsWith(".gif");
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("fun", "async");
+		params.put("f", "json");
+		try {
+			params.put("pass_ticket", URLEncoder.encode(Constant.sign.pass_ticket, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Element root = XMLUtils.createElement("appmsg");
+		root.addAttribute("appid", "wxeb7ec651dd0aefa9");
+		root.addAttribute("sdkver", "");
+		root.addElement("title").setText(log.file.getName());
+		root.addElement("des");
+		root.addElement("action");
+		root.addElement("type").setText("6");
+		root.addElement("content");
+		root.addElement("url");
+		root.addElement("rowurl");
+		Element appattach = root.addElement("appattach");
+		appattach.addElement("totallen").setText(String.valueOf(log.file.length()));
+		appattach.addElement("attachid").setText(mediaId);
+		root.addElement("extinfo");
+		
+		Map<String, Object> body = new HashMap<String, Object>();
+		Map<String, Object> bodyInner = new HashMap<String, Object>();
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
+		body.put("BaseRequest", bodyInner);
+		body.put("Scene", 0);
+		Map<String, Object> msgMap = new HashMap<>();
+		long cur = System.currentTimeMillis();
+		msgMap.put("ClientMsgId", cur);
+		msgMap.put("Type", 6);
+		msgMap.put("ToUserName", log.toId);
+		msgMap.put("FromUserName", Constant.user.UserName);
+		msgMap.put("LocalID", cur);
+		msgMap.put("Content", root.asXML());
+		body.put("Msg", msgMap);
+		HTTPUtil hu = HTTPUtil.getInstance();
+		try {
+			String result = hu.postBody(Constant.SEND_FILE, params, JSONUtil.toJson(body));
+			Map<String, Object> rstMap= JSONUtil.fromJson(result);
+			Map<String, Object> obj = (Map<String, Object>) rstMap.get("BaseResponse");
+			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {
+				log.msgid = rstMap.get("MsgID").toString();
+				log.newMsgId = Long.parseLong(rstMap.get("LocalID").toString());
+				callBack.callback(log);
+				return log;
+			}
+		} catch (Exception e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 用途：发送聊天图片
+	 * @date 2017年1月5日
+	 * @param ChatLog
+	 * @param process 上传进度
+	 * @param callBack 发送成功回调
+	 * @return
+	 */
+	public static ChatLog sendImg(ChatLog log, ICallback process, ICallback callBack) {
+		String mediaId = uploadFile(log.file, process);
+		if(null == mediaId) {
+			callBack.callback(null);
+			return null;
+		}
+		boolean gif = log.file.getName().toLowerCase().endsWith(".gif");
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("fun", gif ? "sys" : "async");
 		params.put("f", "json");
@@ -160,7 +258,7 @@ public class WeChatUtil {
 		msgMap.put("ClientMsgId", cur);
 		msgMap.put("MediaId", mediaId);
 		msgMap.put("Type", gif ? 47 : 3);
-		msgMap.put("ToUserName", to);
+		msgMap.put("ToUserName", log.toId);
 		msgMap.put("FromUserName", Constant.user.UserName);
 		msgMap.put("LocalID", cur);
 		body.put("Msg", msgMap);
@@ -170,21 +268,16 @@ public class WeChatUtil {
 			Map<String, Object> rstMap= JSONUtil.fromJson(result);
 			Map<String, Object> obj = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {
-				ChatLog log = new ChatLog();
-				log.createTime = System.currentTimeMillis();
-				log.toId = to;
-				log.fromId = Constant.user.UserName;
 				log.msgid = rstMap.get("MsgID").toString();
 				log.newMsgId = Long.parseLong(rstMap.get("LocalID").toString());
-				log.msgType = 3;
-				log.img = ImageCache.getChatImage(log.msgid, img);
-				log.content = "[图片]";
+				callBack.callback(log);
 				return log;
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		callBack.callback(null);
 		return null;
 	}
 	
@@ -197,7 +290,7 @@ public class WeChatUtil {
 	 * @param sign
 	 * @param user
 	 */
-	public static ChatLog sendMsg(String msg, String to) {
+	public static ChatLog sendMsg(ChatLog log, ICallback callBack) {
 		Map<String, String> params = new HashMap<>();
 		params.put("lang", "zh_CN");
 		params.put("pass_ticket", Constant.sign.pass_ticket);
@@ -212,9 +305,9 @@ public class WeChatUtil {
 		Map<String, Object> msgMap = new HashMap<>();
 		long cur = System.currentTimeMillis();
 		msgMap.put("ClientMsgId", cur);
-		msgMap.put("Content", msg);
+		msgMap.put("Content", log.content);
 		msgMap.put("Type", 1);
-		msgMap.put("ToUserName", to);
+		msgMap.put("ToUserName", log.toId);
 		msgMap.put("FromUserName", Constant.user.UserName);
 		msgMap.put("LocalID", cur);
 		body.put("Msg", msgMap);
@@ -225,21 +318,17 @@ public class WeChatUtil {
 			Map<String, Object> rstMap= JSONUtil.fromJson(result);
 			Map<String, Object> obj = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {
-				System.out.println("msg : " + msg +"-> 发送成功！！");
-				ChatLog log = new ChatLog();
-				log.createTime = System.currentTimeMillis();
-				log.toId = to;
-				log.fromId = Constant.user.UserName;
+				System.out.println("msg : " + log.content +"-> 发送成功！！");
 				log.msgid = rstMap.get("MsgID").toString();
 				log.newMsgId = Long.parseLong(rstMap.get("MsgID").toString());
-				log.msgType = 1;
-				log.content = msg;
+				callBack.callback(log);
 				return log;
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		callBack.callback(null);
 		return null;
 	}
 	
@@ -725,7 +814,7 @@ public class WeChatUtil {
 	/**
 	 * 撤回消息
 	 * @param log
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	public static void revokeMsg(ChatLog log) {
 		if(!Constant.user.UserName.equals(log.fromId) || log.recalled) {
@@ -757,7 +846,7 @@ public class WeChatUtil {
 	 * 提醒已读未读
 	 * @param from
 	 * @param to
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	public static void statusNotify(String from, String to) {
 		HTTPUtil hu = HTTPUtil.getInstance();

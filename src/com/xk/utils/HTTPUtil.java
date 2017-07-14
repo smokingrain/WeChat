@@ -32,6 +32,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.cookie.Cookie;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.impl.client.AbstractHttpClient;
@@ -40,6 +41,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
+
+import com.xk.uiLib.ICallback;
 
 
 public class HTTPUtil {
@@ -82,6 +85,11 @@ public class HTTPUtil {
 		}
 	}
 	
+	public String httpPostFile(String url, Map<String, String> params, Map<String, File> files) {
+		return httpPostFile(url, params, files, null);
+	}
+	
+	
 	/**
 	 * 用途：http图片上传
 	 * @date 2017年1月5日
@@ -90,12 +98,18 @@ public class HTTPUtil {
 	 * @param files
 	 * @return
 	 */
-	public String httpPostFile(String url, Map<String, String> params, Map<String, File> files) {
+	public String httpPostFile(String url, Map<String, String> params, Map<String, File> files, ICallback callBack) {
 		try {
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 			if (null != files) {
 				for (String key : files.keySet()) {
-					builder.addBinaryBody(key, files.get(key));
+					File file = files.get(key);
+					if(null == file) {
+						continue;
+					}
+					FileHookBody body = new FileHookBody(file, ContentType.DEFAULT_BINARY, file.getName());
+					body.setCallBack(callBack);
+					builder.addPart(key, body);
 				}
 			}
 			if (null != params) {

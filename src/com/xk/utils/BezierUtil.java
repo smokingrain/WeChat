@@ -4,7 +4,7 @@ import com.xk.bean.Pointd;
 
 /**
  * 贝塞尔曲线计算公式
- * @author o-kui.xiao
+ * @author xiaokui
  *
  */
 public class BezierUtil {
@@ -14,7 +14,7 @@ public class BezierUtil {
 	 * @param t
 	 * @param points
 	 * @return
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	public static Pointd computLine(double t, Pointd... points) {
 		if(null == points) {
@@ -43,7 +43,7 @@ public class BezierUtil {
 	 * @param p
 	 * @param i
 	 * @return
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private static double computPoint(int n, double t, double p, int i) {
 		double result = (getFactorialSum(n)/(getFactorialSum(i) * getFactorialSum(n - i)))
@@ -55,7 +55,7 @@ public class BezierUtil {
 	 * 计算阶乘
 	 * @param n
 	 * @return
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private static int getFactorialSum(int n) {
 		if (n == 1 || n == 0) {

@@ -277,6 +277,17 @@ public class ChatItem extends ListItem {
 			}
 //			gc.drawPath(contentPath);
 			gc.fillPath(contentPath);
+			if(!log.sent && log.persent < 100 && null != chatContent.get(0) && chatContent.get(0) instanceof ImageNode) {
+				if(((ImageNode)chatContent.get(0)).type == 1) {
+					for(Rectangle rect : imgs.keySet()) {
+						if(imgs.get(rect).equals(chatContent.get(0))) {
+							Rectangle fill = new Rectangle(rect.x, rect.y, rect.width, (int)(rect.height * ((100 - log.persent) / 100D)));
+							gc.fillRectangle(fill);
+							break;
+						}
+					}
+				}
+			}
 			if(log.recalled) {
 				drawXX(gc, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, allHeight, SWTResourceManager.getColor(0XFF, 0X00, 0X00));
 			}
@@ -484,6 +495,13 @@ public class ChatItem extends ListItem {
 							break;
 						}
 						ImageLoader loader = WeChatUtil.loadImage(log.msgid, null);
+//						if(log.local) {
+//							loader = new ImageLoader();
+//							loader.load(log.file.getAbsolutePath());
+//						} else {
+//							
+//						}
+						
 						if(null == loader) {
 							break;
 						}
