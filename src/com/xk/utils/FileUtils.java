@@ -18,6 +18,18 @@ import net.sourceforge.pinyin4j.format.exception.BadHanyuPinyinOutputFormatCombi
 
 public class FileUtils {
 
+	public static String getFileExt(File file) {
+		if(null == file || file.isDirectory()) {
+			return "";
+		}
+		String name = file.getName();
+		if(!name.contains(".")) {
+			return "";
+		}
+		String ext = name.substring(name.lastIndexOf(".") + 1, name.length());
+		return ext.toLowerCase();
+	}
+	
 	
 	public static void writeString(String content,File file){
 		try {

@@ -101,7 +101,7 @@ public class MainWindow {
 		shell.setSize(850, 590);
 		shell.setBackgroundMode(SWT.INHERIT_DEFAULT);
 		shell.setText("微信");
-		shell.setImage(SWTResourceManager.getImage(MainWindow.class, "/images/wechat.jpg"));
+		shell.setImage(SWTResourceManager.getImage(MainWindow.class, "/images/wechat.png"));
 		shell.addDisposeListener(new DisposeListener() {
 			
 			@Override
@@ -492,7 +492,7 @@ public class MainWindow {
 	 * 渲染联系人，群组
 	 * @param gName
 	 * @param friends
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	private void renderContact(String gName, Map<String, List<ContactsStruct>> friends) {
 		List<ContactsStruct> friend = friends.get(gName);

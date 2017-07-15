@@ -42,7 +42,7 @@ public class ImojCache {
 	 * 将文字中的表情提取出来
 	 * @param base
 	 * @return
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	public static List<StringNode> computeNode(String base) {
 		String classReg = "\\<span\\sclass=\"emoji\\s\\w+\"\\>\\</span\\>";
@@ -75,7 +75,7 @@ public class ImojCache {
 	 * 计算这个表情位置
 	 * @param className
 	 * @return
-	 * @author o-kui.xiao
+	 * @author xiaokui
 	 */
 	public static Point computeLoc(String className) {
 		String text = FileUtils.readString(ImojCache.class.getResourceAsStream("/images/imoj.txt"));

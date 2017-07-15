@@ -416,7 +416,7 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 
 /**
  * 绘画接口
- * @author o-kui.xiao
+ * @author xiaokui
  *
  */
 interface Drawable{
