@@ -165,6 +165,7 @@ public class ChatItem extends ListItem {
 		if(null == head) {
 			head = SWTResourceManager.getImage(ChatItem.class, "/images/head.png");
 		}
+		imgs.clear();
 		//原来属性
 		Font oldFont = gc.getFont();
 		Color backOld = gc.getBackground();

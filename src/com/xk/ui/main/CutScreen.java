@@ -15,6 +15,8 @@ import com.xk.uiLib.ICallback;
 import com.xk.utils.SWTTools;
 
 public class CutScreen implements ICallback{
+	
+	private static boolean active = false;
                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 	protected Shell shell;
 	private Display display;
@@ -31,11 +33,16 @@ public class CutScreen implements ICallback{
 			e.printStackTrace();
 		}
 	}
+	
 
 	/**
 	 * Open the window.
 	 */
 	public void open() {
+		if(active) {
+			return ;
+		}
+		active = true;
 		display = Display.getDefault();
 		createContents();
 		shell.open();
@@ -45,6 +52,7 @@ public class CutScreen implements ICallback{
 				display.sleep();
 			}
 		}
+		active = false;
 	}
 
 	/**
