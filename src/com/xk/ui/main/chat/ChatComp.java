@@ -250,9 +250,10 @@ public class ChatComp extends Composite implements HotKeyListener{
 				StyleRange style = event.style;
 				Image image = (Image)style.data;
 				if (!image.isDisposed()) {
+					ImageData id = image.getImageData();
 					int x = event.x;
 					int y = event.y + event.ascent - style.metrics.ascent;
-					event.gc.drawImage(image, x, y);
+					event.gc.drawImage(image, 0, 0, id.width, id.height, x, y, style.metrics.width, style.metrics.ascent);
 				}
 			}
 		});
@@ -308,6 +309,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 	}
 
 	public void addImage(Image image) {
+		double limit = 120d;//宽高限制
 		int offset = text.getCaretOffset();
 		text.insert("\uFFFC");
 		StyleRange style = new StyleRange ();
@@ -315,7 +317,18 @@ public class ChatComp extends Composite implements HotKeyListener{
 		style.length = 1;
 		style.data = image;
 		Rectangle rect = image.getBounds();
-		style.metrics = new GlyphMetrics(rect.height, 0, rect.width);
+		int width = rect.width;
+		int height = rect.height;
+		if(width > limit || height > limit) {
+			if(width > height) {
+				height = (int)(height * (limit / width));
+				width = (int)limit;
+			}else {
+				width = (int)(width * (limit / height));
+				height = (int)limit;
+			}
+		}
+		style.metrics = new GlyphMetrics(height, 0, width);
 		text.setStyleRange(style);
 	}
 	
@@ -353,7 +366,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		}
  	}
 	
-	private ICallback createProcess(ChatLog log) {
+	private ICallback createProcess(final ChatLog log) {
 		ICallback callBack = new ICallback() {
 			private String convId = ChatComp.this.convId;
 			double length = log.file.length();
@@ -381,7 +394,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		return callBack;
 	}
 	
-	private void sendLog(ChatLog log, final boolean del) {
+	private void sendLog(final ChatLog log, final boolean del) {
 		ChatLogCache.saveLogs(convId, log);
 		ICallback callBack = new ICallback() {
 			private String convId = ChatComp.this.convId;
@@ -412,11 +425,43 @@ public class ChatComp extends Composite implements HotKeyListener{
 		return sent;
 	}
 	
-	public boolean sendText(String msg) {
+	/**
+	 * 发送消息，如果是图文，要分条发
+	 * @param str
+	 * @return
+	 * @author o-kui.xiao
+	 */
+	public boolean sendText(String str) {
 		boolean sent = false;
-		if(!"".equals(msg) && null != convId) {
-			ChatLog log = ChatLog.createSimpleLog(msg, convId);
-			sendLog(log, false);
+		if(!"".equals(str) && null != convId) {
+			int index = str.indexOf('\uFFFC');
+			int lastIndex = 0;
+			while (index != -1) {
+				String msg = str.substring(lastIndex, index);
+				ChatLog log = ChatLog.createSimpleLog(msg, convId);
+				sendLog(log, false);
+				StyleRange style = text.getStyleRangeAtOffset(index);
+				if (style != null) {
+					Image image = (Image)style.data;
+					if (image != null) {
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
+						File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
+						file.getParentFile().mkdirs();
+						ImageLoader loader = new ImageLoader();
+						loader.data = new ImageData[]{image.getImageData()};
+						loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
+						ChatLog imgLog = ChatLog.createImageLog(file, convId);
+						sendLog(imgLog, true);
+					}
+				}
+				lastIndex = index + 1;
+				index = str.indexOf('\uFFFC', lastIndex);
+			}
+			if(lastIndex < str.length()) {
+				String msg = str.substring(lastIndex, str.length());
+				ChatLog log = ChatLog.createSimpleLog(msg, convId);
+				sendLog(log, false);
+			}
 			flush(item);
 			sent = true;
 		}
@@ -429,16 +474,16 @@ public class ChatComp extends Composite implements HotKeyListener{
 		cs.open();
 		Image img = cs.img;
 		if(null != img && null != convId) {
-//			addImage(cs.img);
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
-			File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
-			file.getParentFile().mkdirs();
-			ImageLoader loader = new ImageLoader();
-			loader.data = new ImageData[]{img.getImageData()};
-			loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
-			ChatLog log = ChatLog.createImageLog(file, convId);
-			sendLog(log, true);
-			flush(item);
+			addImage(cs.img);
+//			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
+//			File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
+//			file.getParentFile().mkdirs();
+//			ImageLoader loader = new ImageLoader();
+//			loader.data = new ImageData[]{img.getImageData()};
+//			loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
+//			ChatLog log = ChatLog.createImageLog(file, convId);
+//			sendLog(log, true);
+//			flush(item);
 			
 		}
 	}
