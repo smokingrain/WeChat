@@ -6,7 +6,6 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.sun.jna.platform.win32.WinUser.MSG;
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.MemberStruct;
-import com.xk.bean.StringNode;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
 import com.xk.hook.HotKeyListener;
@@ -197,7 +196,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		CLabel cutScreen = new CLabel(this, SWT.CENTER);
 		cutScreen.setBounds(64, 400, 30, 30);
 		cutScreen.setBackground(SWTTools.scaleImage(cutPic.getImageData() , 30, 30));
-		cutScreen.setToolTipText("屏幕截图(ALT + J)");
+		cutScreen.setToolTipText("屏幕截图(CTRL + J)");
 		cutScreen.addMouseListener(new MouseAdapter() {
 			
 			@Override
@@ -366,7 +365,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		}
  	}
 	
-	private ICallback createProcess(ChatLog log) {
+	private ICallback createProcess(final ChatLog log) {
 		ICallback callBack = new ICallback() {
 			private String convId = ChatComp.this.convId;
 			double length = log.file.length();
@@ -394,7 +393,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		return callBack;
 	}
 	
-	private void sendLog(ChatLog log, final boolean del) {
+	private void sendLog(final ChatLog log, final boolean del) {
 		ChatLogCache.saveLogs(convId, log);
 		ICallback callBack = new ICallback() {
 			private String convId = ChatComp.this.convId;

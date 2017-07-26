@@ -97,7 +97,9 @@ public class ConvItem extends ListItem {
 			gc.setAlpha(alf);
 			gc.setBackground(bk);
 		}
+		Font old = gc.getFont();
 		Font font=SWTResourceManager.getFont("宋体", 10, SWT.NORMAL);
+		gc.setFont(font);
 		Image showHead =(null == data.head || data.head.isDisposed()) ? headDefault : data.head;
 		gc.drawImage(showHead, 0, 0, showHead.getImageData().width, showHead.getImageData().height, 15, start + 7, 50, 50);
 		Path path=new Path(null);
@@ -153,6 +155,7 @@ public class ConvItem extends ListItem {
 			gc.setBackground(bk);
 			gc.setForeground(fo);
 		}
+		gc.setFont(old);
 		
 	}
 

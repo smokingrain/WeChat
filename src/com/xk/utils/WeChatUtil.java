@@ -270,14 +270,18 @@ public class WeChatUtil {
 			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {
 				log.msgid = rstMap.get("MsgID").toString();
 				log.newMsgId = Long.parseLong(rstMap.get("LocalID").toString());
-				callBack.callback(log);
+				if(null != callBack) {
+					callBack.callback(log);
+				}
 				return log;
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		callBack.callback(null);
+		if(null != callBack) {
+			callBack.callback(null);
+		}
 		return null;
 	}
 	
@@ -321,14 +325,18 @@ public class WeChatUtil {
 				System.out.println("msg : " + log.content +"-> 发送成功！！");
 				log.msgid = rstMap.get("MsgID").toString();
 				log.newMsgId = Long.parseLong(rstMap.get("MsgID").toString());
-				callBack.callback(log);
+				if(null != callBack) {
+					callBack.callback(log);
+				}
 				return log;
 			}
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		callBack.callback(null);
+		if(null != callBack) {
+			callBack.callback(null);
+		}
 		return null;
 	}
 	
@@ -759,18 +767,20 @@ public class WeChatUtil {
 								ChatLog log = ChatLog.fromMap(msg);
 								if(null != log) {
 									ChatLogCache.saveLogs(FromUserName, log);
-//									String[] splt = Content.split(":<br/>");
-//									String sender = ContactsStruct.getGroupMember(splt[0], Constant.contacts.get(FromUserName));
-//									String ctt = splt[1].replace("<br/>", "\n");
-//									if(ctt.contains("@" + Constant.user.NickName)) {
-//										String detail = ctt.replace("@" + Constant.user.NickName, "");
-//										String reply = "什么情况?";
-//										if(!detail.trim().isEmpty()) {
-//											reply = AutoReply.call(detail, sender);
-//										}
-//										
-//										ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
-//										if(null != replyLog) {
+//									int start = Content.indexOf(":<br/>");
+//									if(start > 0) {
+//										String name = Content.substring(0, start);
+//										String ctt = Content.substring(start + ":<br/>".length(), Content.length());
+//										String sender = ContactsStruct.getGroupMember(name, Constant.contacts.get(FromUserName));
+//										if(ctt.contains("@" + Constant.user.NickName)) {
+//											String detail = ctt.replace("@" + Constant.user.NickName, "");
+//											String reply = "什么情况?";
+//											if(!detail.trim().isEmpty()) {
+//												reply = AutoReply.call(detail, sender);
+//											}
+//											
+//											ChatLog replyLog = ChatLog.createSimpleLog(reply, FromUserName);
+//											WeChatUtil.sendLog(replyLog, null, null);
 //											ChatLogCache.saveLogs(FromUserName, replyLog);
 //										}
 //									}
@@ -785,14 +795,12 @@ public class WeChatUtil {
 									String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
 									String ctt = Content.replace("<br/>", "\n");
 									System.out.println(sender + " 说：" + ctt);
-//									if(!Constant.noReply.contains(FromUserName)) {
-//										String reply = AutoReply.call(ctt, sender);
-//										ChatLog replyLog = WeChatUtil.sendMsg(reply, FromUserName);
-//										if(null != replyLog) {
-//											ChatLogCache.saveLogs(FromUserName, replyLog);
-//										}
-//										
-//									}
+									if(!Constant.noReply.contains(FromUserName)) {
+										String reply = AutoReply.call(ctt, sender);
+										ChatLog replyLog = ChatLog.createSimpleLog(reply, FromUserName);
+										WeChatUtil.sendLog(replyLog, null, null);
+										ChatLogCache.saveLogs(FromUserName, replyLog);
+									}
 									main.flushChatView(FromUserName, true);
 								}
 								

@@ -90,7 +90,7 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 				RECT rect = new RECT();
 				boolean hasrect = u32.GetWindowRect(hwnd, rect);
 //				int handle =  u32.GetWindowLong(hwnd, User32.GWL_HINSTANCE);//32位系统用这个
-				LONG_PTR handle = u32.GetWindowLongPtr(hwnd, User32.GWL_HINSTANCE);
+				LONG_PTR handle = u32.GetWindowLongPtr(hwnd, User32.GWL_HINSTANCE);//64位系统用这个
 				boolean visiable =u32.IsWindowVisible(hwnd);
 				if(hasrect && visiable && handle.longValue() > 0) {
 					System.out.println("handle : " + handle);

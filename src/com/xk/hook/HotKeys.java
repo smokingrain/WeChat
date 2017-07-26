@@ -50,7 +50,7 @@ public class HotKeys {
 			@Override
 			public void run() {
 				System.out.println("reging!");
-				registed = lib.RegisterHotKey(null, 0xAAAA, User32.MOD_ALT, KeyEvent.VK_J);
+				registed = lib.RegisterHotKey(null, 0xAAAA, User32.MOD_CONTROL, KeyEvent.VK_J);
 				lock.lock();
 				try {
 					cond.signal();

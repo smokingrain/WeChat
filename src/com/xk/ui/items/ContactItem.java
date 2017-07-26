@@ -80,7 +80,9 @@ public class ContactItem extends ListItem {
 			gc.setAlpha(alf);
 			gc.setBackground(bk);
 		}
+		Font old = gc.getFont();
 		Font font=SWTResourceManager.getFont("宋体", 10, SWT.NORMAL);
+		gc.setFont(font);
 		if(dir) {
 			int alf=gc.getAlpha();
 			Color bk = gc.getBackground();
@@ -117,7 +119,7 @@ public class ContactItem extends ListItem {
 			}
 			gc.drawPath(path);
 		}
-
+		gc.setFont(old);
 	}
 
 	@Override
