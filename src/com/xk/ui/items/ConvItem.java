@@ -215,9 +215,10 @@ public class ConvItem extends ListItem {
 
 					@Override
 					public void widgetSelected(SelectionEvent arg0) {
-						if(!data.UserName.startsWith("@@")) {
-							Constant.noReply.add(data.UserName);
-						}
+						Constant.noReply.add(data.UserName);
+//						if(!data.UserName.startsWith("@@")) {
+//							
+//						}
 					}
 					
 				});

@@ -13,10 +13,14 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+
+
 
 import org.apache.http.client.ClientProtocolException;
 import org.dom4j.Document;
@@ -44,6 +48,27 @@ public class WeChatUtil {
 	private static Timer timer;
 	
 	private static ExecutorService service = Executors.newFixedThreadPool(4);
+	
+	private static ExecutorService chatRobot = Executors.newFixedThreadPool(4);
+	
+	private static void addRandomReply(String reply, String FromUserName) {
+		chatRobot.submit(new Runnable() {
+			int random = new Random().nextInt(11);
+			@Override
+			public void run() {
+				try {
+					Thread.sleep((long) ((random + 0.5) * 1000));
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				ChatLog replyLog = ChatLog.createSimpleLog(reply, FromUserName);
+				WeChatUtil.sendLog(replyLog, null, null);
+				ChatLogCache.saveLogs(FromUserName, replyLog);
+				MainWindow.getInstance().flushChatView(FromUserName, true);
+			}
+		});
+	}
 	
 	
 	public static void sendLog(final ChatLog log, final ICallback process, final ICallback callBack) {
@@ -718,6 +743,7 @@ public class WeChatUtil {
 				changeUser(modContactList);
 			}
 			Map<String, Object> BaseResponse = (Map<String, Object>) rst.get("BaseResponse");
+			System.out.println(JSONUtil.toJson(rst));
 			if(new Integer(0).equals(BaseResponse.get("Ret"))) {
 				Integer msgCount = (Integer) rst.get("AddMsgCount");
 				if(null != msgCount && msgCount > 0) {
@@ -767,23 +793,34 @@ public class WeChatUtil {
 								ChatLog log = ChatLog.fromMap(msg);
 								if(null != log) {
 									ChatLogCache.saveLogs(FromUserName, log);
-//									int start = Content.indexOf(":<br/>");
-//									if(start > 0) {
-//										String name = Content.substring(0, start);
-//										String ctt = Content.substring(start + ":<br/>".length(), Content.length());
-//										String sender = ContactsStruct.getGroupMember(name, Constant.contacts.get(FromUserName));
-//										if(ctt.contains("@" + Constant.user.NickName)) {
-//											String detail = ctt.replace("@" + Constant.user.NickName, "");
-//											String reply = "什么情况?";
-//											if(!detail.trim().isEmpty()) {
-//												reply = AutoReply.call(detail, sender);
-//											}
-//											
-//											ChatLog replyLog = ChatLog.createSimpleLog(reply, FromUserName);
-//											WeChatUtil.sendLog(replyLog, null, null);
-//											ChatLogCache.saveLogs(FromUserName, replyLog);
-//										}
-//									}
+									int start = Content.indexOf(":<br/>");
+									if(start > 0) {
+										String name = Content.substring(0, start);
+										String ctt = Content.substring(start + ":<br/>".length(), Content.length());
+										String sender = ContactsStruct.getGroupMember(name, Constant.contacts.get(FromUserName));
+										if(!Constant.noReply.contains(FromUserName)) {
+											if(ctt.contains("@" + Constant.user.NickName)) {
+												String detail = ctt.replace("@" + Constant.user.NickName, "");
+												String reply = "什么情况?";
+												if(!detail.trim().isEmpty()) {
+													reply = AutoReply.call(detail, sender);
+												}
+//												addRandomReply(reply, FromUserName);
+	//											ChatLog replyLog = ChatLog.createSimpleLog(reply, FromUserName);
+	//											WeChatUtil.sendLog(replyLog, null, null);
+	//											ChatLogCache.saveLogs(FromUserName, replyLog);
+											}else {
+												String reply = "什么情况?";
+												if(!ctt.trim().isEmpty()) {
+													reply = AutoReply.call(ctt, sender);
+												}
+//												addRandomReply(reply, FromUserName);
+	//											ChatLog replyLog = ChatLog.createSimpleLog(reply, FromUserName);
+	//											WeChatUtil.sendLog(replyLog, null, null);
+	//											ChatLogCache.saveLogs(FromUserName, replyLog);
+											}
+										}
+									}
 									main.flushChatView(FromUserName, true);
 								}
 								
@@ -795,12 +832,12 @@ public class WeChatUtil {
 									String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
 									String ctt = Content.replace("<br/>", "\n");
 									System.out.println(sender + " 说：" + ctt);
-									if(!Constant.noReply.contains(FromUserName)) {
-										String reply = AutoReply.call(ctt, sender);
-										ChatLog replyLog = ChatLog.createSimpleLog(reply, FromUserName);
-										WeChatUtil.sendLog(replyLog, null, null);
-										ChatLogCache.saveLogs(FromUserName, replyLog);
-									}
+//									if(!Constant.noReply.contains(FromUserName)) {
+//										String reply = AutoReply.call(ctt, sender);
+//										ChatLog replyLog = ChatLog.createSimpleLog(reply, FromUserName);
+//										WeChatUtil.sendLog(replyLog, null, null);
+//										ChatLogCache.saveLogs(FromUserName, replyLog);
+//									}
 									main.flushChatView(FromUserName, true);
 								}
 								

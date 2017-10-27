@@ -1,6 +1,7 @@
 package com.xk.utils;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Map;
 
 import com.fasterxml.jackson.core.JsonParser.Feature;
@@ -99,5 +100,14 @@ public class JSONUtil {
 		} catch (Exception e) {
 			return null;
 		} 
+	}
+	
+	
+	public static void main(String[] args) {
+		Map<String, Object> map = new HashMap<String, Object>();
+		Map<String, Object> map1 = new HashMap<String, Object>();
+		map1.put("1111", 123123);
+		map.put("sdf", map1);
+		System.out.print(toJson(map));
 	}
 }
