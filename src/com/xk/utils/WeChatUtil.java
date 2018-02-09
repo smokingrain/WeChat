@@ -22,6 +22,9 @@ import java.util.concurrent.Executors;
 
 
 
+
+
+
 import org.apache.http.client.ClientProtocolException;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -32,6 +35,7 @@ import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Display;
 
 import com.xk.bean.ContactsStruct;
+import com.xk.bean.MemberStruct;
 import com.xk.bean.User;
 import com.xk.bean.WeChatSign;
 import com.xk.chatlogs.ChatLog;
@@ -51,7 +55,7 @@ public class WeChatUtil {
 	
 	private static ExecutorService chatRobot = Executors.newFixedThreadPool(4);
 	
-	private static void addRandomReply(String reply, String FromUserName) {
+	private static void addRandomReply(String ctt, String FromUserName, String user) {
 		chatRobot.submit(new Runnable() {
 			int random = new Random().nextInt(11);
 			@Override
@@ -62,10 +66,44 @@ public class WeChatUtil {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				ChatLog replyLog = ChatLog.createSimpleLog(reply, FromUserName);
-				WeChatUtil.sendLog(replyLog, null, null);
-				ChatLogCache.saveLogs(FromUserName, replyLog);
-				MainWindow.getInstance().flushChatView(FromUserName, true);
+				ICallback<String> textCall = new ICallback<String>() {
+
+					@Override
+					public String callback(String obj) {
+						ChatLog replyLog = ChatLog.createSimpleLog(obj, FromUserName);
+						WeChatUtil.sendLog(replyLog, null, null);
+						ChatLogCache.saveLogs(FromUserName, replyLog);
+						MainWindow.getInstance().flushChatView(FromUserName, true);
+						return null;
+					}
+				};
+				
+				ICallback<File> imgCall = new ICallback<File>() {
+
+					@Override
+					public File callback(File obj) {
+						ChatLog log = ChatLog.createImageLog(obj, FromUserName);
+						WeChatUtil.sendLog(log, null, null);
+						ChatLogCache.saveLogs(FromUserName, log);
+						MainWindow.getInstance().flushChatView(FromUserName, true);
+						return null;
+					}
+				};
+				
+				ICallback<File> fileCall = new ICallback<File>() {
+
+					@Override
+					public File callback(File obj) {
+						ChatLog log = ChatLog.createFileLog(obj, FromUserName);
+						WeChatUtil.sendLog(log, null, null);
+						ChatLogCache.saveLogs(FromUserName, log);
+						MainWindow.getInstance().flushChatView(FromUserName, true);
+						return null;
+					}
+				};
+				
+				AutoReply.call(ctt, user, fileCall, textCall, imgCall);
+				
 			}
 		});
 	}
@@ -778,7 +816,13 @@ public class WeChatUtil {
 								}
 							}
 							main.flushChatView(FromUserName, true);
-						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType) {
+						}else if(10000 == MsgType) {
+							ChatLog log = ChatLog.fromMap(msg);
+							if(null != log) {
+								ChatLogCache.saveLogs(FromUserName, log);
+								main.flushChatView(FromUserName, true);
+							}
+						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType ) {
 							if(Constant.FILTER_USERS.contains(FromUserName)) {
 								System.out.println("忽略特殊用户信息！！" + Content);
 							}else if(FromUserName.equals(Constant.user.UserName)){
@@ -798,26 +842,13 @@ public class WeChatUtil {
 										String name = Content.substring(0, start);
 										String ctt = Content.substring(start + ":<br/>".length(), Content.length());
 										String sender = ContactsStruct.getGroupMember(name, Constant.contacts.get(FromUserName));
-										if(!Constant.noReply.contains(FromUserName)) {
+										if(!Constant.noReply.contains(FromUserName) && !Constant.globalSilence) {
 											if(ctt.contains("@" + Constant.user.NickName)) {
 												String detail = ctt.replace("@" + Constant.user.NickName, "");
 												String reply = "什么情况?";
 												if(!detail.trim().isEmpty()) {
-													reply = AutoReply.call(detail, sender);
+													addRandomReply(reply, FromUserName, name);
 												}
-//												addRandomReply(reply, FromUserName);
-	//											ChatLog replyLog = ChatLog.createSimpleLog(reply, FromUserName);
-	//											WeChatUtil.sendLog(replyLog, null, null);
-	//											ChatLogCache.saveLogs(FromUserName, replyLog);
-											}else {
-												String reply = "什么情况?";
-												if(!ctt.trim().isEmpty()) {
-													reply = AutoReply.call(ctt, sender);
-												}
-//												addRandomReply(reply, FromUserName);
-	//											ChatLog replyLog = ChatLog.createSimpleLog(reply, FromUserName);
-	//											WeChatUtil.sendLog(replyLog, null, null);
-	//											ChatLogCache.saveLogs(FromUserName, replyLog);
 											}
 										}
 									}
@@ -832,12 +863,9 @@ public class WeChatUtil {
 									String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
 									String ctt = Content.replace("<br/>", "\n");
 									System.out.println(sender + " 说：" + ctt);
-//									if(!Constant.noReply.contains(FromUserName)) {
-//										String reply = AutoReply.call(ctt, sender);
-//										ChatLog replyLog = ChatLog.createSimpleLog(reply, FromUserName);
-//										WeChatUtil.sendLog(replyLog, null, null);
-//										ChatLogCache.saveLogs(FromUserName, replyLog);
-//									}
+									if(!Constant.noReply.contains(FromUserName) && !Constant.globalSilence) {
+										addRandomReply(ctt, FromUserName, FromUserName);
+									}
 									main.flushChatView(FromUserName, true);
 								}
 								
@@ -950,7 +978,13 @@ public class WeChatUtil {
 		for(Map<String, Object> map : userList) {
 			int ContactFlag = (int) map.get("ContactFlag");
 			String user = (String) map.get("UserName");
-			mw.topUser(user, ContactFlag == 2049 ? 1 : 0);
+			List<Map<String, Object>> MemberList = (List<Map<String, Object>>) map.get("MemberList");
+			String memberStr = JSONUtil.toJson(MemberList);
+			List<MemberStruct> members = JSONUtil.toBean(memberStr, JSONUtil.getCollectionType(List.class, MemberStruct.class));
+			ContactsStruct cs = Constant.contacts.get(user);
+			cs.ContactFlag = ContactFlag;
+			cs.MemberList = members;
+			mw.topUser(cs, ContactFlag == 2049 ? 1 : 0);
 		}
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {

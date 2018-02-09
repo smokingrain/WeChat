@@ -168,6 +168,47 @@ public class FileUtils {
         return "GBK";  
     }  
 	
+	public static File saveStream(File file, InputStream in) {
+		if(null == file || null == in) {
+			return null;
+		}
+		FileOutputStream out = null;
+		try {
+			out = new FileOutputStream(file);
+			byte[] buffer = new byte[20480];
+			int len = 0;
+			while((len = in.read(buffer, 0, buffer.length)) >= 0) {
+				out.write(buffer, 0, len);
+			}
+			out.flush();
+			return file;
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} finally {
+			if(null != in) {
+				try {
+					in.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			if(null != out) {
+				try {
+					out.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		return null;
+	}
+	
 	public static void main(String[] args) {
 		System.out.println(getFirstSpell("%sdfaas"));
 	}

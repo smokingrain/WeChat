@@ -27,6 +27,7 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.xk.bean.ImageNode;
 import com.xk.bean.StringNode;
 import com.xk.chatlogs.ChatLog;
 import com.xk.ui.items.ContactItem;
@@ -47,7 +48,7 @@ import com.xk.utils.WeChatUtil;
  */
 public class ChatItem extends ListItem {
 
-	private static final Integer ITEM_AREA_WIDTH = 450;
+	protected static final Integer ITEM_AREA_WIDTH = 450;
 	private static final Integer LINE_SPACE_HEIGHT = 2;
 	private static final Integer HEAD_FOOT_SAPCE = 15;
 	private static final Integer HEAD_IMG_HEIGHT = 50;
@@ -435,6 +436,18 @@ public class ChatItem extends ListItem {
 				});
 			}
 			
+			MenuItem del = new MenuItem(m, SWT.NONE);
+			del.setText("删除");
+			del.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent e) {
+					getParent().removeItem(ChatItem.this);
+				}
+				
+			});
+			
+			
 			MenuItem cp=new MenuItem(m, SWT.NONE);//复制菜单
 			cp.setText("复制");
 			cp.addSelectionListener(new SelectionAdapter() {
@@ -539,14 +552,9 @@ public class ChatItem extends ListItem {
 		}
 		return false;
 	}
-}
-
-class ImageNode {
-	public int type;
-	public Image img;
 	
-	public ImageNode(int type, Image img) {
-		this.type = type;
-		this.img = img;
+	public ChatLog getLog() {
+		return log;
 	}
 }
+

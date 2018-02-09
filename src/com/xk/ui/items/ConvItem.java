@@ -18,6 +18,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.StringNode;
+import com.xk.chatlogs.ChatLogCache;
 import com.xk.ui.main.MainWindow;
 import com.xk.uiLib.ICallback;
 import com.xk.uiLib.ListItem;
@@ -179,7 +180,7 @@ public class ConvItem extends ListItem {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
 					if(WeChatUtil.OPlog(data, isTop() ? 0 : 1)) {
-						MainWindow.getInstance().topUser(getData().UserName, isTop() ? 0 : 1);
+						MainWindow.getInstance().topUser(getData(), isTop() ? 0 : 1);
 					}
 				}
 			});
@@ -191,9 +192,22 @@ public class ConvItem extends ListItem {
 				@Override
 				public void widgetSelected(SelectionEvent arg0) {
 					getParent().removeItem(ConvItem.this);
+					ChatLogCache.removeConv(data.UserName);
 				}
 				
 			});
+			
+			MenuItem global = new MenuItem(m, SWT.NONE);
+			global.setText(Constant.globalSilence ? "启用全局回复" : "禁用全局回复");
+			global.addSelectionListener(new SelectionAdapter() {
+
+				@Override
+				public void widgetSelected(SelectionEvent arg0) {
+					Constant.globalSilence = !Constant.globalSilence;
+				}
+				
+			});
+			
 			
 			if(Constant.noReply.contains(data.UserName)) {
 				MenuItem noReply=new MenuItem(m, SWT.NONE);

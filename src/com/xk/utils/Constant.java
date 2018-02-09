@@ -1,11 +1,14 @@
 package com.xk.utils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+
+import org.eclipse.swt.SWT;
 
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.User;
@@ -41,9 +44,38 @@ public class Constant {
 	public static Map<String, String> imgTypes = new HashMap<String, String>();
 	public static User user;
 	public static Set<String> noReply = new HashSet<String>();
+	public static Boolean globalSilence = true;
 	public static WeChatSign sign;
 	public static Map<String, ContactsStruct> contacts = new HashMap<String, ContactsStruct>();
 	public static Integer file_index = 0;
+	
+	public static String DOWNLOAD_TEMP = "songtemp";
+	public static final Map<String, String> SONG_SOURCE = new HashMap<String, String>();
+	public static final List<String> SUPPORTED_SOURCE = new ArrayList<String>(){
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = -1263290324005652107L;
+
+		{
+			add("kugou");
+			add("kuwo");
+			add("ne");
+			add("qier");
+		}
+	};
+	
+	public static final List<String> SUPPORTED_CMD = new ArrayList<String>() {
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 2508424727530199543L;
+
+		{
+			add("歌曲");
+			add("圣诞帽");
+		}
+	};
 	
 	public static final String[] SYNC_HOST = {
 		"webpush.weixin.qq.com",

@@ -43,6 +43,7 @@ import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 import com.xk.uiLib.ICallback;
+import com.xk.utils.song.SongLocation;
 
 
 public class HTTPUtil {
@@ -141,6 +142,31 @@ public class HTTPUtil {
 	}
 	
 	
+	public String getHtml(String url, Map<String, String> params) {
+		if(null != params) {
+			StringBuffer sb = new StringBuffer();
+			sb.append("?");
+			for(String key : params.keySet()) {
+				sb.append(key).append("=").append(params.get(key)).append("&");
+			}
+			url += sb.toString();
+		}
+		return getHtml(url);
+	}
+	
+	
+	public String getHtml(String url, List<NameValuePair> params) {
+		if(null != params) {
+			StringBuffer sb = new StringBuffer();
+			sb.append("?");
+			for(NameValuePair param : params) {
+				sb.append(param.getName()).append("=").append(param.getValue()).append("&");
+			}
+			url += sb.toString();
+		}
+		return getHtml(url);
+	}
+	
 	public String getHtml(String url){
 		StringBuffer result=new StringBuffer();
 		try {
@@ -183,7 +209,11 @@ public class HTTPUtil {
 		return result.toString();
 	}
 	
-	public InputStream getInput(String url, Map<String, String> params){
+	public SongLocation getInputStream(String url) {
+		return getInputStream(url, null);
+	}
+	
+	public SongLocation getInputStream(String url, Map<String, String> params) {
 		if(null != params) {
 			url += "?";
 			for(String key : params.keySet()) {
@@ -204,11 +234,14 @@ public class HTTPUtil {
 				if(null!=headers&&headers.length>0){
 					Header header=headers[0];
 					String redirect=header.getValue();
-					return getInput(redirect);
+					return getInputStream(redirect);
 				}
 			}else{
 				HttpEntity entity = response.getEntity();
-				return entity.getContent();
+				SongLocation location = new SongLocation();
+				location.input = entity.getContent();
+				location.length = entity.getContentLength();
+				return location;
 			}
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
@@ -219,6 +252,16 @@ public class HTTPUtil {
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	
+	public InputStream getInput(String url, Map<String, String> params){
+		SongLocation loc = getInputStream(url, params);
+		if(null != loc) {
+			return loc.input;
 		}
 		return null;
 		

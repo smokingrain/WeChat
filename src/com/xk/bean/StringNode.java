@@ -29,10 +29,10 @@ public class StringNode {
 			if(node.type == 0) {
 				Point pt = gc.textExtent(node.base, flag);
 				x += pt.x + StringNode.SPACE;
-				y = pt.y;
+				y = Math.max(pt.y, y);
 			}else {
 				x += 20 + StringNode.SPACE;
-				y = 20 + StringNode.SPACE;
+				y = Math.max(20 + StringNode.SPACE, y);
 			}
 		}
 		return new Point(x, y);

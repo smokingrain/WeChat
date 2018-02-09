@@ -5,6 +5,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.sun.jna.platform.win32.WinUser.MSG;
 import com.xk.bean.ContactsStruct;
+import com.xk.bean.ImageNode;
 import com.xk.bean.MemberStruct;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
@@ -15,12 +16,20 @@ import com.xk.ui.main.CutScreen;
 import com.xk.uiLib.ICallback;
 import com.xk.uiLib.MyList;
 import com.xk.uiLib.XLabel;
+import com.xk.uiLib.listeners.ItemEvent;
+import com.xk.uiLib.listeners.ItemListener;
 import com.xk.utils.Constant;
 import com.xk.utils.FileUtils;
 import com.xk.utils.ImageCache;
 import com.xk.utils.ImojCache;
 import com.xk.utils.SWTTools;
 import com.xk.utils.WeChatUtil;
+
+
+
+
+
+
 
 
 
@@ -82,6 +91,7 @@ import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.jsoup.helper.StringUtil;
 
 /**
  * 用途：聊天面板
@@ -302,6 +312,15 @@ public class ChatComp extends Composite implements HotKeyListener{
 			}
 		});
 		
+		chatList.addItemListener(new ItemListener<ChatItem>() {
+			
+			@Override
+			public void itemRemove(ItemEvent<ChatItem> e) {
+				ChatLogCache.removeLog(convId, e.item.getLog());
+				flush(item);
+			}
+		});
+		
 		registerHotKey();
 		
 		
@@ -417,7 +436,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		if(!"".equals(path) && null != convId) {
 			File file = new File(path);
 			String ext = FileUtils.getFileExt(file);
-			ChatLog log = Constant.imgTypes.keySet().contains(ext) ? ChatLog.createImageLog(file, convId) : ChatLog.createFileLog(new File(path), convId);
+			ChatLog log = Constant.imgTypes.keySet().contains(ext) ? ChatLog.createImageLog(file, convId) : ChatLog.createFileLog(file, convId);
 			sendLog(log, false);
 			sent = true;
 		}
@@ -437,8 +456,10 @@ public class ChatComp extends Composite implements HotKeyListener{
 			int lastIndex = 0;
 			while (index != -1) {
 				String msg = str.substring(lastIndex, index);
-				ChatLog log = ChatLog.createSimpleLog(msg, convId);
-				sendLog(log, false);
+				if(!StringUtil.isBlank(msg)) {
+					ChatLog log = ChatLog.createSimpleLog(msg, convId);
+					sendLog(log, false);
+				}
 				StyleRange style = text.getStyleRangeAtOffset(index);
 				if (style != null) {
 					Image image = (Image)style.data;
@@ -517,7 +538,14 @@ public class ChatComp extends Composite implements HotKeyListener{
 			long current = 0;
 			long limitTime = 3 * 60 * 1000;//五分钟刷一次时间戳 
 			long limitCount = 10;//或者每十条刷一次时间戳
-			for(ChatLog log : logs) {
+			List<ChatLog> tempLogs = new ArrayList<ChatLog>(logs);
+			for(ChatLog log : tempLogs) {
+				if(10000 == log.msgType) {
+					ChatItem itm = new NotifyItem(log);
+					itm.setWeight(log.createTime);
+					chatList.addItem(itm);
+					continue;
+				}
 				String user = log.fromId;
 				boolean fromSelf = user.equals(Constant.user.UserName);
 				Image head = null;
@@ -551,37 +579,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 						chatContent.add(log.content);
 					}
 				}else {
-					boolean hasImoj = false;
-					String reg = "\\[(\\w+|[\u4E00-\u9FA5]+)\\]";
-					Pattern patternNode = Pattern.compile(reg);
-					Matcher matcherNode = patternNode.matcher(log.content);
-					String[] splt = log.content.split(reg);
-					int index = 0;
-					while (matcherNode.find()) {
-						hasImoj = true;
-						if(index < splt.length) {
-							String txt = splt[index++];
-							for(int i = 0; i < txt.length(); i++ ) {
-								chatContent.add(String.valueOf(txt.charAt(i)));
-							}
-						}
-						String match = matcherNode.group();
-						chatContent.add(getContent(match));
-					}
-					
-					if(hasImoj) {
-						for(int i = index ;i < splt.length ; i++) {
-							String txt = splt[i];
-							for(int j = 0; j < txt.length(); j++ ) {
-								chatContent.add(String.valueOf(txt.charAt(j)));
-							}
-						}
-					}else {
-						String txt = log.content;
-						for(int i = 0; i < txt.length(); i++ ) {
-							chatContent.add(String.valueOf(txt.charAt(i)));
-						}
-					}
+					chatContent.addAll(ImojCache.computeImoj(log.content));
 				}
 				
 				if(log.createTime - current > limitTime || ++limitCount  >= 10) {
@@ -591,8 +589,6 @@ public class ChatComp extends Composite implements HotKeyListener{
 					current = log.createTime;
 					limitCount = 0;
 				}
-				
-				
 				
 				ChatItem ci = new ChatItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
 				ci.setWeight(log.createTime);
@@ -609,14 +605,6 @@ public class ChatComp extends Composite implements HotKeyListener{
 		});
 	}
 
-	private Object getContent(String content) {
-		if(null == content) {
-			return "";
-		}
-		String name = content.replace("[", "").replace("]", "");
-		Image img = ImojCache.qqface.get(name);
-		return null == img ? content : new ImageNode(0, img);
-	}
 	
 	private void registerHotKey() {
 		HotKeys keys = HotKeys.getInstance();

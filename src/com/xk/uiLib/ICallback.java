@@ -1,6 +1,6 @@
 package com.xk.uiLib;
 
-public interface ICallback {
+public interface ICallback<T> {
 
-	public Object callback(Object obj);
+	public T callback(T obj);
 }

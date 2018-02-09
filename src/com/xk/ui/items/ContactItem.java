@@ -40,10 +40,7 @@ public class ContactItem extends ListItem {
 		this.data = data;
 		this.dir = dir;
 		this.name = ImojCache.computeNode(name);
-		if(null != data && "你去那边吃屎".equals(data.NickName)) {
-			System.out.println(data.HeadImgUrl);
-		}
-		ImageCache.asyncLoadPicture(data, new ICallback() {
+		ImageCache.asyncLoadPicture(data, new ICallback<Object>() {
 			
 			@Override
 			public Object callback(Object obj) {

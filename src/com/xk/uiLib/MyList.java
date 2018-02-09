@@ -491,7 +491,7 @@ public class MyList<T extends ListItem> extends Composite {
 			for (ItemListener<T> listener : itemListeners) {
 				listener.itemRemove(event);
 			}
-			items.remove(index);
+			items.remove(removed);
 			removed.setParent(null);
 			countHeight();
 			return removed;

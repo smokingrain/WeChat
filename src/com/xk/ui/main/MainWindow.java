@@ -391,8 +391,8 @@ public class MainWindow {
 	 * @param user 用户id
 	 * @param type 类型 0，取消，1，置顶
 	 */
-	public void topUser(String user, int type) {
-		ContactsStruct cs = Constant.contacts.get(user);
+	public void topUser(ContactsStruct cs, int type) {
+//		ContactsStruct cs = Constant.contacts.get(user);
 		ConvItem item = addConversition(cs);
 		if(null == item) {
 			return;

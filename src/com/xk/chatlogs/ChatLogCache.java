@@ -1,6 +1,7 @@
 package com.xk.chatlogs;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,7 +32,7 @@ public class ChatLogCache {
 		}
 		List<ChatLog> logs = cache.get(conv);
 		if(null == logs) {
-			logs = new CopyOnWriteArrayList<ChatLog>();
+			logs = new ArrayList<ChatLog>();
 			cache.put(conv, logs);
 		}
 		logs.add(log);
@@ -39,5 +40,19 @@ public class ChatLogCache {
 	
 	public static List<ChatLog> getLogs(String convs) {
 		return cache.get(convs);
+	}
+	
+	public static void removeLog(String convs, ChatLog log) {
+		List<ChatLog> logs = getLogs(convs);
+		if(null != logs) {
+			logs.remove(log);
+		}
+	}
+	
+	public static void removeConv(String convs) {
+		List<ChatLog> logs = getLogs(convs);
+		if(null != logs) {
+			logs.clear();
+		}
 	}
 }
