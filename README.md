@@ -8,6 +8,7 @@ SWT.jar与官方发版的包有一点点修改，不能直接使用官方jar,请
 - [x] json解析使用jackson
 - [x] dom4j解析xml
 - [x] http请求使用httpclient
+- [x] java请使用java8及以上版本
 
 #功能
 - [x] 同步最近聊天群，人
