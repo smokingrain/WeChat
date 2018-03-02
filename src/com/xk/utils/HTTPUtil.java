@@ -99,7 +99,7 @@ public class HTTPUtil {
 	 * @param files
 	 * @return
 	 */
-	public String httpPostFile(String url, Map<String, String> params, Map<String, File> files, ICallback callBack) {
+	public String httpPostFile(String url, Map<String, String> params, Map<String, File> files, ICallback<Long> callBack) {
 		try {
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
 			if (null != files) {

@@ -174,7 +174,7 @@ public class WeChatUtil {
 	 * @param file
 	 * @return
 	 */
-	private static String uploadFile(File file, ICallback callBack) {
+	private static String uploadFile(File file, ICallback<Long> callBack) {
 		HTTPUtil hu = HTTPUtil.getInstance();
 		String name = file.getName();
 		String minaType = Constant.imgTypes.get(name.substring(name.lastIndexOf(".") + 1).toLowerCase());
@@ -219,7 +219,7 @@ public class WeChatUtil {
 	 * @return
 	 * @author xiaokui
 	 */
-	public static ChatLog sendFile(ChatLog log, ICallback process, ICallback callBack) {
+	public static ChatLog sendFile(ChatLog log, ICallback<Long> process, ICallback<ChatLog> callBack) {
 		String mediaId = uploadFile(log.file, process);
 		if(null == mediaId) {
 			callBack.callback(null);
@@ -292,7 +292,7 @@ public class WeChatUtil {
 	 * @param callBack 发送成功回调
 	 * @return
 	 */
-	public static ChatLog sendImg(ChatLog log, ICallback process, ICallback callBack) {
+	public static ChatLog sendImg(ChatLog log, ICallback<Long> process, ICallback<ChatLog> callBack) {
 		String mediaId = uploadFile(log.file, process);
 		if(null == mediaId) {
 			callBack.callback(null);
@@ -982,6 +982,9 @@ public class WeChatUtil {
 			String memberStr = JSONUtil.toJson(MemberList);
 			List<MemberStruct> members = JSONUtil.toBean(memberStr, JSONUtil.getCollectionType(List.class, MemberStruct.class));
 			ContactsStruct cs = Constant.contacts.get(user);
+			if(cs == null) {
+				continue;
+			}
 			cs.ContactFlag = ContactFlag;
 			cs.MemberList = members;
 			mw.topUser(cs, ContactFlag == 2049 ? 1 : 0);

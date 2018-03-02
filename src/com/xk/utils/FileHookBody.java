@@ -13,9 +13,9 @@ import org.apache.http.util.Args;
 import com.xk.uiLib.ICallable;
 import com.xk.uiLib.ICallback;
 
-public class FileHookBody extends FileBody implements ICallable{
+public class FileHookBody extends FileBody implements ICallable<Long>{
 
-	private ICallback callBack;
+	private ICallback<Long> callBack;
 	
 	public FileHookBody(File file, ContentType contentType) {
 		super(file, contentType);
@@ -56,7 +56,7 @@ public class FileHookBody extends FileBody implements ICallable{
 
 
 	@Override
-	public void setCallBack(ICallback callBack) {
+	public void setCallBack(ICallback<Long> callBack) {
 		this.callBack = callBack;
 	}
 
