@@ -33,11 +33,5 @@ public class XMLUtils {
 	}
 	
 	public static void main(String[] args){
-//		String xml="<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\"   xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"   xsi:schemaLocation=\"http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd\">  </urlset> ";
-		String xml="<sttttream:stream xmlns=\"jabber:client\" xmlns:sttttream=\"http://etherx.jabber.org/streams\" version=\"1.0\" to=\"dji.com\"/>";
-		Document doc=fromText(xml);
-		Element root=doc.getRootElement();
-		Namespace ns=root.getNamespace();
-		System.out.println(ns);
 	}
 }
