@@ -816,11 +816,16 @@ public class WeChatUtil {
 								}
 							}
 							main.flushChatView(FromUserName, true);
-						}else if(10000 == MsgType) {
+						}else if(10000 == MsgType) {//通知消息
 							ChatLog log = ChatLog.fromMap(msg);
 							if(null != log) {
-								ChatLogCache.saveLogs(FromUserName, log);
-								main.flushChatView(FromUserName, true);
+								if(FromUserName.equals(Constant.user.UserName)){
+									ChatLogCache.saveLogs(ToUserName, log);
+									main.flushChatView(ToUserName, true);
+								} else {
+									ChatLogCache.saveLogs(FromUserName, log);
+									main.flushChatView(FromUserName, true);
+								}
 							}
 						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType ) {
 							if(Constant.FILTER_USERS.contains(FromUserName)) {

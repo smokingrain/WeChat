@@ -46,7 +46,8 @@ public class NotifyItem extends ChatItem {
 			content = ImojCache.computeNode(log.content);
 			GC gc = new GC(getParent());
 			Point size = StringNode.textExtent(content, StringNode.DRAW_FLAGS, gc);
-			height = 22 + (size.x + 1) / ChatItem.ITEM_AREA_WIDTH * (size.y + 2);
+			height = 22 + size.y;
+			gc.dispose();
 		}
 		
 		return height;
@@ -69,8 +70,9 @@ public class NotifyItem extends ChatItem {
 		gc.setAlpha(alf);
 		gc.setBackground(bk);
 		Image icons = SWTResourceManager.getImage(ContactItem.class, "/images/icons.png");
-		Point cur = new Point((width - boxLen) / 2 + left, start + 7 + 11);
+		Point cur = new Point((width - boxLen) / 2 + left, start + 11);
 		int maxHeight = 0;
+		Path path = new Path(null);
 		for(StringNode node : content) {
 			if(node.type == 0) {
 				Point baseSize = gc.textExtent(node.base, StringNode.DRAW_FLAGS);
@@ -80,7 +82,7 @@ public class NotifyItem extends ChatItem {
 					cur.y += maxHeight + 1;
 					maxHeight = 0;
 				}
-				gc.drawText(node.base, cur.x, cur.y, StringNode.DRAW_FLAGS);
+				path.addString(node.base, cur.x, cur.y, gc.getFont());
 				cur.x += baseSize.x;
 			} else {
 				maxHeight = Math.max(maxHeight, 20);
@@ -93,10 +95,8 @@ public class NotifyItem extends ChatItem {
 				cur.x += 20 + 1;
 			}
 		}
-		
-		
-		
-		
+		gc.fillPath(path);
+		path.dispose();
 		
 	}
 	

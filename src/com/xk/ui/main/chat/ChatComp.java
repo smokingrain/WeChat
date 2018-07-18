@@ -161,11 +161,13 @@ public class ChatComp extends Composite implements HotKeyListener{
 			
 		});
 		
+		Image tempPic = SWTResourceManager.getImage(ChatComp.class, "/images/select.png");
 		Image tempEmoj = SWTResourceManager.getImage(ChatComp.class, "/images/emoj.png");
+		Image cutPic = SWTResourceManager.getImage(ChatComp.class, "/images/cutscreen.png");
 		//发送表情按钮
 		final CLabel emojL = new CLabel(this, SWT.CENTER);
 		emojL.setBounds(0, 400, 30, 30);
-		emojL.setBackground(SWTTools.scaleImage(tempEmoj.getImageData(), 30, 30));
+		emojL.setBackground(tempEmoj);
 		emojL.setToolTipText("发送表情");
 		emojL.addMouseListener(new MouseAdapter() {
 
@@ -184,10 +186,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 				
 			}
 		});
-		tempEmoj.dispose();
 		
-		
-		Image tempPic = SWTResourceManager.getImage(ChatComp.class, "/images/select.png");
 		//发送图片按钮
 		CLabel picL = new CLabel(this, SWT.CENTER);
 		picL.setBounds(32, 400, 30, 30);
@@ -202,10 +201,10 @@ public class ChatComp extends Composite implements HotKeyListener{
 			
 		});
 		
-		Image cutPic = SWTResourceManager.getImage(ChatComp.class, "/images/cutscreen.png");
+		//截图按钮
 		CLabel cutScreen = new CLabel(this, SWT.CENTER);
 		cutScreen.setBounds(64, 400, 30, 30);
-		cutScreen.setBackground(SWTTools.scaleImage(cutPic.getImageData() , 30, 30));
+		cutScreen.setBackground(cutPic);
 		cutScreen.setToolTipText("屏幕截图(CTRL + J)");
 		cutScreen.addMouseListener(new MouseAdapter() {
 			
@@ -215,7 +214,6 @@ public class ChatComp extends Composite implements HotKeyListener{
 			}
 			
 		});
-		cutPic.dispose();
 		
 		//内容输入框
 		text = new StyledText(this, SWT.MULTI | SWT.V_SCROLL);
@@ -533,7 +531,9 @@ public class ChatComp extends Composite implements HotKeyListener{
 		this.item = item;
 		chatList.clearAll();
 		List<ChatLog> logs = ChatLogCache.getLogs(convId);
-		WeChatUtil.statusNotify(Constant.user.UserName, convId);
+		if(item.getUnread() > 0) {
+			WeChatUtil.statusNotify(Constant.user.UserName, convId);
+		}
 		if(null != logs) {
 			long current = 0;
 			long limitTime = 3 * 60 * 1000;//五分钟刷一次时间戳 

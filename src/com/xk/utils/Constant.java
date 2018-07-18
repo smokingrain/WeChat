@@ -32,12 +32,14 @@ public class Constant {
 	public static final String BASE_URL = "https://wx.qq.com/";
 	public static final String LOGOUT_URL = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxlogout?redirect=1&type=1&skey={SKEY}";
 	public static final String LOAD_IMG = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxgetmsgimg";
+	public static final String LOAD_VOICE = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxgetvoice";
 	public static final String UPLOAD_MEDIA = "https://file.wx.qq.com/cgi-bin/mmwebwx-bin/webwxuploadmedia";
 	public static final String SEND_IMG = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendmsgimg";
 	public static final String SEND_GIF = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendemoticon";
 	public static final String SEND_FILE = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendappmsg";
 	public static final String OP_LOG = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxoplog";
 	public static final String REVOKE_MSG = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxrevokemsg";
+	
 	
 	public static final String[] FORMATS = {".bmp", ".bmp", ".gif", ".ico", ".jpg", ".png", ".tiff", ".bmp"};
 	

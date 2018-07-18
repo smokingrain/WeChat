@@ -26,11 +26,11 @@ public class ImageFace {
 		if(!file.exists() || file.isDirectory()) {
 			return null;
 		}
-		CascadeClassifier faceCatDetector = new CascadeClassifier("D:/Program Files/opencv/opencv/build/etc/lbpcascades/lbpcascade_frontalcatface.xml");
-		CascadeClassifier faceDetector = new CascadeClassifier("D:/Program Files/opencv/opencv/build/etc/lbpcascades/lbpcascade_frontalface.xml");
-//		CascadeClassifier faceImproDetector = new CascadeClassifier("D:/Program Files/opencv/opencv/build/etc/lbpcascades/lbpcascade_frontalface_improved.xml");
-		CascadeClassifier faceProfDetector = new CascadeClassifier("D:/Program Files/opencv/opencv/build/etc/lbpcascades/lbpcascade_profileface.xml");
-		CascadeClassifier faceSliDetector = new CascadeClassifier("D:/Program Files/opencv/opencv/build/etc/lbpcascades/lbpcascade_silverware.xml");
+		CascadeClassifier faceCatDetector = new CascadeClassifier("D:/Program Files/opencv_3_4_2/opencv/build/etc/lbpcascades/lbpcascade_frontalcatface.xml");
+		CascadeClassifier faceDetector = new CascadeClassifier("D:/Program Files/opencv_3_4_2/opencv/build/etc/lbpcascades/lbpcascade_frontalface.xml");
+//		CascadeClassifier faceImproDetector = new CascadeClassifier("D:/Program Files/opencv_3_4_2/opencv/build/etc/lbpcascades/lbpcascade_frontalface_improved.xml");
+		CascadeClassifier faceProfDetector = new CascadeClassifier("D:/Program Files/opencv_3_4_2/opencv/build/etc/lbpcascades/lbpcascade_profileface.xml");
+		CascadeClassifier faceSliDetector = new CascadeClassifier("D:/Program Files/opencv_3_4_2/opencv/build/etc/lbpcascades/lbpcascade_silverware.xml");
 		List<Rect> faces = new ArrayList<Rect>();
 		Mat image = Imgcodecs.imread(filePath);
 		MatOfRect faceDetections = new MatOfRect();
