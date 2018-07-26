@@ -96,7 +96,7 @@ public class MainWindow {
 		final Color back = SWTResourceManager.getColor(234, 234, 234);
 		final Color red = SWTResourceManager.getColor(SWT.COLOR_RED);
 		final Color dark = SWTResourceManager.getColor(220, 220, 220);
-		shell = new Shell(SWT.NO_TRIM);
+		shell = new Shell(SWT.FILL_WINDING);
 		shell.setBackground(back);
 		shell.setSize(850, 590);
 		shell.setBackgroundMode(SWT.INHERIT_DEFAULT);
