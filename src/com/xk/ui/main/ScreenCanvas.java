@@ -75,6 +75,7 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 		selection = new Rectangle(0, 0, 0, 0);
 		selecting = new Rectangle(0, 0, 0, 0);
 		downLoc = new Point(0, 0);
+		this.setBackgroundImage(base);
 	}
 	
 	/**
@@ -139,7 +140,7 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 				if(e.button != 1 && STATUS.INITED.equals(status)) {
 					callBack.callback(null);
 					return;
-				}else if(e.button != 1 && STATUS.DRAWED.equals(status)) {
+				}else if(e.button != 1 && (STATUS.DRAWED.equals(status) || STATUS.OPTIONG_SELE.equals(status))) {
 					if(selection.contains(e.x, e.y)) {
 						createMenu(e);
 						return;
@@ -168,10 +169,13 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 						return;
 					}
 					status = STATUS.DRAWED;
-				} else if(STATUS.OPTIONG.equals(status)) {
+				} else if(STATUS.OPTIONG.equals(status) || STATUS.OPTIONG_DOWN.equals(status) ) {
 					option.processEvent(e, 2);
-					status = STATUS.DRAWED;
-					options.add(option);
+					if(option.enable()) {
+						options.add(option);
+					}
+					option = option.newInstance();
+					status = STATUS.OPTIONG_SELE;
 				}
 				redraw();
 				
@@ -208,7 +212,7 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 				if(e.button != 1) {
 					return;
 				}
-				if(STATUS.DRAWED.equals(status)) {
+				if(STATUS.DRAWED.equals(status) || STATUS.OPTIONG_DOWN.equals(status)) {
 					Point loc = new Point(e.x, e.y);
 					if(selection.contains(loc)) {
 						GC baseGC = new GC(base);
@@ -274,6 +278,17 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 			}
 			
 		});
+		MenuItem arrow = new MenuItem(m, SWT.NONE);
+		arrow.setText("箭头");
+		arrow.addSelectionListener(new SelectionAdapter() {
+			
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				option = new ArrowDraw();
+				status = STATUS.OPTIONG_SELE;
+			}
+			
+		});
 		
 		m.setVisible(true);
 	}
@@ -289,13 +304,11 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 				if(null == nowWindow) {
 					nowWindow = rect;
 					redraw();
-					System.out.println("find rect " + rect);
 					break;
 				} else if (!rect.equals(nowWindow)) {
 					if(rect.equals(nowWindow.intersection(rect))) {
 						nowWindow = rect;
 						redraw();
-						System.out.println("find sub rect " + rect);
 						break;
 					}else {
 						if(rect.intersects(nowWindow) && nowWindow.contains(now)) {
@@ -303,7 +316,6 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 						}
 						nowWindow = rect;
 						redraw();
-						System.out.println("find parent rect " + rect);
 					}
 				}
 			}
@@ -319,17 +331,20 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 	@Override
 	public void paintControl(PaintEvent e) {
 		GC gc = e.gc;
-		gc.drawImage(base, 0, 0);
+		gc.setAdvanced(true);
+		gc.setAntialias(SWT.ON);
+//		gc.drawImage(base, 0, 0);
 		if(STATUS.INITED.equals(status)) {
-			gc.drawImage(base, 0, 0);
 			maskRect(gc, nowWindow, 2);
 		}else if(STATUS.DRAWING.equals(status)) {
 			maskRect(gc, selecting, 1);
 		}else if(STATUS.DRAWED.equals(status)) {
 			maskRect(gc, selection, 1);
 			drawOptions(gc);
+		}else if(STATUS.OPTIONG_SELE.equals(status)) {
+			maskRect(gc, selection, 1);
+			drawOptions(gc);
 		}else if(STATUS.OPTIONG.equals(status)) {
-			System.out.println("OPTIONG");
 			maskRect(gc, selection, 1);
 			drawOptions(gc);
 		}
@@ -342,7 +357,7 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 		for(Drawable draw : options) {
 			draw.draw(gc);
 		}
-		if(null != option) {
+		if(null != option && option.enable()) {
 			option.draw(gc);
 		}
 	}
@@ -423,6 +438,8 @@ interface Drawable{
 	public void draw(GC gc);
 	public void processEvent(MouseEvent e, int type);
 	public Drawable newInstance();
+	public boolean enable();
+	public void finish();
 	
 }
 
@@ -460,11 +477,23 @@ class BezierLine implements Drawable{
 		// TODO Auto-generated method stub
 		return new BezierLine();
 	}
+
+	@Override
+	public boolean enable() {
+		return points.size() > 0;
+	}
+
+	@Override
+	public void finish() {
+		
+	}
+	
+	
 }
 
 class RectDraw implements Drawable {
 
-	Point loc, size;
+	Point start, target;
 	
 	public RectDraw() {
 	}
@@ -473,16 +502,16 @@ class RectDraw implements Drawable {
 	public void draw(GC gc) {
 		Color old = gc.getForeground();
 		gc.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
-		gc.drawRectangle(Math.min(loc.x, size.x), Math.min(loc.y, size.y), Math.abs(size.x - loc.x), Math.abs(size.y - loc.y));
+		gc.drawRectangle(Math.min(start.x, target.x), Math.min(start.y, target.y), Math.abs(target.x - start.x), Math.abs(target.y - start.y));
 		gc.setForeground(old);
 	}
 
 	@Override
 	public void processEvent(MouseEvent e, int type) {
-		if(null == loc) {
-			loc = new Point(e.x, e.y);
+		if(null == start) {
+			start = new Point(e.x, e.y);
 		} else {
-			size = new Point(e.x, e.y);
+			target = new Point(e.x, e.y);
 		}
 		
 	}
@@ -492,11 +521,124 @@ class RectDraw implements Drawable {
 		// TODO Auto-generated method stub
 		return new RectDraw();
 	}
+
+	@Override
+	public boolean enable() {
+		// TODO Auto-generated method stub
+		return start != null && target != null;
+	}
+
+	@Override
+	public void finish() {
+		// TODO Auto-generated method stub
+		
+	}
+}
+
+class ArrowDraw implements Drawable{
+
+	Point start;
+	Point target;
+	
+	@Override
+	public void draw(GC gc) {
+		Point[] points = computeHead();
+		if(null == points) {
+			return;
+		}
+		Color old = gc.getBackground();
+		Color oldFore = gc.getForeground();
+		gc.setBackground(SWTResourceManager.getColor(SWT.COLOR_RED));
+		gc.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_RED));
+		gc.fillPolygon(new int[]{target.x, target.y, points[0].x, points[0].y, points[1].x, points[1].y});
+		gc.fillPolygon(new int[]{start.x, start.y, points[2].x, points[2].y, points[3].x, points[3].y});
+		gc.drawPolygon(new int[]{target.x, target.y, points[0].x, points[0].y, points[1].x, points[1].y});
+		gc.drawPolygon(new int[]{start.x, start.y, points[2].x, points[2].y, points[3].x, points[3].y});
+		gc.setBackground(old);
+		gc.setForeground(oldFore);
+	}
+	/**
+	 * 计算箭头四个点位置
+	 * 
+	 * @Description:
+	 * @author:肖逵
+	 * @type:方法
+	 * @date:2018年7月31日 上午9:04:33
+	 * @return
+	 */
+	private Point[] computeHead() {
+		if(null == start || null == target) {
+			return null;
+		}
+		int x = Math.abs(start.x - target.x);
+		int y = Math.abs(start.y - target.y);
+		x = x == 0 ? 1 : x;
+		y = y == 0 ? 1 : y;
+		
+		int t = (int) ((Math.sqrt(x * x + y * y) - 8)  * y / x);
+		int s = (int) (Math.sqrt(x * x + y * y) - 8);
+		int length = (int) Math.sqrt(t * t + s * s);
+		
+		int pointX1 = (int) (length  -  (t - 6) * y / Math.sqrt(x * x + y * y));
+		int pointY1 = (int) ((t - 6) * x / Math.sqrt(x * x + y * y));
+		
+		int pointX2 = (int) (length - ((t + 6) * y / Math.sqrt(x * x + y * y)));
+		int pointY2 = (int) ((t + 6) * x / Math.sqrt(x * x + y * y));
+		
+		int pointX3 = (int) (length  -  (t - 2) * y / Math.sqrt(x * x + y * y));
+		int pointY3 = (int) ((t - 2) * x / Math.sqrt(x * x + y * y));
+		
+		int pointX4 = (int) (length - ((t + 2) * y / Math.sqrt(x * x + y * y)));
+		int pointY4 = (int) ((t + 2) * x / Math.sqrt(x * x + y * y));
+		
+		
+		pointX1 = (target.x < start.x) ? (start.x - pointX1) : (start.x + pointX1);
+		pointX2 = (target.x < start.x) ? (start.x - pointX2) : (start.x + pointX2);
+		pointX3 = (target.x < start.x) ? (start.x - pointX3) : (start.x + pointX3);
+		pointX4 = (target.x < start.x) ? (start.x - pointX4) : (start.x + pointX4);
+		
+		pointY1 = (target.y < start.y) ? (start.y - pointY1) : (start.y + pointY1);
+		pointY2 = (target.y < start.y) ? (start.y - pointY2) : (start.y + pointY2);
+		pointY3 = (target.y < start.y) ? (start.y - pointY3) : (start.y + pointY3);
+		pointY4 = (target.y < start.y) ? (start.y - pointY4) : (start.y + pointY4);
+		
+		return new Point[]{new Point(pointX1, pointY1), new Point(pointX2, pointY2), new Point(pointX3, pointY3), new Point(pointX4, pointY4)};
+	}
+
+	@Override
+	public void processEvent(MouseEvent e, int type) {
+		if(null == start) {
+			start = new Point(e.x, e.y);
+		} else {
+			target = new Point(e.x, e.y);
+		}
+	}
+
+	@Override
+	public Drawable newInstance() {
+		return new ArrowDraw();
+	}
+
+	@Override
+	public boolean enable() {
+		if(start != null && target != null) {
+			int x = Math.abs(start.x - target.x);
+			int y = Math.abs(start.y - target.y);
+			return Math.sqrt(x * x + y * y) >= 10;
+		}
+		return false;
+	}
+
+	@Override
+	public void finish() {
+		
+	}
+	
 }
 
 class CircleDraw implements Drawable {
 	
-	Point loc, size;
+	Point start, target;
 	
 	public CircleDraw() {
 	}
@@ -505,24 +647,34 @@ class CircleDraw implements Drawable {
 	public void draw(GC gc) {
 		Color old = gc.getForeground();
 		gc.setForeground(SWTResourceManager.getColor(SWT.COLOR_RED));
-		gc.drawOval(Math.min(loc.x, size.x), Math.min(loc.y, size.y), Math.abs(size.x - loc.x), Math.abs(size.y - loc.y));
+		gc.drawOval(Math.min(start.x, target.x), Math.min(start.y, target.y), Math.abs(target.x - start.x), Math.abs(target.y - start.y));
 		gc.setForeground(old);
 	}
 
 	@Override
 	public void processEvent(MouseEvent e, int type) {
-		if(null == loc) {
-			loc = new Point(e.x, e.y);
+		if(null == start) {
+			start = new Point(e.x, e.y);
 		} else {
-			size = new Point(e.x, e.y);
+			target = new Point(e.x, e.y);
 		}
 		
 	}
 
 	@Override
 	public Drawable newInstance() {
-		// TODO Auto-generated method stub
 		return new CircleDraw();
+	}
+
+	@Override
+	public boolean enable() {
+		// TODO Auto-generated method stub
+		return start != null && target != null;
+	}
+
+	@Override
+	public void finish() {
+		
 	}
 	
 }

@@ -59,7 +59,7 @@ public abstract class ListItem implements Comparable<ListItem>{
 	public void select(){
 		selected=true;
 		if(null!=parent){
-			parent.selected=this;
+			parent.selected = this;
 		}
 	}
 	

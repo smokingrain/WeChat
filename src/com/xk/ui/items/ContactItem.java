@@ -17,7 +17,6 @@ import com.xk.bean.StringNode;
 import com.xk.uiLib.ICallback;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
-import com.xk.utils.FileUtils;
 import com.xk.utils.ImageCache;
 import com.xk.utils.ImojCache;
 

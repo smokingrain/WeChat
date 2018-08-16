@@ -1,6 +1,5 @@
 package com.xk.hook;
 import java.awt.event.KeyEvent;
-import java.util.Date;
 
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.Kernel32;

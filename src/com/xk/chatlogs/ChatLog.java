@@ -130,9 +130,10 @@ public class ChatLog {
 		}
 		
 		//获取图片
-		if(log.msgType == 3 || log.msgType == 47) {
+		if(log.msgType == 3 || log.msgType == 47 || log.msgType == 49) {
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("MsgID", log.msgid);
+			params.put("type", "big");
 			try {
 				params.put("skey", URLEncoder.encode(Constant.sign.skey, "UTF-8"));
 			} catch (UnsupportedEncodingException e1) {

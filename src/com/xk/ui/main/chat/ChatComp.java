@@ -571,7 +571,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 					user = ContactsStruct.getContactName(Constant.contacts.get(log.fromId));
 				}
 				List<Object> chatContent = new ArrayList<>();
-				if(3 == log.msgType || 47 == log.msgType) {
+				if(3 == log.msgType || 47 == log.msgType || 49 == log.msgType) {
 					if(null != log.img) {
 						ImageNode node = new ImageNode(1, log.img);
 						chatContent.add(node);

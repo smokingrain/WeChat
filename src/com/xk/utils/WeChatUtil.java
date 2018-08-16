@@ -827,7 +827,7 @@ public class WeChatUtil {
 									main.flushChatView(FromUserName, true);
 								}
 							}
-						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType ) {
+						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType || 49 == MsgType) {
 							if(Constant.FILTER_USERS.contains(FromUserName)) {
 								System.out.println("忽略特殊用户信息！！" + Content);
 							}else if(FromUserName.equals(Constant.user.UserName)){

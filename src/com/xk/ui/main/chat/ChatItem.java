@@ -474,7 +474,7 @@ public class ChatItem extends ListItem {
 					if(!(chatContent.get(0) instanceof ImageNode)) {
 						break;
 					}
-					final ImageLoader loader = WeChatUtil.loadImage(log.msgid, null);
+					final ImageLoader loader = WeChatUtil.loadImage(log.msgid, "big");
 					if(null == loader) {
 						break;
 					}
@@ -501,14 +501,14 @@ public class ChatItem extends ListItem {
 			m.setVisible(true);
 			
 		}else if(e.button == 1 && e.count == 2 && type == MyList.CLICK_DOUBLE) {//双击
-			if(log.msgType == 3 || log.msgType == 47) {
+			if(log.msgType == 3 || log.msgType == 47 || log.msgType == 49) {
 				Point point = new Point(e.x, e.y);
 				for(Rectangle rect : imgs.keySet()) {
 					if(rect.contains(point)) {
 						if(!(chatContent.get(0) instanceof ImageNode)) {
 							break;
 						}
-						ImageLoader loader = WeChatUtil.loadImage(log.msgid, null);
+						ImageLoader loader = WeChatUtil.loadImage(log.msgid, "big");
 //						if(log.local) {
 //							loader = new ImageLoader();
 //							loader.load(log.file.getAbsolutePath());
