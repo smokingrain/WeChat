@@ -216,6 +216,8 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 					Point loc = new Point(e.x, e.y);
 					if(selection.contains(loc)) {
 						GC baseGC = new GC(base);
+						baseGC.setAdvanced(true);
+						baseGC.setAntialias(SWT.ON);
 						drawOptions(baseGC);
 						baseGC.dispose();
 						Image img = new Image(null, selection.width, selection.height);
