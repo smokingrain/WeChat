@@ -357,7 +357,7 @@ public class MainWindow {
 		
 		//加载自己的头像
 		String headUrl = Constant.BASE_URL + Constant.user.HeadImgUrl + "&type=big";
-		Image temp = ImageCache.getUserHeadCache(Constant.user.UserName, headUrl, null, 180, 180);
+		Image temp = ImageCache.getUserHeadCache(Constant.user.UserName, headUrl, null).getImg();
 		Image img = SWTTools.scaleImage(temp.getImageData(), 30, 30);
 		Constant.user.head = temp;
 		me.setImage(img);

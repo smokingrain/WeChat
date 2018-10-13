@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 
 import com.xk.bean.ContactsStruct;
+import com.xk.bean.ImageNode;
 import com.xk.uiLib.ICallback;
 
 public class ImageCache {
@@ -25,8 +26,8 @@ public class ImageCache {
 	private static final String HEAD_PATH = "headscache"; 
 	private static final String CHAT_PATH = "msgimages"; 
 	
-	private static Map<String, Image> userHeads = new ConcurrentHashMap<String, Image>();
-	private static Map<String, Image> chatImages = new ConcurrentHashMap<String, Image>();
+	private static Map<String, ImageNode> userHeads = new ConcurrentHashMap<String, ImageNode>();
+	private static Map<String, ImageNode> chatImages = new ConcurrentHashMap<String, ImageNode>();
 	
 	private static ExecutorService service = Executors.newFixedThreadPool(20);
 	
@@ -36,7 +37,7 @@ public class ImageCache {
 			@Override
 			public void run() {
 				String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
-				convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, null, null);
+				convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null).getImg();
 				callBack.callback(convs);
 			}
 		});
@@ -72,7 +73,8 @@ public class ImageCache {
 				ImageData[] datas = loader.load(file.getAbsolutePath());
 				if(null != datas && datas.length > 0) {
 					Image img = new Image(null,datas[0]);
-					userHeads.put(id, img);
+					ImageNode node = new ImageNode(1, img, loader);
+					userHeads.put(id, node);
 					count++;
 				}
 			} catch (Exception e) {
@@ -83,29 +85,29 @@ public class ImageCache {
 		System.out.println("load " + count + " caches!!");
 	}
 	
-	public static Image getChatImage(String msgId, File file) {
-		Image temp = chatImages.get(msgId);
-		if(null != temp && !temp.isDisposed()) {
+	public static ImageNode getChatImage(String msgId, File file) {
+		ImageNode temp = chatImages.get(msgId);
+		if(null != temp && !temp.getImg().isDisposed()) {
 			return temp;
 		}
-		Image image = new Image(null, file.getAbsolutePath());
-		if(image.getImageData().width > 200 || image.getImageData().height > 200) {
-			if(image.getImageData().width > image.getImageData().height) {
+		ImageLoader loader = new ImageLoader();
+		loader.load(file.getAbsolutePath());
+		ImageData data = loader.data[0];
+		ImageNode node = new ImageNode(1, new Image(null, loader.data[0]), loader);
+		if(data.width > 200 || data.height > 200) {
+			if(data.width > data.height) {
 				Integer w = 200;
-				Integer h = (int) (image.getImageData().height * 200D / image.getImageData().width);
-				Image tmp = SWTTools.scaleImage(image.getImageData(), w, h);
-				chatImages.put(msgId, tmp);
-				return tmp;
+				Integer h = (int) (data.height * 200D / data.width);
+				node.setImg(SWTTools.scaleImage(data, w, h));
+				chatImages.put(msgId, node);
 			}else {
 				Integer h = 200;
-				Integer w = (int) (image.getImageData().width * 200D / image.getImageData().height);
-				Image tmp = SWTTools.scaleImage(image.getImageData(), w, h);
-				chatImages.put(msgId, tmp);
-				return tmp;
+				Integer w = (int) (data.width * 200D / data.height);
+				node.setImg(SWTTools.scaleImage(data, w, h));
+				chatImages.put(msgId, node);
 			}
 		}
-		
-		return image;
+		return node;
 	}
 	
 	
@@ -120,23 +122,17 @@ public class ImageCache {
 	 * @param height
 	 * @return
 	 */
-	public static Image getChatImage(String msgId, String url, Map<String, String> params,Integer width, Integer height) {
-		Image temp = chatImages.get(msgId);
-		if(null != temp && !temp.isDisposed()) {
-			if(null != width && null != height && (temp.getImageData().width != width || temp.getImageData().height != height)) {
-				Image img = SWTTools.scaleImage(temp.getImageData(), width, height);
-				chatImages.put(msgId, img);
-				temp.dispose();
-				return img;
-			}
+	public static ImageNode getChatImage(String msgId, String url, Map<String, String> params) {
+		ImageNode temp = chatImages.get(msgId);
+		if(null != temp && !temp.getImg().isDisposed()) {
 			return temp;
 		}
 		File cache = new File(CHAT_PATH);
-		return getImage(msgId, cache, chatImages, url, params, width, height);
+		return getImage(msgId, cache, chatImages, url, params);
 	}
 	
 	
-	private static Image getImage(final String id, File cache, Map<String, Image> caches, String url, Map<String, String> params, Integer width, Integer height) {
+	private static ImageNode getImage(final String id, File cache, Map<String, ImageNode> caches, String url, Map<String, String> params) {
 		if(!cache.exists()) {
 			cache.mkdirs();
 		}else if(cache.exists() && !cache.isDirectory()) {
@@ -155,15 +151,9 @@ public class ImageCache {
 				ImageLoader loader = new ImageLoader();
 				ImageData[] datas = loader.load(heads[0].getAbsolutePath());
 				if(null != datas && datas.length > 0) {
-					if(null != width && null != height && (datas[0].width != width || datas[0].height != height)) {
-						Image img = SWTTools.scaleImage(datas[0], width, height);
-						caches.put(id, img);
-						return img;
-					}else {
-						Image img = new Image(null,datas[0]);
-						caches.put(id, img);
-						return img;
-					}
+					ImageNode node = new ImageNode(1, new Image(null, datas[0]), loader);
+					caches.put(id, node);
+					return node;
 				}
 			} catch (Exception e) {
 				// TODO Auto-generated catch block
@@ -176,19 +166,9 @@ public class ImageCache {
 			ImageLoader loader = new ImageLoader();
 			ImageData[] datas = loader.load(in);
 			if(null != datas && datas.length > 0) {
-				if(null != width && null != height && (datas[0].width != width || datas[0].height != height)) {
-					Image img = SWTTools.scaleImage(datas[0], width, height);
-					caches.put(id, img);
-//					File dest = new File(cache, id + Constant.FORMATS[loader.format]);
-//					loader.save(dest.getAbsolutePath(), loader.format);
-					return img;
-				}else {
-					Image img = new Image(null,datas[0]);
-					caches.put(id, img);
-//					File dest = new File(cache, id + Constant.FORMATS[loader.format]);
-//					loader.save(dest.getAbsolutePath(), loader.format);
-					return img;
-				}
+				ImageNode node = new ImageNode(1, new Image(null, datas[0]), loader);
+				caches.put(id, node);
+				return node;
 			}
 		} catch (Exception e) {
 			System.out.println(url);
@@ -207,18 +187,13 @@ public class ImageCache {
 	}
 	
 	
-	public static Image getUserHeadCache(String userName,String url, Map<String, String> params, Integer width, Integer height) {
-		Image temp = userHeads.get(userName);
-		if(null != temp && !temp.isDisposed()) {
-			if(null !=width && null != height && (temp.getImageData().width != width || temp.getImageData().height != height)) {
-				Image img = SWTTools.scaleImage(temp.getImageData(), width, height);
-				userHeads.put(userName, img);
-				return img;
-			}
+	public static ImageNode getUserHeadCache(String userName,String url, Map<String, String> params) {
+		ImageNode temp = userHeads.get(userName);
+		if(null != temp && !temp.getImg().isDisposed()) {
 			return temp;
 		}
 		File cache = new File(HEAD_PATH);
-		return getImage(userName, cache, userHeads, url, params, width, height);
+		return getImage(userName, cache, userHeads, url, params);
 	}
 	
 }

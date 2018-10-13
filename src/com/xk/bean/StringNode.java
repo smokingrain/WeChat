@@ -37,4 +37,12 @@ public class StringNode {
 		}
 		return new Point(x, y);
 	}
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return base;
+	}
+	
+	
 }

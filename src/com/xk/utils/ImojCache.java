@@ -15,6 +15,7 @@ import java.util.regex.Pattern;
 
 import javax.imageio.ImageIO;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -81,7 +82,7 @@ public class ImojCache {
 		}
 		String name = content.replace("[", "").replace("]", "");
 		Image img = ImojCache.qqface.get(name);
-		return null == img ? content : new ImageNode(0, img);
+		return null == img ? content : new ImageNode(0, img, null);
 	}
 	
 	/**

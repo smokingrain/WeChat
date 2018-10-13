@@ -558,23 +558,22 @@ public class ChatComp extends Composite implements HotKeyListener{
 							params.put("username", ms.UserName);
 							params.put("chatroomid", struct.EncryChatRoomId);
 							params.put("skey", Constant.sign.skey);
-							head = ImageCache.getUserHeadCache(log.fromId, Constant.GET_MEMBER_ICON, params, 50, 50);
+							head = ImageCache.getUserHeadCache(log.fromId, Constant.GET_MEMBER_ICON, params).getImg();
 							break;
 						}
 					}
 					user = ContactsStruct.getGroupMember(log.fromId, Constant.contacts.get(convId));
 				}else if(Constant.user.UserName.equals(user)){
-					head = ImageCache.getUserHeadCache(user, Constant.user.HeadImgUrl, null, 50, 50);
+					head = ImageCache.getUserHeadCache(user, Constant.user.HeadImgUrl, null).getImg();
 					user = Constant.user.NickName;
 				}else {
-					head = ImageCache.getUserHeadCache(user, Constant.contacts.get(user).HeadImgUrl, null, 50, 50);
+					head = ImageCache.getUserHeadCache(user, Constant.contacts.get(user).HeadImgUrl, null).getImg();
 					user = ContactsStruct.getContactName(Constant.contacts.get(log.fromId));
 				}
 				List<Object> chatContent = new ArrayList<>();
 				if(3 == log.msgType || 47 == log.msgType || 49 == log.msgType) {
 					if(null != log.img) {
-						ImageNode node = new ImageNode(1, log.img);
-						chatContent.add(node);
+						chatContent.add(log.img);
 					}else {
 						chatContent.add(log.content);
 					}
@@ -590,7 +589,12 @@ public class ChatComp extends Composite implements HotKeyListener{
 					limitCount = 0;
 				}
 				
-				ChatItem ci = new ChatItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
+				ChatItem ci = null;
+				if(null != log.url && !"".equals(log.url)) {
+					ci = new LinkItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
+				} else {
+					ci = new ChatItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
+				}
 				ci.setWeight(log.createTime);
 				chatList.addItem(ci);
 			}

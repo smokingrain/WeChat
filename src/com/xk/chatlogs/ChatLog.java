@@ -7,8 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.xk.bean.ImageNode;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
 import com.xk.utils.SWTTools;
@@ -30,11 +33,12 @@ public class ChatLog {
 	public String content;
 	public String fromId;
 	public String toId;
+	public String url;
 	public Long createTime;
 	public Integer voiceLength;
 	
 	@JsonIgnore
-	public Image img;
+	public ImageNode img;
 	
 	@JsonIgnore
 	public File file;
@@ -84,17 +88,20 @@ public class ChatLog {
 		log.content = "[图片]";
 		log.file = file;
 		
-		Image image = new Image(null, file.getAbsolutePath());
-		log.img = image;
-		if(image.getImageData().width > 200 || image.getImageData().height > 200) {
-			if(image.getImageData().width > image.getImageData().height) {
+		ImageLoader loader = new ImageLoader();
+		loader.load(file.getAbsolutePath());
+		ImageData data = loader.data[0];
+		ImageNode node = new ImageNode(1, new Image(null, loader.data[0]), loader);
+		log.img = node;
+		if(data.width > 200 || data.height > 200) {
+			if(data.width > data.height) {
 				Integer w = 200;
-				Integer h = (int) (image.getImageData().height * 200D / image.getImageData().width);
-				log.img = SWTTools.scaleImage(image.getImageData(), w, h);
+				Integer h = (int) (data.height * 200D / data.width);
+				log.img.setImg(SWTTools.scaleImage(data, w, h));
 			}else {
 				Integer h = 200;
-				Integer w = (int) (image.getImageData().width * 200D / image.getImageData().height);
-				log.img = SWTTools.scaleImage(image.getImageData(), w, h);
+				Integer w = (int) (data.width * 200D / data.height);
+				log.img.setImg(SWTTools.scaleImage(data, w, h));
 			}
 		}
 		return log;
@@ -114,6 +121,7 @@ public class ChatLog {
 		log.content = (String) msg.get("Content");
 		log.fromId = (String) msg.get("FromUserName");
 		log.toId = (String) msg.get("ToUserName");
+		log.url = (String) msg.get("Url");
 		log.createTime = System.currentTimeMillis();
 		
 		//获取群消息发送者
@@ -129,7 +137,8 @@ public class ChatLog {
 			
 		}
 		
-		//获取图片
+		
+		//获取图片或者连接
 		if(log.msgType == 3 || log.msgType == 47 || log.msgType == 49) {
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("MsgID", log.msgid);
@@ -140,25 +149,19 @@ public class ChatLog {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
 			}
-			Image temp = ImageCache.getChatImage(log.msgid, Constant.LOAD_IMG, params, null, null);
-			if(temp != null) {
-				if(temp.getImageData().width > 200 || temp.getImageData().height > 200) {
-					if(temp.getImageData().width > temp.getImageData().height) {
-						Integer width = 200;
-						Integer height = (int) (temp.getImageData().height * 200D / temp.getImageData().width);
-						log.img = ImageCache.getChatImage(log.msgid, Constant.LOAD_IMG, params, width, height);
-					}else {
-						Integer height = 200;
-						Integer width = (int) (temp.getImageData().width * 200D / temp.getImageData().height);
-						log.img = ImageCache.getChatImage(log.msgid, Constant.LOAD_IMG, params, width, height);
-					}
-					
-				}else {
-					log.img = temp;
-				}
-				
+			if(null != log.url && !"".equals(log.url)) {
+				params.put("type", "slave");
+				params.put("skey", Constant.sign.skey);
+				log.content = (String) msg.get("FileName");
+			} else {
+				log.content = 3 == log.msgType ? "[图片]" : "[表情]" ;
 			}
-			log.content = 3 == log.msgType ? "[图片]" : "[表情]" ;
+			ImageNode temp = ImageCache.getChatImage(log.msgid, Constant.LOAD_IMG, params);
+			if(temp != null) {
+				log.img = temp;
+			}
+			
+			
 			
 		}
 		

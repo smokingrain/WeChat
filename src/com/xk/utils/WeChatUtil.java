@@ -29,23 +29,17 @@ import org.apache.http.client.ClientProtocolException;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Display;
 
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.MemberStruct;
 import com.xk.bean.User;
-import com.xk.bean.WeChatSign;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
-import com.xk.ui.items.ContactItem;
-import com.xk.ui.items.ConvItem;
 import com.xk.ui.items.TypeItem;
 import com.xk.ui.main.MainWindow;
 import com.xk.uiLib.ICallback;
-import com.xk.uiLib.MyList;
 
 public class WeChatUtil {
 
