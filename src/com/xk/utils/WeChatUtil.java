@@ -25,6 +25,7 @@ import java.util.concurrent.Executors;
 
 
 
+
 import org.apache.http.client.ClientProtocolException;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -195,7 +196,12 @@ public class WeChatUtil {
 		params.put("mediatype", null == minaType ? "doc" : (name.toLowerCase().endsWith(".gif") ? "doc" : "pic"));
 		params.put("uploadmediarequest", JSONUtil.toJson(req));
 		params.put("webwx_data_ticket", hu.getCookie("webwx_data_ticket"));
-		params.put("pass_ticket", Constant.sign.pass_ticket);
+		try {
+			params.put("pass_ticket", URLEncoder.encode(Constant.sign.pass_ticket, "UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 		Map<String, File> files = new HashMap<String, File>();
 		files.put("filename", file);
 		String result = hu.httpPostFile(Constant.UPLOAD_MEDIA, params, files, callBack);
@@ -424,7 +430,13 @@ public class WeChatUtil {
 					for(Map<String, Object> cmap : contactList) {
 						ContactsStruct convs = ContactsStruct.fromMap(cmap);
 						window.addConversition(convs);
-						
+						if(Constant.contacts.containsKey(convs.UserName)) {
+							ContactsStruct old = Constant.contacts.get(convs.UserName);
+							System.out.println(convs.UserName + " " + convs.NickName + " " + convs.RemarkName);
+							old.fixMissProps(convs);
+						}else {
+							Constant.contacts.put(convs.UserName, convs);
+						}
 						if(convs.UserName.indexOf("@@") > -1) {
 							allGroups.add(convs.UserName);
 						}
@@ -745,6 +757,45 @@ public class WeChatUtil {
 	}
 	
 	
+	public static void acceptFriends(ChatLog log) {
+		HTTPUtil hu = HTTPUtil.getInstance();
+		Map<String,Object> bodyMap = new HashMap<String,Object>();
+		Map<String,Object> bodyInner = new HashMap<String,Object>();
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
+		bodyMap.put("BaseRequest", bodyInner);
+		bodyMap.put("Opcode", 3);
+		bodyMap.put("SceneListCount", 1);
+		bodyMap.put("VerifyContent", "");
+		bodyMap.put("SceneList", new int[]{33});
+		bodyMap.put("VerifyUserList", new Map[]{new HashMap<String, String>(){{
+			put("Value", log.recommendInfo.get("UserName").toString());
+			put("VerifyUserTicket", log.recommendInfo.get("Ticket").toString());
+		}}});
+		bodyMap.put("VerifyUserListSize", 1);
+		bodyMap.put("skey", Constant.sign.skey);
+		Map<String, String> params = new HashMap<String, String>();
+		try {
+			params.put("pass_ticket", URLEncoder.encode(Constant.sign.pass_ticket, "UTF-8"));
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		params.put("r", String.valueOf(System.currentTimeMillis()));
+		try {
+			String result =  hu.postBody(Constant.VERIFY_USER, params, JSONUtil.toJson(bodyMap));
+			System.out.println(result);
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 	/**
 	 * 用途：同步到数据的时候刷新数据
 	 * @date 2016年12月30日
@@ -821,7 +872,7 @@ public class WeChatUtil {
 									main.flushChatView(FromUserName, true);
 								}
 							}
-						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType || 49 == MsgType) {
+						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType || 49 == MsgType || 37 == MsgType) {
 							if(Constant.FILTER_USERS.contains(FromUserName)) {
 								System.out.println("忽略特殊用户信息！！" + Content);
 							}else if(FromUserName.equals(Constant.user.UserName)){
@@ -840,7 +891,7 @@ public class WeChatUtil {
 									if(start > 0) {
 										String name = Content.substring(0, start);
 										String ctt = Content.substring(start + ":<br/>".length(), Content.length());
-										String sender = ContactsStruct.getGroupMember(name, Constant.contacts.get(FromUserName));
+										String sender = ContactsStruct.getGroupMember(name, Constant.getContact(FromUserName));
 										if(!Constant.noReply.contains(FromUserName) && !Constant.globalSilence) {
 											if(ctt.contains("@" + Constant.user.NickName)) {
 												String detail = ctt.replace("@" + Constant.user.NickName, "");
@@ -859,7 +910,7 @@ public class WeChatUtil {
 								ChatLog log = ChatLog.fromMap(msg);
 								if(null != log) {
 									ChatLogCache.saveLogs(FromUserName, log);
-									String sender = ContactsStruct.getContactName(Constant.contacts.get(FromUserName));
+									String sender = ContactsStruct.getContactName(Constant.getContact(FromUserName));
 									String ctt = Content.replace("<br/>", "\n");
 									System.out.println(sender + " 说：" + ctt);
 									if(!Constant.noReply.contains(FromUserName) && !Constant.globalSilence) {
@@ -980,7 +1031,7 @@ public class WeChatUtil {
 			List<Map<String, Object>> MemberList = (List<Map<String, Object>>) map.get("MemberList");
 			String memberStr = JSONUtil.toJson(MemberList);
 			List<MemberStruct> members = JSONUtil.toBean(memberStr, JSONUtil.getCollectionType(List.class, MemberStruct.class));
-			ContactsStruct cs = Constant.contacts.get(user);
+			ContactsStruct cs = Constant.getContact(user);
 			if(cs == null) {
 				continue;
 			}

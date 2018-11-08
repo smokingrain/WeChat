@@ -426,7 +426,7 @@ public class MainWindow {
 //		String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
 //		convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null, 50, 50);
 		String name = ContactsStruct.getContactsStructName(convs);
-		System.out.println("load conver " + name);
+		System.out.println("load conver " + name + ", " + convs.UserName);
 		Integer Statues = convs.Statues;
 		Integer ContactFlag = convs.ContactFlag;
 		boolean top = ContactFlag == 2051 || ContactFlag == 2049;
@@ -523,7 +523,7 @@ public class MainWindow {
 			
 			@Override
 			public void run() {
-				ContactsStruct struct = Constant.contacts.get(conv);
+				ContactsStruct struct = Constant.getContact(conv);
 				ConvItem ci = addConversition(struct);
 				//此时没有在会话列表找到需要从好友中创建新的
 				if(null == ci) {

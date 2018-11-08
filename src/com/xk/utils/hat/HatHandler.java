@@ -24,7 +24,7 @@ public class HatHandler implements ICMDHandler {
 	@Override
 	public void handle(String content, String user, ICallback<File> fileCall,
 			ICallback<String> textCall, ICallback<File> imgCall) {
-		ContactsStruct target = Constant.contacts.get(user);
+		ContactsStruct target = Constant.getContact(user);
 		if(null == target) {
 			textCall.callback("没有找到你的头像");
 			return;

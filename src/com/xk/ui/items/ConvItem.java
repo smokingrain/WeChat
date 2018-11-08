@@ -46,9 +46,9 @@ public class ConvItem extends ListItem {
 	private boolean top;//是否置顶
 	private boolean silence;//是否不提示消息数
 	private Integer unread = 0;//未读数
-	private Image headDefault = SWTResourceManager.getImage(ConvItem.class, "/images/head.png");
-	private Image silenceImage = SWTResourceManager.getImage(ConvItem.class, "/images/silence.png");
-	private Image topImage = SWTResourceManager.getImage(ConvItem.class, "/images/top.png");
+	private static Image headDefault = SWTResourceManager.getImage(ConvItem.class, "/images/head.png");
+	private static Image silenceImage = SWTResourceManager.getImage(ConvItem.class, "/images/silence.png");
+	private static Image topImage = SWTResourceManager.getImage(ConvItem.class, "/images/top.png");
 	
 	
 	public ConvItem(ContactsStruct data, String name, String lastChat, String lastMsg, Long lastTime,

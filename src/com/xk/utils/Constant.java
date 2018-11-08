@@ -39,6 +39,7 @@ public class Constant {
 	public static final String SEND_FILE = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxsendappmsg";
 	public static final String OP_LOG = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxoplog";
 	public static final String REVOKE_MSG = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxrevokemsg";
+	public static final String VERIFY_USER = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxverifyuser";
 	
 	
 	public static final String[] FORMATS = {".bmp", ".bmp", ".gif", ".ico", ".jpg", ".png", ".tiff", ".bmp"};
@@ -49,6 +50,21 @@ public class Constant {
 	public static Boolean globalSilence = true;
 	public static WeChatSign sign;
 	public static Map<String, ContactsStruct> contacts = new HashMap<String, ContactsStruct>();
+	
+	public static ContactsStruct getContact(String userName) {
+		ContactsStruct contact = contacts.get(userName);
+		if(null == contact) {
+			WeChatUtil.loadGroups(new ArrayList<String>(){
+				{
+					add(userName);
+				}
+			});
+			contact = contacts.get(userName);
+		}
+		return contact;
+	}
+	
+	
 	public static Integer file_index = 0;
 	
 	public static String DOWNLOAD_TEMP = "songtemp";
@@ -89,8 +105,8 @@ public class Constant {
 	};
 	
 	// 特殊用户 须过滤
-	public static final List<String> FILTER_USERS = Arrays.asList("newsapp", "fmessage", "filehelper", "weibo", "qqmail", 
-			"fmessage", "tmessage", "qmessage", "qqsync", "floatbottle", "lbsapp", "shakeapp", "medianote", "qqfriend", 
+	public static final List<String> FILTER_USERS = Arrays.asList("newsapp", "filehelper", "weibo", "qqmail", 
+			"tmessage", "qmessage", "qqsync", "floatbottle", "lbsapp", "shakeapp", "medianote", "qqfriend", 
 			"readerapp", "blogapp", "facebookapp", "masssendapp", "meishiapp", "feedsapp", "voip", "blogappweixin", 
 			"weixin", "brandsessionholder", "weixinreminder", "wxid_novlwrv3lqwv11", "gh_22b87fa7cb3c", "officialaccounts",
 			"notification_messages", "wxid_novlwrv3lqwv11", "gh_22b87fa7cb3c", "wxitil", "userexperience_alarm", 

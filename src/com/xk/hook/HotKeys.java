@@ -91,6 +91,7 @@ public class HotKeys {
 		if(registed) {
 			return lib.UnregisterHotKey(null, 0xAAAA);
 		}
+		registed = false;
 		return false;
 	}
 	

@@ -550,7 +550,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 				boolean fromSelf = user.equals(Constant.user.UserName);
 				Image head = null;
 				if(convId.startsWith("@@")) {
-					ContactsStruct struct = Constant.contacts.get(convId);
+					ContactsStruct struct = Constant.getContact(convId);
 					for(MemberStruct ms : struct.MemberList) {
 						if(log.fromId.equals(ms.UserName)) {
 							Map<String, String> params = new HashMap<String, String>();
@@ -558,17 +558,20 @@ public class ChatComp extends Composite implements HotKeyListener{
 							params.put("username", ms.UserName);
 							params.put("chatroomid", struct.EncryChatRoomId);
 							params.put("skey", Constant.sign.skey);
-							head = ImageCache.getUserHeadCache(log.fromId, Constant.GET_MEMBER_ICON, params).getImg();
+							ImageNode node = ImageCache.getUserHeadCache(log.fromId, Constant.GET_MEMBER_ICON, params);
+							if(null != node) {
+								head = node.getImg();
+							}
 							break;
 						}
 					}
-					user = ContactsStruct.getGroupMember(log.fromId, Constant.contacts.get(convId));
+					user = ContactsStruct.getGroupMember(log.fromId, Constant.getContact(convId));
 				}else if(Constant.user.UserName.equals(user)){
 					head = ImageCache.getUserHeadCache(user, Constant.user.HeadImgUrl, null).getImg();
 					user = Constant.user.NickName;
 				}else {
-					head = ImageCache.getUserHeadCache(user, Constant.contacts.get(user).HeadImgUrl, null).getImg();
-					user = ContactsStruct.getContactName(Constant.contacts.get(log.fromId));
+					head = ImageCache.getUserHeadCache(user, Constant.getContact(user).HeadImgUrl, null).getImg();
+					user = ContactsStruct.getContactName(Constant.getContact(log.fromId));
 				}
 				List<Object> chatContent = new ArrayList<>();
 				if(3 == log.msgType || 47 == log.msgType || 49 == log.msgType) {
@@ -590,7 +593,10 @@ public class ChatComp extends Composite implements HotKeyListener{
 				}
 				
 				ChatItem ci = null;
-				if(null != log.url && !"".equals(log.url)) {
+				//这个是
+				if(log.msgType == 37) {
+					ci = new AddFriendItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
+				} else if(null != log.url && !"".equals(log.url)) {
 					ci = new LinkItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
 				} else {
 					ci = new ChatItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);

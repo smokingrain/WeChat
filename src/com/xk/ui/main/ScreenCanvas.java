@@ -222,7 +222,7 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 						baseGC.dispose();
 						Image img = new Image(null, selection.width, selection.height);
 						GC gc = new GC(img);
-						gc.drawImage(base, Math.max(0, selection.x), Math.max(0, selection.y), Math.min(selection.width, base.getImageData().width), Math.min(selection.width, base.getImageData().height), 0, 0, selection.width, selection.height);
+						gc.drawImage(base, Math.max(0, selection.x), Math.max(0, selection.y), Math.min(selection.width, base.getImageData().width), Math.min(selection.height, base.getImageData().height), 0, 0, selection.width, selection.height);
 						
 						gc.dispose();
 						if(null != callBack) {

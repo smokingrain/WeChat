@@ -12,6 +12,7 @@ import org.eclipse.swt.graphics.ImageLoader;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.xk.bean.ImageNode;
+import com.xk.chatlogs.interfaces.IChatLogChain;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
 import com.xk.utils.SWTTools;
@@ -36,6 +37,9 @@ public class ChatLog {
 	public String url;
 	public Long createTime;
 	public Integer voiceLength;
+	
+	@JsonIgnore
+	public Map<String, Object> recommendInfo;
 	
 	@JsonIgnore
 	public ImageNode img;
@@ -123,49 +127,10 @@ public class ChatLog {
 		log.toId = (String) msg.get("ToUserName");
 		log.url = (String) msg.get("Url");
 		log.createTime = System.currentTimeMillis();
-		
-		//获取群消息发送者
-		if(log.fromId.startsWith("@@") && !Constant.user.UserName.equals(log.fromId)) {
-			String[] splt = log.content.split(":<br/>");
-			if(null != splt && splt.length > 0) {
-				log.fromId = splt[0];//ContactsStruct.getGroupMember(splt[0], Constant.contacts.get(log.fromId));
-				if(splt.length > 1) {
-					log.content = splt[1];
-				}
-				
-			}
-			
-		}
+		IChatLogChain firstChain = new GroupChain();
 		
 		
-		//获取图片或者连接
-		if(log.msgType == 3 || log.msgType == 47 || log.msgType == 49) {
-			Map<String, String> params = new HashMap<String, String>();
-			params.put("MsgID", log.msgid);
-			params.put("type", "big");
-			try {
-				params.put("skey", URLEncoder.encode(Constant.sign.skey, "UTF-8"));
-			} catch (UnsupportedEncodingException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-			if(null != log.url && !"".equals(log.url)) {
-				params.put("type", "slave");
-				params.put("skey", Constant.sign.skey);
-				log.content = (String) msg.get("FileName");
-			} else {
-				log.content = 3 == log.msgType ? "[图片]" : "[表情]" ;
-			}
-			ImageNode temp = ImageCache.getChatImage(log.msgid, Constant.LOAD_IMG, params);
-			if(temp != null) {
-				log.img = temp;
-			}
-			
-			
-			
-		}
-		
-		return log;
+		return firstChain.fromMap(log, msg);
 	}
 	
 }

@@ -17,6 +17,7 @@ import com.xk.bean.StringNode;
 import com.xk.chatlogs.ChatLog;
 import com.xk.ui.items.ContactItem;
 import com.xk.utils.Constant;
+import com.xk.utils.FileUtils;
 import com.xk.utils.ImojCache;
 
 
@@ -39,11 +40,11 @@ public class NotifyItem extends ChatItem {
 	
 	@Override
 	public int getHeight() {
-		if(null == log || StringUtil.isBlank(log.content)) {
+		if(null == log || StringUtil.isBlank(FileUtils.getLimitString(log.content, 20))) {
 			return 0;
 		}
 		if(height < 0) {
-			content = ImojCache.computeNode(log.content);
+			content = ImojCache.computeNode(FileUtils.getLimitString(log.content, 20));
 			GC gc = new GC(getParent());
 			Point size = StringNode.textExtent(content, StringNode.DRAW_FLAGS, gc);
 			height = 22 + size.y;

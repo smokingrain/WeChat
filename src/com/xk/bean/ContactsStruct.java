@@ -176,6 +176,9 @@ public class ContactsStruct {
 	 */
 	public static String getContactName(ContactsStruct con) {
 		String name = "匿名";
+		if(null == con) {
+			return name;
+		}
 		if (null != con.RemarkName && !con.RemarkName.trim().isEmpty()) {
 			name = con.RemarkName;
 		} else {

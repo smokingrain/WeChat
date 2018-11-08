@@ -29,7 +29,7 @@ import com.xk.utils.ImojCache;
 public class ContactItem extends ListItem {
 
 	private ContactsStruct data;
-	private Image headDefault=SWTResourceManager.getImage(ContactItem.class, "/images/head.png");
+	private static Image headDefault=SWTResourceManager.getImage(ContactItem.class, "/images/head.png");
 	private boolean dir;
 //	private String name;
 	private List<StringNode> name;

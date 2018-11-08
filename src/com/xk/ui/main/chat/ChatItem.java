@@ -91,8 +91,7 @@ public class ChatItem extends ListItem {
 			for(Object content : chatContent) {
 				if(content instanceof ImageNode) {
 					ImageNode node = (ImageNode) content;
-					Image img = node.getImg();
-					int width = img.getImageData().width;
+					int width = node.getWidth();
 					allLength += width + LINE_SPACE_HEIGHT;
 					if(lineNum == 0) {
 						if(maxWidth < width) {
@@ -101,7 +100,7 @@ public class ChatItem extends ListItem {
 							maxWidth += width + LINE_SPACE_HEIGHT;
 						}
 					}
-					int height = img.getImageData().height;
+					int height = node.getHeight();
 					if(maxHeight < height) {
 						maxHeight = height;
 					}
@@ -202,9 +201,9 @@ public class ChatItem extends ListItem {
 			gc.drawImage(head, 0, 0, head.getImageData().width, head.getImageData().height, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + MyList.BAR_WIDTH), start + LINE_SPACE_HEIGHT, HEAD_IMG_HEIGHT, HEAD_IMG_HEIGHT);
 			gc.setBackground(SWTResourceManager.getColor(0x9E, 0xEE, 0x6B));
 			gc.setForeground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
-			gc.fillRoundRectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, allHeight, 3, 3);
+			gc.fillRoundRectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, getHeight() - nameHeight - LINE_SPACE_HEIGHT * 2 -HEAD_FOOT_SAPCE , 3, 3);
 			gc.setForeground(SWTResourceManager.getColor(0x91, 0xe1, 0x61));
-			gc.drawRoundRectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, allHeight - 3, 3, 3);
+			gc.drawRoundRectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, getHeight() - nameHeight - LINE_SPACE_HEIGHT * 2 - HEAD_FOOT_SAPCE - 1, 3, 3);
 			gc.setFont(font);
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			gc.setForeground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
@@ -231,9 +230,9 @@ public class ChatItem extends ListItem {
 			gc.drawImage(head, 0, 0, head.getImageData().width, head.getImageData().height, LINE_SPACE_HEIGHT, start + LINE_SPACE_HEIGHT, HEAD_IMG_HEIGHT, HEAD_IMG_HEIGHT);
 			gc.setBackground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
 			gc.setForeground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
-			gc.fillRoundRectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT  + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, allHeight, 3, 3);
+			gc.fillRoundRectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT  + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, getHeight() - nameHeight - LINE_SPACE_HEIGHT * 2 - HEAD_FOOT_SAPCE, 3, 3);
 			gc.setForeground(SWTResourceManager.getColor(0xe1, 0xe1, 0xe1));
-			gc.drawRoundRectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT  + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, allHeight - 4, 3, 3);
+			gc.drawRoundRectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT  + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, getHeight() - nameHeight - LINE_SPACE_HEIGHT * 2 - HEAD_FOOT_SAPCE - 1, 3, 3);
 			gc.setFont(font);
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			gc.setForeground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
@@ -265,11 +264,11 @@ public class ChatItem extends ListItem {
 			if(content instanceof ImageNode) {
 				ImageNode node = (ImageNode) content;
 				Image img = node.getImg();
-				int imgWidth = img.getImageData().width;
-				int imgHeight = img.getImageData().height;
+				int imgWidth = node.getWidth();
+				int imgHeight = node.getHeight();
 				cLineWidth += imgWidth;
 				if(cLineWidth > ITEM_AREA_WIDTH) {
-					gc.drawImage(img, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 3  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+					gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 3  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
 					if(node.type == 1) {
 						Rectangle rect = new Rectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 3  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
 						imgs.put(rect, node);
@@ -279,7 +278,7 @@ public class ChatItem extends ListItem {
 					cLineWidth = 0;
 					continue;
 				} else {
-					gc.drawImage(img, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + cLineWidth - imgWidth + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 3  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+					gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + cLineWidth - imgWidth + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 3  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
 					if(node.type == 1) {
 						Rectangle rect = new Rectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + cLineWidth - imgWidth + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 3  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
 						imgs.put(rect, node);
@@ -353,12 +352,13 @@ public class ChatItem extends ListItem {
 			if(content instanceof ImageNode) {//绘制图片
 				ImageNode node = (ImageNode) content;
 				Image img = node.getImg();
-				int imgWidth = img.getImageData().width;
-				int imgHeight = img.getImageData().height;
+				int imgWidth = node.getWidth();
+				int imgHeight = node.getHeight();
 				cLineWidth += imgWidth + LINE_SPACE_HEIGHT;
 				if(cLineWidth > ITEM_AREA_WIDTH) {
 					cHeight += cMaxHeight + LINE_SPACE_HEIGHT;
-					gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+					gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
+//					gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
 					if(node.type == 1) {
 						Rectangle rect = new Rectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
 						imgs.put(rect, node);
@@ -367,7 +367,8 @@ public class ChatItem extends ListItem {
 					cLineWidth = imgWidth + LINE_SPACE_HEIGHT;
 					continue;
 				} else {
-					gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
+					gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
+//					gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
 					if(node.type == 1) {
 						Rectangle rect = new Rectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
 						imgs.put(rect, node);
