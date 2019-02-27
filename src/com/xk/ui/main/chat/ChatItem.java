@@ -197,13 +197,18 @@ public class ChatItem extends ListItem {
 				
 			}
 			gc.fillPath(namePath);//绘制发送者
-//			gc.drawPath(namePath);
 			gc.drawImage(head, 0, 0, head.getImageData().width, head.getImageData().height, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + MyList.BAR_WIDTH), start + LINE_SPACE_HEIGHT, HEAD_IMG_HEIGHT, HEAD_IMG_HEIGHT);
 			gc.setBackground(SWTResourceManager.getColor(0x9E, 0xEE, 0x6B));
-			gc.setForeground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
-			gc.fillRoundRectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, getHeight() - nameHeight - LINE_SPACE_HEIGHT * 2 -HEAD_FOOT_SAPCE , 3, 3);
+			gc.fillRoundRectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, getHeight() - nameHeight - LINE_SPACE_HEIGHT * 2 -HEAD_FOOT_SAPCE , 3, 3);
 			gc.setForeground(SWTResourceManager.getColor(0x91, 0xe1, 0x61));
-			gc.drawRoundRectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, getHeight() - nameHeight - LINE_SPACE_HEIGHT * 2 - HEAD_FOOT_SAPCE - 1, 3, 3);
+			gc.drawRoundRectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + MyList.BAR_WIDTH + MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, getHeight() - nameHeight - LINE_SPACE_HEIGHT * 2 - HEAD_FOOT_SAPCE - 1, 3, 3);
+			gc.fillPolygon(new int[]{width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + MyList.BAR_WIDTH + MARGIN) + maxWidth - 1, start + nameHeight + LINE_SPACE_HEIGHT * 2 + 8,
+					width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + MyList.BAR_WIDTH + MARGIN) + maxWidth + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 2 + 14,
+					width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + MyList.BAR_WIDTH + MARGIN) + maxWidth - 1, start + nameHeight + LINE_SPACE_HEIGHT * 2 + 18});
+			gc.drawLine(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + MyList.BAR_WIDTH + MARGIN) + maxWidth - 1, start + nameHeight + LINE_SPACE_HEIGHT * 2 + 8,
+					width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + MyList.BAR_WIDTH + MARGIN) + maxWidth + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 2 + 14);
+			gc.drawLine(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + MyList.BAR_WIDTH + MARGIN) + maxWidth + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 2 + 14,
+					width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 3 + maxWidth + MyList.BAR_WIDTH + MARGIN) + maxWidth - 1, start + nameHeight + LINE_SPACE_HEIGHT * 2 + 18);
 			gc.setFont(font);
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			gc.setForeground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
@@ -229,10 +234,17 @@ public class ChatItem extends ListItem {
 //			gc.drawPath(namePath);
 			gc.drawImage(head, 0, 0, head.getImageData().width, head.getImageData().height, LINE_SPACE_HEIGHT, start + LINE_SPACE_HEIGHT, HEAD_IMG_HEIGHT, HEAD_IMG_HEIGHT);
 			gc.setBackground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
-			gc.setForeground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
 			gc.fillRoundRectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT  + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, getHeight() - nameHeight - LINE_SPACE_HEIGHT * 2 - HEAD_FOOT_SAPCE, 3, 3);
 			gc.setForeground(SWTResourceManager.getColor(0xe1, 0xe1, 0xe1));
 			gc.drawRoundRectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT  + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 2, maxWidth, getHeight() - nameHeight - LINE_SPACE_HEIGHT * 2 - HEAD_FOOT_SAPCE - 1, 3, 3);
+			gc.fillPolygon(new int[]{
+					HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT  + MARGIN + 1, start + nameHeight + LINE_SPACE_HEIGHT * 2 + 8,
+					HEAD_IMG_HEIGHT  + LINE_SPACE_HEIGHT, start + nameHeight + LINE_SPACE_HEIGHT * 2 + 14,
+					HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT  + MARGIN + 1,start + nameHeight + LINE_SPACE_HEIGHT * 2 + 18});
+			gc.drawLine(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT  + MARGIN + 1, start + nameHeight + LINE_SPACE_HEIGHT * 2 + 8,
+					HEAD_IMG_HEIGHT  + LINE_SPACE_HEIGHT, start + nameHeight + LINE_SPACE_HEIGHT * 2 + 14);
+			gc.drawLine(HEAD_IMG_HEIGHT  +LINE_SPACE_HEIGHT, start + nameHeight + LINE_SPACE_HEIGHT * 2 + 14,
+					HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT  + MARGIN + 1,start + nameHeight + LINE_SPACE_HEIGHT * 2 + 18);
 			gc.setFont(font);
 			gc.setBackground(SWTResourceManager.getColor(0x12, 0x12, 0x12));
 			gc.setForeground(SWTResourceManager.getColor(0x12, 0x12, 0x12));

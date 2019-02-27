@@ -166,7 +166,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		Image cutPic = SWTResourceManager.getImage(ChatComp.class, "/images/cutscreen.png");
 		//发送表情按钮
 		final CLabel emojL = new CLabel(this, SWT.CENTER);
-		emojL.setBounds(0, 400, 30, 30);
+		emojL.setBounds(5, 405, 19, 19);
 		emojL.setBackground(tempEmoj);
 		emojL.setToolTipText("发送表情");
 		emojL.addMouseListener(new MouseAdapter() {
@@ -189,7 +189,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		
 		//发送图片按钮
 		CLabel picL = new CLabel(this, SWT.CENTER);
-		picL.setBounds(32, 400, 30, 30);
+		picL.setBounds(32, 406, 19, 17);
 		picL.setBackground(tempPic);
 		picL.setToolTipText("发送图片");
 		picL.addMouseListener(new MouseAdapter() {
@@ -203,7 +203,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		
 		//截图按钮
 		CLabel cutScreen = new CLabel(this, SWT.CENTER);
-		cutScreen.setBounds(64, 400, 30, 30);
+		cutScreen.setBounds(60, 406, 15, 18);
 		cutScreen.setBackground(cutPic);
 		cutScreen.setToolTipText("屏幕截图(CTRL + J)");
 		cutScreen.addMouseListener(new MouseAdapter() {
