@@ -15,10 +15,8 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.graphics.Transform;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -28,13 +26,11 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.sun.jna.Pointer;
 import com.sun.jna.platform.win32.BaseTSD.LONG_PTR;
 import com.sun.jna.platform.win32.User32;
-import com.sun.jna.platform.win32.WinDef.HDC;
 import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.RECT;
 import com.sun.jna.platform.win32.WinUser.WNDENUMPROC;
 import com.xk.bean.Pointd;
 import com.xk.uiLib.ICallback;
-import com.xk.utils.BezierUtil;
 
 /**
  * 用途：屏幕截图画布
@@ -53,10 +49,10 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 	private List<Rectangle> windows = new ArrayList<Rectangle>();
 	private Rectangle nowWindow;
 	private List<Drawable> options = new CopyOnWriteArrayList<Drawable>();
-	private ICallback callBack;
+	private ICallback<Image> callBack;
 	private Drawable option;
 	
-	public ScreenCanvas(Shell parent, Image base, ICallback callBack) {
+	public ScreenCanvas(Shell parent, Image base, ICallback<Image> callBack) {
 		super(parent, SWT.DOUBLE_BUFFERED);
 		this.parent = parent;
 		this.base = base;
@@ -550,6 +546,8 @@ class ArrowDraw implements Drawable{
 		}
 		Color old = gc.getBackground();
 		Color oldFore = gc.getForeground();
+		gc.setAdvanced(true);
+		gc.setAntialias(SWT.ON);
 		gc.setBackground(SWTResourceManager.getColor(SWT.COLOR_RED));
 		gc.setForeground(SWTResourceManager.getColor(SWT.COLOR_DARK_RED));
 		gc.fillPolygon(new int[]{target.x, target.y, points[0].x, points[0].y, points[1].x, points[1].y});
