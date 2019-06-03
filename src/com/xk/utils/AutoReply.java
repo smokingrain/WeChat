@@ -15,6 +15,7 @@ import org.jsoup.helper.StringUtil;
 import com.xk.uiLib.ICallback;
 import com.xk.utils.hat.HatHandler;
 import com.xk.utils.interfaces.ICMDHandler;
+import com.xk.utils.pic.PictureHandler;
 import com.xk.utils.song.SongHandler;
 
 public class AutoReply {
@@ -87,8 +88,10 @@ public class AutoReply {
 	public static ICMDHandler getHandler(String cmd) {
 		if("歌曲".equals(cmd)) {
 			return new SongHandler();
-		} if("圣诞帽".equals(cmd)) {
+		}else if("圣诞帽".equals(cmd)) {
 			return new HatHandler();
+		} else if("脸".equals(cmd)) {
+			return new PictureHandler();
 		}
 		return null;
 	}

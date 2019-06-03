@@ -3,14 +3,11 @@ package com.xk.ui.main;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Timer;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseTrackListener;
@@ -24,17 +21,16 @@ import com.sun.jna.platform.win32.User32;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
 import com.sun.jna.platform.win32.WinUser.FLASHWINFO;
 import com.xk.bean.ContactsStruct;
-import com.xk.bean.MemberStruct;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
 import com.xk.ui.items.ContactItem;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.items.TypeItem;
 import com.xk.ui.main.chat.ChatComp;
+import com.xk.uiLib.AutoCombo;
 import com.xk.uiLib.ListItem;
 import com.xk.uiLib.MyList;
 import com.xk.uiLib.MyText;
-import com.xk.uiLib.MyText.DeleteListener;
 import com.xk.uiLib.listeners.ItemEvent;
 import com.xk.uiLib.listeners.ItemListener;
 import com.xk.uiLib.listeners.ItemSelectionEvent;
@@ -129,13 +125,13 @@ public class MainWindow {
 			public void mouseUp(MouseEvent e) {
 				Point globPos = me.toDisplay(me.getLocation());
 				System.out.println(globPos.x  + "  " + globPos.y);
-				FloatWindow bb = FloatWindow.getInstance();
+				FloatWindow<Integer> bb = FloatWindow.getInstance();
 				bb.init();
 				bb.setTimeOut(2000L);
 				bb.setSize(180, 255);
 				MyInfoComp mic = new MyInfoComp(bb.shell, SWT.NONE, Constant.user);
 				bb.add(mic);
-				Integer rst = (Integer) bb.open(globPos.x + e.x, globPos.y + e.y);
+				Integer rst = bb.open(globPos.x + e.x, globPos.y + e.y);
 				if(null != rst && 1 == rst) {
 					//打开和自己聊天的窗口
 				}
@@ -200,23 +196,20 @@ public class MainWindow {
 		text.setBounds(66, 17, 190, 25);
 		text.setInnerImage( search);
 		text.setNoTrim();
-		text.addDeleteListener(new DeleteListener() {
+		
+		AutoCombo ac = new AutoCombo(text) {
 			
 			@Override
-			public void deleteClicked() {
-				searchUser();
-			}
-		});
-		text.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if(e.keyCode==SWT.CR){
-					searchUser();
+			public void onSelect(String key, ContactsStruct value) {
+				ConvItem itm = addConversition(value, true);
+				if(null != itm) {
+					convers.select(itm, false);
 				}
+				types.select(0, false);
+				
 			}
-			
-		});
+		};
+		ac.init();
 		
 		//添加，暂未实现
 		Label label = new Label(shell, SWT.NONE);
@@ -356,7 +349,7 @@ public class MainWindow {
 		WeChatUtil.syncData();//开始发送心跳包，拉消息
 		
 		//加载自己的头像
-		String headUrl = Constant.BASE_URL + Constant.user.HeadImgUrl + "&type=big";
+		String headUrl = String.format(Constant.BASE_URL, Constant.HOST) + Constant.user.HeadImgUrl + "&type=big";
 		Image temp = ImageCache.getUserHeadCache(Constant.user.UserName, headUrl, null).getImg();
 		Image img = SWTTools.scaleImage(temp.getImageData(), 30, 30);
 		Constant.user.head = temp;
@@ -368,19 +361,19 @@ public class MainWindow {
 	 * 搜索联系人
 	 */
 	private void searchUser() {
-		String name = text.getText().trim();
-		if(!name.isEmpty()) {
-			for(ContactsStruct convs : Constant.contacts.values()) {
-				if((null != convs.RemarkName && convs.RemarkName.contains(name)) || (null != convs.NickName && convs.NickName.contains(name))) {
-					ConvItem itm = addConversition(convs);
-					if(null != itm) {
-						convers.select(itm, false);
-					}
-					break;
-				}
-			}
-			types.select(0, false);
-		}
+//		String name = text.getText().trim();
+//		if(!name.isEmpty()) {
+//			for(ContactsStruct convs : Constant.contacts.values()) {
+//				if((null != convs.RemarkName && convs.RemarkName.contains(name)) || (null != convs.NickName && convs.NickName.contains(name))) {
+//					ConvItem itm = addConversition(convs);
+//					if(null != itm) {
+//						convers.select(itm, false);
+//					}
+//					break;
+//				}
+//			}
+//			types.select(0, false);
+//		}
 		
 		
 	}
@@ -413,13 +406,8 @@ public class MainWindow {
 		
 	}
 	
-	/**
-	 * 用途：添加会话
-	 * @date 2016年12月30日
-	 * @param convs 会话对象属性
-	 * @return
-	 */
-	public ConvItem addConversition(ContactsStruct convs) {
+	
+	public ConvItem addConversition(ContactsStruct convs, boolean first) {
 		if(null == convs) {
 			return null;
 		}
@@ -437,12 +425,22 @@ public class MainWindow {
 			}
 		}
 		ConvItem ci = new ConvItem(convs, name, null, null, null, top, (convs.MemberCount > 0 && Statues == 0) || (convs.MemberCount == 0 && ContactFlag == 513), 0);
-		if(top) {
+		if(top || first) {
 			convers.addItem(0, ci);
 		} else {
 			convers.addItem(ci);
 		}
 		return ci;
+	}
+	
+	/**
+	 * 用途：添加会话
+	 * @date 2016年12月30日
+	 * @param convs 会话对象属性
+	 * @return
+	 */
+	public ConvItem addConversition(ContactsStruct convs) {
+		return addConversition(convs, false);
 	}
 	
 	/**
@@ -484,8 +482,12 @@ public class MainWindow {
 			public void run() {
 				contacts.flush();
 				convers.flush();
+				Map<String, ContactsStruct> items = new HashMap<String, ContactsStruct>();
+				items.putAll(Constant.contacts);
+				text.setData("items", items);
 			}
 		});
+		
 	}
 	
 	/**

@@ -23,7 +23,7 @@ public class AddFriendChain extends ChatLogChain {
 			params.put("username", userName);
 			params.put("msgid", log.msgid);
 			params.put("skey", Constant.sign.skey);
-			log.img = ImageCache.getUserHeadCache(userName, Constant.GET_MEMBER_ICON, params);
+			log.img = ImageCache.getUserHeadCache(userName, String.format(Constant.GET_MEMBER_ICON, Constant.HOST), params);
 		}
 		return processReturn(log, map);
 	}

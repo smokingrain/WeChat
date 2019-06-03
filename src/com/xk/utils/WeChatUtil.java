@@ -26,6 +26,9 @@ import java.util.concurrent.Executors;
 
 
 
+
+
+
 import org.apache.http.client.ClientProtocolException;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -78,6 +81,7 @@ public class WeChatUtil {
 					@Override
 					public File callback(File obj) {
 						ChatLog log = ChatLog.createImageLog(obj, FromUserName);
+						log.persent = 100;
 						WeChatUtil.sendLog(log, null, null);
 						ChatLogCache.saveLogs(FromUserName, log);
 						MainWindow.getInstance().flushChatView(FromUserName, true);
@@ -145,7 +149,7 @@ public class WeChatUtil {
 		body.put("UserName", cs.UserName);
 		HTTPUtil hu = HTTPUtil.getInstance();
 		try {
-			String result = hu.postBody(Constant.OP_LOG, params, JSONUtil.toJson(body));
+			String result = hu.postBody(String.format(Constant.OP_LOG, Constant.HOST), params, JSONUtil.toJson(body));
 			Map<String, Object> rstMap= JSONUtil.fromJson(result);
 			Map<String, Object> obj = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {
@@ -204,7 +208,7 @@ public class WeChatUtil {
 		}
 		Map<String, File> files = new HashMap<String, File>();
 		files.put("filename", file);
-		String result = hu.httpPostFile(Constant.UPLOAD_MEDIA, params, files, callBack);
+		String result = hu.httpPostFile(String.format(Constant.UPLOAD_MEDIA, Constant.HOST), params, files, callBack);
 		Map<String, Object> rst = JSONUtil.fromJson(result);
 		if(null != rst) {
 			return (String) rst.get("MediaId");
@@ -268,13 +272,14 @@ public class WeChatUtil {
 		body.put("Msg", msgMap);
 		HTTPUtil hu = HTTPUtil.getInstance();
 		try {
-			String result = hu.postBody(Constant.SEND_FILE, params, JSONUtil.toJson(body));
+			String result = hu.postBody(String.format(Constant.SEND_FILE, Constant.HOST), params, JSONUtil.toJson(body));
 			Map<String, Object> rstMap= JSONUtil.fromJson(result);
 			Map<String, Object> obj = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {
 				log.msgid = rstMap.get("MsgID").toString();
 				log.newMsgId = Long.parseLong(rstMap.get("LocalID").toString());
 				callBack.callback(log);
+				WeChatUtil.statusNotify(Constant.user.UserName, log.toId);
 				return log;
 			}
 		} catch (Exception e) {
@@ -327,7 +332,7 @@ public class WeChatUtil {
 		body.put("Msg", msgMap);
 		HTTPUtil hu = HTTPUtil.getInstance();
 		try {
-			String result = hu.postBody(gif ? Constant.SEND_GIF : Constant.SEND_IMG, params, JSONUtil.toJson(body));
+			String result = hu.postBody(gif ? String.format(Constant.SEND_GIF, Constant.HOST) : String.format(Constant.SEND_IMG, Constant.HOST), params, JSONUtil.toJson(body));
 			Map<String, Object> rstMap= JSONUtil.fromJson(result);
 			Map<String, Object> obj = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {
@@ -336,6 +341,7 @@ public class WeChatUtil {
 				if(null != callBack) {
 					callBack.callback(log);
 				}
+				WeChatUtil.statusNotify(Constant.user.UserName, log.toId);
 				return log;
 			}
 		} catch (Exception e) {
@@ -381,7 +387,7 @@ public class WeChatUtil {
 		
 		HTTPUtil hu = HTTPUtil.getInstance();
 		try {
-			String result = hu.postBody(Constant.SEND_MSG, params, JSONUtil.toJson(body));
+			String result = hu.postBody(String.format(Constant.SEND_MSG, Constant.HOST), params, JSONUtil.toJson(body));
 			Map<String, Object> rstMap= JSONUtil.fromJson(result);
 			Map<String, Object> obj = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != obj && new Integer(0).equals(obj.get("Ret"))) {
@@ -421,7 +427,7 @@ public class WeChatUtil {
 		bodyMap.put("BaseRequest", bodyInner);
 		
 		try {
-			String result = hu.postBody(Constant.GET_INIT.replace("{TIME}", System.currentTimeMillis() + ""), JSONUtil.toJson(bodyMap));
+			String result = hu.postBody(String.format(Constant.GET_INIT, Constant.HOST).replace("{TIME}", System.currentTimeMillis() + ""), JSONUtil.toJson(bodyMap));
 			Map<String, Object> rstMap = JSONUtil.fromJson(result);
 			Map<String, Object> baseResponse = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != baseResponse && new Integer(0).equals(baseResponse.get("Ret"))) {
@@ -488,7 +494,7 @@ public class WeChatUtil {
 	 */
 	public static void startNotify(){
 		HTTPUtil hu = HTTPUtil.getInstance();
-		String url = Constant.STATUS_NOTIFY + "?lang=zh_CN&pass_ticket=" + Constant.sign.pass_ticket;
+		String url = String.format(Constant.STATUS_NOTIFY, Constant.HOST) + "?lang=zh_CN&pass_ticket=" + Constant.sign.pass_ticket;
 		Map<String, Object> body = new HashMap<String, Object>();
 		Map<String, Object> BaseRequest = new HashMap<>();
 		BaseRequest.put("DeviceID", Constant.sign.deviceid);
@@ -531,7 +537,7 @@ public class WeChatUtil {
 		params.put("lang", "zh_CN");
 		
 		try {
-			String result = hu.readJsonfromURL2(Constant.GET_CONTACT, params);
+			String result = hu.readJsonfromURL2(String.format(Constant.GET_CONTACT, Constant.HOST), params);
 			Map<String, Object> rstMap = JSONUtil.fromJson(result);
 			Map<String, Object> baseResponse = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != baseResponse && new Integer(0).equals(baseResponse.get("Ret"))) {
@@ -573,7 +579,7 @@ public class WeChatUtil {
 	 * @return
 	 */
 	public static ImageLoader loadImage(String msgId, String type) {
-		String url = Constant.LOAD_IMG;
+		String url = String.format(Constant.LOAD_IMG, Constant.HOST);
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("MsgID", msgId);
 		try {
@@ -615,7 +621,7 @@ public class WeChatUtil {
 	 * @param sign
 	 */
 	public static void exitWeChat() {
-		String url = Constant.LOGOUT_URL.replace("{SKEY}", Constant.sign.skey);
+		String url = String.format(Constant.LOGOUT_URL, Constant.HOST).replace("{SKEY}", Constant.sign.skey);
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("sid", Constant.sign.wxsid);
 		params.put("uin", Constant.sign.wxuin);
@@ -661,7 +667,7 @@ public class WeChatUtil {
 		bodyMap.put("List", gs);
 		
 		try {
-			String url = Constant.GET_GROUPS.replace("{TIME}", System.currentTimeMillis() + "").replace("{TICKET}", Constant.sign.pass_ticket);
+			String url = String.format(Constant.GET_GROUPS, Constant.HOST).replace("{TIME}", System.currentTimeMillis() + "").replace("{TICKET}", Constant.sign.pass_ticket);
 			String result = hu.postBody(url, JSONUtil.toJson(bodyMap));
 			Map<String, Object> rstMap = JSONUtil.fromJson(result);
 			Map<String, Object> baseResponse = (Map<String, Object>) rstMap.get("BaseResponse");
@@ -720,7 +726,7 @@ public class WeChatUtil {
 				params.put("deviceid", Constant.sign.deviceid);
 				params.put("synckey", Constant.sign.synckey);
 				try {
-					String rst = hu.getJsonfromURL2(Constant.SYNC_CHECK, params);
+					String rst = hu.getJsonfromURL2(String.format(Constant.SYNC_CHECK, Constant.HOST), params);
 					if(null != rst && rst.contains("window.synccheck=")) {
 						String result = rst.replace("window.synccheck=", "");
 						System.out.println("checksync + " + result);
@@ -785,7 +791,7 @@ public class WeChatUtil {
 		}
 		params.put("r", String.valueOf(System.currentTimeMillis()));
 		try {
-			String result =  hu.postBody(Constant.VERIFY_USER, params, JSONUtil.toJson(bodyMap));
+			String result =  hu.postBody(String.format(Constant.VERIFY_USER, Constant.HOST), params, JSONUtil.toJson(bodyMap));
 			System.out.println(result);
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
@@ -819,7 +825,7 @@ public class WeChatUtil {
 		params.put("pass_ticket", Constant.sign.pass_ticket);
 		try {
 			final MainWindow main = MainWindow.getInstance();
-			String result =  hu.postBody(Constant.GET_STATUS, params, JSONUtil.toJson(bodyMap));
+			String result =  hu.postBody(String.format(Constant.GET_STATUS, Constant.HOST), params, JSONUtil.toJson(bodyMap));
 			Map<String, Object> rst = JSONUtil.fromJson(result);
 			List<Map<String, Object>> modContactList = (List<Map<String, Object>>) rst.get("ModContactList");
 			if(null != modContactList) {
@@ -913,7 +919,7 @@ public class WeChatUtil {
 									String sender = ContactsStruct.getContactName(Constant.getContact(FromUserName));
 									String ctt = Content.replace("<br/>", "\n");
 									System.out.println(sender + " 说：" + ctt);
-									if(!Constant.noReply.contains(FromUserName) && !Constant.globalSilence) {
+									if(log.msgType == 1 && !Constant.noReply.contains(FromUserName) && !Constant.globalSilence) {
 										addRandomReply(ctt, FromUserName, FromUserName);
 									}
 									main.flushChatView(FromUserName, true);
@@ -957,7 +963,7 @@ public class WeChatUtil {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("pass_ticket", Constant.sign.pass_ticket);
 		try {
-			String result =  hu.postBody(Constant.REVOKE_MSG, params, JSONUtil.toJson(bodyMap));
+			String result =  hu.postBody(String.format(Constant.REVOKE_MSG, Constant.HOST), params, JSONUtil.toJson(bodyMap));
 			System.out.println(result);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -987,7 +993,7 @@ public class WeChatUtil {
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("pass_ticket", Constant.sign.pass_ticket);
 		try {
-			String result =  hu.postBody(Constant.STATUS_NOTIFY, params, JSONUtil.toJson(bodyMap));
+			String result =  hu.postBody(String.format(Constant.STATUS_NOTIFY, Constant.HOST), params, JSONUtil.toJson(bodyMap));
 			System.out.println(result);
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

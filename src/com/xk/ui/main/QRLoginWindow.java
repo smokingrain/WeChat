@@ -213,6 +213,12 @@ public class QRLoginWindow {
 									tips.setText("正在登录...");
 								}
 							});
+							for(String host : Constant.HOSTS) {
+								if(result.contains(host)) {
+									Constant.HOST = host;
+									break;
+								}
+							}
 							String winAndsid = hu.readJsonfromURL2(result, null);
 							System.out.println("获取wxsid和wxuin:" + winAndsid);
 							if(null != winAndsid) {

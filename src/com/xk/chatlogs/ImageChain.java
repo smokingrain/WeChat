@@ -40,7 +40,7 @@ public class ImageChain extends ChatLogChain{
 			} else {
 				log.content = 3 == log.msgType ? "[图片]" : "[表情]" ;
 			}
-			ImageNode temp = ImageCache.getChatImage(log.msgid, Constant.LOAD_IMG, params);
+			ImageNode temp = ImageCache.getChatImage(log.msgid, String.format(Constant.LOAD_IMG, Constant.HOST), params);
 			if(temp != null) {
 				log.img = temp;
 			}

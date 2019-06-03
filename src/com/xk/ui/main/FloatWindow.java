@@ -27,10 +27,10 @@ import org.eclipse.swt.widgets.Display;
  * @author xiaokui
  * @date 2017年1月5日
  */
-public class FloatWindow implements ICallback{
+public class FloatWindow<T> implements ICallback<T>{
 
 	public Shell shell;
-	private Object result;
+	private T result;
 	
 	private Long timeOut = 2000L;//鼠标两秒不在焦点就消失
 	private Timer timer;//失去焦点计时器
@@ -56,7 +56,7 @@ public class FloatWindow implements ICallback{
 	/**
 	 * Open the window.
 	 */
-	public Object open(int x, int y) {
+	public T open(int x, int y) {
 		shell.open();
 		shell.layout();
 		if(x >= 0 && y >= 0) {
@@ -110,7 +110,7 @@ public class FloatWindow implements ICallback{
 		}
 		lo.topControl = comp;
 		if(comp instanceof ICallable) {
-			ICallable ic = (ICallable) comp;
+			ICallable<T> ic = (ICallable<T>) comp;
 			ic.setCallBack(this);
 		}
 	}
@@ -131,7 +131,7 @@ public class FloatWindow implements ICallback{
 	}
 	
 	@Override
-	public Object callback(Object obj) {
+	public T callback(T obj) {
 		this.result = obj;
 		kill();
 		return obj;

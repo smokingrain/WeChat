@@ -422,7 +422,6 @@ public class ChatComp extends Composite implements HotKeyListener{
 						log.file.delete();
 					}
 				}
-				WeChatUtil.statusNotify(Constant.user.UserName, convId);
 				return null;
 			}
 		};
@@ -558,7 +557,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 							params.put("username", ms.UserName);
 							params.put("chatroomid", struct.EncryChatRoomId);
 							params.put("skey", Constant.sign.skey);
-							ImageNode node = ImageCache.getUserHeadCache(log.fromId, Constant.GET_MEMBER_ICON, params);
+							ImageNode node = ImageCache.getUserHeadCache(log.fromId, String.format(Constant.GET_MEMBER_ICON, Constant.HOST), params);
 							if(null != node) {
 								head = node.getImg();
 							}

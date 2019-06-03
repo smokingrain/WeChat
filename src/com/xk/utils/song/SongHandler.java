@@ -33,7 +33,7 @@ public class SongHandler implements ICMDHandler {
 		}
 		String source = Constant.SONG_SOURCE.get(user);
 		if(StringUtil.isBlank(source)) {
-			source = "qier";
+			source = "kugou";
 			Constant.SONG_SOURCE.put(user, source);
 		}
 		IDownloadSource dSource = SourceFactory.getSource(source);

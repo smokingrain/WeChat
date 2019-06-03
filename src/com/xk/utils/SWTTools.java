@@ -17,9 +17,10 @@ import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
 
+import com.xk.bean.StringNode;
+
 public class SWTTools {
 
-	private static int DRAW_FLAGS = SWT.DRAW_MNEMONIC | SWT.DRAW_TAB | SWT.DRAW_TRANSPARENT | SWT.DRAW_DELIMITER;
 	private static final String ELLIPSIS = "...";
 	
 	public static void topWindow(Shell shell) {
@@ -39,7 +40,7 @@ public class SWTTools {
 	 */
 	public static String shortenText(GC gc, String t, int width) {
 		if (t == null) return null;
-		int w = gc.textExtent(ELLIPSIS, DRAW_FLAGS).x;
+		int w = gc.textExtent(ELLIPSIS, StringNode.DRAW_FLAGS).x;
 		if (width<=w) return t;
 		int l = t.length();
 		int max = l/2;
@@ -52,8 +53,8 @@ public class SWTTools {
 		while (min < mid && mid < max) {
 			String s1 = t.substring(0, mid);
 			String s2 = t.substring(validateOffset(layout, l-mid), l);
-			int l1 = gc.textExtent(s1, DRAW_FLAGS).x;
-			int l2 = gc.textExtent(s2, DRAW_FLAGS).x;
+			int l1 = gc.textExtent(s1, StringNode.DRAW_FLAGS).x;
+			int l2 = gc.textExtent(s2, StringNode.DRAW_FLAGS).x;
 			if (l1+w+l2 > width) {
 				max = mid;			
 				mid = validateOffset(layout, (max+min)/2);

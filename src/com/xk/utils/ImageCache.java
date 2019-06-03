@@ -36,7 +36,7 @@ public class ImageCache {
 			
 			@Override
 			public void run() {
-				String headUrl = Constant.BASE_URL + convs.HeadImgUrl;
+				String headUrl = String.format(Constant.BASE_URL, Constant.HOST) + convs.HeadImgUrl;
 				convs.head = ImageCache.getUserHeadCache(convs.UserName, headUrl, null).getImg();
 				callBack.callback(convs);
 			}

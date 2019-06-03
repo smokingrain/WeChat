@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.List;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
@@ -29,27 +30,29 @@ public class HatHandler implements ICMDHandler {
 			textCall.callback("没有找到你的头像");
 			return;
 		}
-		if(StringUtil.isBlank(target.HeadImgUrl)) {
+		if(null == target.head) {
 			textCall.callback("老哥，你没有头像P个jj");
 			return;
 		}
-		InputStream input = HTTPUtil.getInstance().getInput(target.HeadImgUrl);
-		if(null == input) {
-			textCall.callback("貌似你头像有问题...");
-			return;
-		}
+//		InputStream input = HTTPUtil.getInstance().getInput(target.HeadImgUrl);
+//		if(null == input) {
+//			textCall.callback("貌似你头像有问题...");
+//			return;
+//		}
 		ImageLoader loader = new ImageLoader();
-		loader.load(input);
+		ImageData source = target.head.getImageData();
+//		loader.load(input);
+		loader.data = new ImageData[]{source};
 		Image greenHat = SWTResourceManager.getImage(HatHandler.class, "/images/green.png");
-		String path = "temp/source" + target.NickName + Constant.FORMATS[loader.format];
-		String pathTarget = "temp/target" + target.NickName + Constant.FORMATS[loader.format];
-		loader.save(path, loader.format);
+		String path = "temp/source" + target.NickName + Constant.FORMATS[SWT.IMAGE_JPEG];
+		String pathTarget = "temp/target" + target.NickName + Constant.FORMATS[SWT.IMAGE_JPEG];
+		loader.save(path, SWT.IMAGE_JPEG);
 		List<Rect> faces = ImageFace.findFaces(path);
 		if(null == faces || faces.isEmpty()) {
 			textCall.callback("找不到正脸，给不了图。");
 			return;
 		}
-		ImageData source = loader.data[0];
+		
 		ImageData id = greenHat.getImageData();
 		Image img = new Image(null, source);
 		GC gc = new GC(img);
@@ -60,12 +63,11 @@ public class HatHandler implements ICMDHandler {
 		}
 		gc.dispose();
 		loader.data = new ImageData[]{img.getImageData()};
-		loader.save(pathTarget, loader.format);
+		loader.save(pathTarget, SWT.IMAGE_JPEG);
 		File sourceFile = new File(path);
 		File targetFile = new File(pathTarget);
 		imgCall.callback(targetFile);
 		textCall.callback("来来来,存好你的新头像...");
-		targetFile.delete();
 		sourceFile.delete();
 		img.dispose();
 	}
