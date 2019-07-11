@@ -49,6 +49,7 @@ import com.xk.utils.WeChatUtil;
 
 
 
+
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -382,17 +383,34 @@ public class ChatComp extends Composite implements HotKeyListener{
 		}
  	}
 	
-	private ICallback createProcess(final ChatLog log) {
-		ICallback callBack = new ICallback() {
-			private String convId = ChatComp.this.convId;
-			double length = log.file.length();
+	private ICallback<Long> createCount(final ChatLog log) {
+		ICallback<Long> callBack = new ICallback<Long>() {
+			private long count = 0;
 			@Override
-			public Object callback(Object obj) {
-				if(null == obj || !(obj instanceof Long) || !convId.equals(ChatComp.this.convId)) {
+			public Long callback(Long obj) {
+				if(null == obj || !convId.equals(ChatComp.this.convId)) {
 					return null;
 				}
-				Long current = (Long) obj;
-				int persent =((Double)(current / length * 100)).intValue();
+				count += obj;
+				return count;
+			}
+			
+		};
+		return callBack;
+	}
+	
+	private ICallback<Long> createProcess(final ChatLog log) {
+		ICallback<Long> callBack = new ICallback<Long>() {
+			private String convId = ChatComp.this.convId;
+			double length = log.file.length();
+			private long total = 0;
+			@Override
+			public Long callback(Long obj) {
+				if(null == obj || !convId.equals(ChatComp.this.convId)) {
+					return null;
+				}
+				total += obj;
+				int persent =((Double)(total / length * 100)).intValue();
 				if(persent != log.persent) {
 					log.persent = persent;
 					Display.getDefault().asyncExec(new Runnable() {
@@ -425,7 +443,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 				return null;
 			}
 		};
-		WeChatUtil.sendLog(log, 3 == log.msgType ? createProcess(log) : null, callBack);
+		WeChatUtil.sendLog(log, 3 == log.msgType ? createProcess(log) : createCount(log), callBack);
 	}
 	
 	private boolean sendFile(String path) {

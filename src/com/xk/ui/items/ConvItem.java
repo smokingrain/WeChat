@@ -73,7 +73,10 @@ public class ConvItem extends ListItem {
 
 					@Override
 					public void run() {
-						getParent().flush();
+						MyList ml = getParent();
+						if(null != ml) {
+							ml.flush();
+						}
 					}
 					
 				});

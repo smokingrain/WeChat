@@ -17,9 +17,26 @@ public class FileHookBody extends FileBody implements ICallable<Long>{
 
 	private ICallback<Long> callBack;
 	
+	private long start = 0;
+	
+	private long size = 0;
+	
 	public FileHookBody(File file, ContentType contentType) {
 		super(file, contentType);
 		// TODO Auto-generated constructor stub
+	}
+	
+	/**
+	 * 只上传部分文件内容
+	 * @param file
+	 * @param contentType
+	 * @param start
+	 * @param size
+	 */
+	public FileHookBody(File file, ContentType contentType,String filename, long start, long size) {
+		super(file, contentType, filename);
+		this.start = start;
+		this.size = size;
 	}
 
 	public FileHookBody(File file) {
@@ -37,13 +54,22 @@ public class FileHookBody extends FileBody implements ICallable<Long>{
 		InputStream in = getInputStream();
 		Long current = 0L;
 		try {
+			if(start > 0) {
+				in.skip(start);
+			}
 			byte[] tmp = new byte[4096];
 			int l;
 			while ((l = in.read(tmp)) != -1) {
-				out.write(tmp, 0, l);
 				current += l;
+				if(size > 0 && current > size) {
+					l -= current - size;
+				}
+				out.write(tmp, 0, l);
 				if(null != callBack) {
-					callBack.callback(current);
+					callBack.callback(new Long(l));
+				}
+				if(current >= size) {
+					break;
 				}
 			}
 			out.flush();
@@ -52,7 +78,13 @@ public class FileHookBody extends FileBody implements ICallable<Long>{
 		}
 	}
 
-
+	@Override
+	public long getContentLength() {
+		if(this.size > 0) {
+			return size;
+		}
+		return super.getContentLength();
+	}
 
 
 	@Override

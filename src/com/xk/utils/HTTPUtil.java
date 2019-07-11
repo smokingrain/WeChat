@@ -35,6 +35,7 @@ import org.apache.http.cookie.Cookie;
 import org.apache.http.entity.ContentType;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.entity.mime.MultipartEntityBuilder;
+import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -91,32 +92,24 @@ public class HTTPUtil {
 	}
 	
 	
-	/**
-	 * 用途：http图片上传
-	 * @date 2017年1月5日
-	 * @param url
-	 * @param params
-	 * @param files
-	 * @return
-	 */
-	public String httpPostFile(String url, Map<String, String> params, Map<String, File> files, ICallback<Long> callBack) {
+	public String httpPostFile(String url, Map<String, String> params, Map<String, File> files, ICallback<Long> callBack, long start, long size) {
 		try {
 			MultipartEntityBuilder builder = MultipartEntityBuilder.create();
+			builder.setBoundary("----WebKitFormBoundary" + RandomStringUtils.random(16, "0123456789abcde"));
 			if (null != files) {
 				for (String key : files.keySet()) {
 					File file = files.get(key);
 					if(null == file) {
 						continue;
 					}
-					FileHookBody body = new FileHookBody(file, ContentType.DEFAULT_BINARY, file.getName());
+					FileHookBody body = new FileHookBody(file, ContentType.DEFAULT_BINARY, file.getName(), start, size);
 					body.setCallBack(callBack);
 					builder.addPart(key, body);
 				}
 			}
 			if (null != params) {
 				for (String key : params.keySet()) {
-					System.out.println(key);
-					builder.addTextBody(key, params.get(key));
+					builder.addPart(key, new StringBody(params.get(key), ContentType.create("text/plain", StandardCharsets.UTF_8)));
 				}
 			}
 			HttpEntity entity = builder.build();
@@ -139,6 +132,18 @@ public class HTTPUtil {
 			e.printStackTrace();
 			return "";
 		}
+	}
+	
+	/**
+	 * 用途：http文件上传
+	 * @date 2017年1月5日
+	 * @param url
+	 * @param params
+	 * @param files
+	 * @return
+	 */
+	public String httpPostFile(String url, Map<String, String> params, Map<String, File> files, ICallback<Long> callBack) {
+		return httpPostFile(url, params, files, callBack, 0, 0);
 	}
 	
 	

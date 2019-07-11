@@ -30,6 +30,7 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.RECT;
 import com.sun.jna.platform.win32.WinUser.WNDENUMPROC;
 import com.xk.bean.Pointd;
+import com.xk.bean.StringNode;
 import com.xk.uiLib.ICallback;
 
 /**
@@ -386,7 +387,31 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 			}
 			gc.setAlpha(alpha);
 			drawRect(gc, width, rect);
+			drawSize(gc, rect);
 		}
+	}
+	
+	/**
+	 * 绘制选中区域宽高
+	 * 作者 ：肖逵
+	 * 时间 ：2019年7月10日 上午10:15:17
+	 * @param gc
+	 * @param rect
+	 */
+	private void drawSize(GC gc, Rectangle rect) {
+		int height = gc.getFontMetrics().getHeight();
+		Point target = new Point(rect.x + 3, rect.y < 100 ? rect.y + 3 : rect.y - (height + 9));
+		Color back = gc.getBackground();
+		int alpha = gc.getAlpha();
+		String text = rect.width + " x " + rect.height;
+		Point textSize = gc.textExtent(text, StringNode.DRAW_FLAGS);
+		gc.setBackground(SWTResourceManager.getColor(0x33, 0x33, 0x33));
+		gc.setAlpha(200);
+		gc.fillRectangle(target.x, target.y, textSize.x + 5, (height + 6));
+		gc.setAlpha(alpha);
+		gc.setForeground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
+		gc.drawText(text, target.x + 3, target.y + 3, StringNode.DRAW_FLAGS);
+		gc.setBackground(back);
 	}
 	
 	

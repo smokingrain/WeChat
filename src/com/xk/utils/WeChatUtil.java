@@ -4,7 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.math.BigDecimal;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -12,6 +16,7 @@ import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.Timer;
@@ -29,12 +34,19 @@ import java.util.concurrent.Executors;
 
 
 
+
+
+
+
+
+
 import org.apache.http.client.ClientProtocolException;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Display;
+import org.jsoup.helper.StringUtil;
 
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.MemberStruct;
@@ -46,6 +58,8 @@ import com.xk.ui.main.MainWindow;
 import com.xk.uiLib.ICallback;
 
 public class WeChatUtil {
+	
+	private static final Long CHUNK_SIZE = 524288L;
 
 	private static Timer timer;
 	
@@ -173,10 +187,10 @@ public class WeChatUtil {
 	 * @param file
 	 * @return
 	 */
-	private static String uploadFile(File file, ICallback<Long> callBack) {
+	private static String uploadFile(File file, ICallback<Long> callBack, String fromUserName, String toUserName, String mediaType) {
 		HTTPUtil hu = HTTPUtil.getInstance();
 		String name = file.getName();
-		String minaType = Constant.imgTypes.get(name.substring(name.lastIndexOf(".") + 1).toLowerCase());
+		String type = Constant.mediaTypes.get(name.substring(name.lastIndexOf(".") + 1).toLowerCase());
 		Long flen = file.length();
 		Date lastModify = new Date(file.lastModified());
 		Map<String, Object> bodyInner = new HashMap<String, Object>();
@@ -191,28 +205,49 @@ public class WeChatUtil {
 		req.put("StartPos", 0);
 		req.put("DataLen", flen);
 		req.put("MediaType", 4);
+		req.put("UploadType", 2);
+		req.put("FileMd5", Md5.MD5(file));
+		req.put("FromUserName", fromUserName);
+		req.put("ToUserName", toUserName);
 		Map<String, String> params = new HashMap<String, String>();
-		params.put("f", "json");
+		params.put("name", file.getName());
 		params.put("id", "WU_FILE_" + Constant.file_index++);
-		params.put("type", null == minaType ? "application/octet-stream" : minaType);
-		params.put("lastModifiedDate", lastModify.toString());
+		params.put("type", null == type ? "application/octet-stream" : type);
+		//Mon Apr 29 2019 14:05:40 GMT 0800 (中国标准时间)
+		
+		params.put("lastModifiedDate", new SimpleDateFormat("E MMM d yyyy HH:mm:ss ", Locale.US).format(lastModify) + "GMT 0800 (中国标准时间)");
 		params.put("size", String.valueOf(flen));
-		params.put("mediatype", null == minaType ? "doc" : (name.toLowerCase().endsWith(".gif") ? "doc" : "pic"));
+		params.put("mediatype", mediaType);
 		params.put("uploadmediarequest", JSONUtil.toJson(req));
 		params.put("webwx_data_ticket", hu.getCookie("webwx_data_ticket"));
 		try {
-			params.put("pass_ticket", URLEncoder.encode(Constant.sign.pass_ticket, "UTF-8"));
+			params.put("pass_ticket", URLDecoder.decode(Constant.sign.pass_ticket, "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		Map<String, File> files = new HashMap<String, File>();
 		files.put("filename", file);
-		String result = hu.httpPostFile(String.format(Constant.UPLOAD_MEDIA, Constant.HOST), params, files, callBack);
-		Map<String, Object> rst = JSONUtil.fromJson(result);
-		if(null != rst) {
-			return (String) rst.get("MediaId");
+		
+		int chunks = new BigDecimal(flen).divide(new BigDecimal(CHUNK_SIZE), 0, BigDecimal.ROUND_UP).intValue();
+		long total = 0;
+		for(int chunk = 0; chunk < chunks; chunk++) {
+			long start = chunk * CHUNK_SIZE;
+            long size = Math.min(CHUNK_SIZE, flen - start);
+            total += size;
+            params.put("chunks", String.valueOf(chunks));
+            params.put("chunk", String.valueOf(chunk));
+			String result = hu.httpPostFile(String.format(Constant.UPLOAD_MEDIA, Constant.HOST), params, files, callBack, start, size);
+			System.out.println(result);
+			Map<String, Object> rst = JSONUtil.fromJson(result);
+			if(null != rst) {
+				String mediaId =  (String) rst.get("MediaId");
+				if(!StringUtil.isBlank(mediaId)) {
+					return mediaId;
+				}
+			}
 		}
+		System.out.println("total = " + total + ", flen = " + flen);
 		return null;
 	}
 	
@@ -224,7 +259,7 @@ public class WeChatUtil {
 	 * @author xiaokui
 	 */
 	public static ChatLog sendFile(ChatLog log, ICallback<Long> process, ICallback<ChatLog> callBack) {
-		String mediaId = uploadFile(log.file, process);
+		String mediaId = uploadFile(log.file, process, Constant.user.UserName, log.toId, "doc");
 		if(null == mediaId) {
 			callBack.callback(null);
 			return null;
@@ -298,12 +333,12 @@ public class WeChatUtil {
 	 * @return
 	 */
 	public static ChatLog sendImg(ChatLog log, ICallback<Long> process, ICallback<ChatLog> callBack) {
-		String mediaId = uploadFile(log.file, process);
+		boolean gif = log.file.getName().toLowerCase().endsWith(".gif");
+		String mediaId = uploadFile(log.file, process, Constant.user.UserName, log.toId, gif ? "doc" : "pic");
 		if(null == mediaId) {
 			callBack.callback(null);
 			return null;
 		}
-		boolean gif = log.file.getName().toLowerCase().endsWith(".gif");
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("fun", gif ? "sys" : "async");
 		params.put("f", "json");

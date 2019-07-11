@@ -1,4 +1,8 @@
 package com.xk.utils;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.security.MessageDigest;
 /**
  * md5加密
@@ -15,10 +19,36 @@ public class Md5 {
 	 * @return 加密结果，全小写的字符串
 	 */
 	public static String MD5(String s) {
+		byte[] input = s.getBytes();
+		return MD5(input);
+	}
+	
+	public static String MD5(File file) {
+		byte[] input = new byte[(int)file.length()];
+		FileInputStream fin = null;
+		try {
+			 fin = new FileInputStream(file);
+			 fin.read(input);
+			 return MD5(input);
+		} catch (IOException e) {
+			return "";
+		} finally {
+			if(null != fin) {
+				try {
+					fin.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		}
+		
+	}
+	
+	public static String MD5(byte[] btInput) {
 		char hexDigits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
 				'a', 'b', 'c', 'd', 'e', 'f' };
 		try {
-			byte[] btInput = s.getBytes("utf-8");
 			// 获得MD5摘要算法的 MessageDigest 对象
 			MessageDigest mdInst = MessageDigest.getInstance("MD5");
 			// 使用指定的字节更新摘要
