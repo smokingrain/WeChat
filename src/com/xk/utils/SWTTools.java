@@ -1,9 +1,19 @@
 package com.xk.utils;
 
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+
+import javax.imageio.ImageIO;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
+import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.PaletteData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -16,6 +26,15 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Shell;
+import org.jcodec.api.FrameGrab;
+import org.jcodec.api.JCodecException;
+import org.jcodec.common.io.FileChannelWrapper;
+import org.jcodec.common.io.NIOUtils;
+import org.jcodec.common.model.ColorSpace;
+import org.jcodec.common.model.Picture;
+import org.jcodec.scale.ColorUtil;
+import org.jcodec.scale.RgbToBgr;
+import org.jcodec.scale.SwingUtil;
 
 import com.xk.bean.StringNode;
 
@@ -163,4 +182,115 @@ public class SWTTools {
 			}		
 		}
 	}
+	
+	public static Image toImage(Picture src) {
+		BufferedImage bi = SwingUtil.toBufferedImage(src);
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			ImageIO.write(bi, "png", out);
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+		byte[] data = out.toByteArray();
+		ByteArrayInputStream in = new ByteArrayInputStream(data);
+		ImageData id = new ImageData(in);
+		try {
+			out.close();
+			in.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Image img = new Image(null, id);
+		return img;
+	}
+	
+	
+	public static Image toSWTImage(Picture src) {
+		if (src.getColor() != ColorSpace.BGR) {
+			Picture bgr = Picture.createCropped(src.getWidth(), src.getHeight(), ColorSpace.BGR, src.getCrop());
+			if (src.getColor() == ColorSpace.RGB) {
+				new RgbToBgr().transform(src, bgr);
+			} else {
+				org.jcodec.scale.Transform transform = ColorUtil.getTransform(src.getColor(), ColorSpace.RGB);
+				transform.transform(src, bgr);
+				new RgbToBgr().transform(bgr, bgr);				
+			}
+			src = bgr;
+		}
+		Image img = new Image(null, src.getCroppedWidth(), src.getCroppedHeight());
+		if(null == src.getCrop()) {
+			return toSWTImage(src, img);
+		} else {
+			return toSWTImageCropped(src, img);
+		}
+		
+	}
+	
+	public static Image toSWTImageCropped(Picture src, Image dest) {
+		ImageData idata = dest.getImageData();
+		byte[] data = idata.data;
+		byte[] srcData = src.getPlaneData(0);
+        int dstStride = idata.width * 4;
+        int srcStride = src.getWidth() * 3;
+        for (int line = 0, srcOff = 0, dstOff = 0; line < idata.height; line++) {
+            for (int id = dstOff, is = srcOff; id < dstOff + dstStride; id += 4, is += 3) {
+                data[id] = (byte) (srcData[is] + 128);
+                data[id + 1] = (byte) (srcData[is + 1] + 128);
+                data[id + 2] = (byte) (srcData[is + 2] + 128);
+            }
+            srcOff += srcStride;
+            dstOff += dstStride;
+        }
+        idata.data =data;
+		dest.dispose();
+		return new Image(null, idata);
+	}
+	
+	public static Image toSWTImage(Picture src, Image dest) {
+		ImageData id = dest.getImageData();
+		byte[] data = id.data;
+		byte[] srcData = src.getPlaneData(0);
+		int pixs = data.length / 4;
+		for (int i = 0; i < pixs; i++) {
+            data[i * 4] = (byte) (srcData[i * 3] + 128);
+            data[i * 4 + 1] = (byte) (srcData[i * 3 + 1] + 128);
+            data[i * 4 + 2] = (byte) (srcData[i * 3 + 2] + 128);
+        }
+		id.data =data;
+		dest.dispose();
+		return new Image(null, id);
+	}
+	
+	public static void main(String[] args) {
+		try {
+    		FileChannelWrapper ch = NIOUtils.readableChannel(new File("F:\\git\\WeChat\\temp\\1564988874286.mp4"));
+    		FrameGrab fg = FrameGrab.createFrameGrab(ch);
+    		Picture pic = fg.getNativeFrame();
+    		Image img = SWTTools.toSWTImage(pic);
+    		ImageLoader loader = new ImageLoader();
+    		loader.data = new ImageData[]{img.getImageData()};
+    		loader.save("D:\\tttttest\\aaaa.jpg", SWT.IMAGE_JPEG);
+//    		long start = System.currentTimeMillis();
+//    		for(int i = 0; i < frames ; i++) {
+////    			fg.seekToFramePrecise(i);
+//    			Picture pic = fg.getNativeFrame();
+//    			BufferedImage img = SwingUtil.toBufferedImage(pic);
+//    			ImageIO.write(img, "jpg", new File("d:/tttttest",i + ".jpg"));
+//    		}
+//    		System.out.println("cost:" + (System.currentTimeMillis() - start));
+//    		FrameGrab.getFrameAtSec(new File(""), 12d);
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JCodecException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	
 }

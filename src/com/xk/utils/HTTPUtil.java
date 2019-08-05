@@ -218,17 +218,26 @@ public class HTTPUtil {
 		return getInputStream(url, null);
 	}
 	
-	public SongLocation getInputStream(String url, Map<String, String> params) {
+	public SongLocation getInputStream(String url, Map<String, String> params, Map<String, String> rHeaders) {
 		if(null != params) {
 			url += "?";
+			int count = 0;
 			for(String key : params.keySet()) {
 				String value = params.get(key);
-				url += key + "=" + value + "&";
+				url += key + "=" + value ;
+				if(++count < params.size()) {
+					url += "&";
+				}
 			}
 		}
 		HttpGet httppost = new HttpGet(url);  
 		httppost.addHeader("Connection", "keep-alive");
 		httppost.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
+		if(null != rHeaders) {
+			for(String key : rHeaders.keySet()) {
+				httppost.addHeader(key, rHeaders.get(key));
+			}
+		}
 		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(50000).setConnectTimeout(50000).setConnectionRequestTimeout(50000).build();//设置请求和传输超时时间
 		httppost.setConfig(requestConfig);
 		try {
@@ -259,6 +268,10 @@ public class HTTPUtil {
 			e.printStackTrace();
 		}
 		return null;
+	}
+	
+	public SongLocation getInputStream(String url, Map<String, String> params) {
+		return getInputStream(url, params, null);
 	}
 	
 	

@@ -10,6 +10,8 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 
+import com.xk.uiLib.ICallback;
+
 import net.sourceforge.pinyin4j.PinyinHelper;
 import net.sourceforge.pinyin4j.format.HanyuPinyinCaseType;
 import net.sourceforge.pinyin4j.format.HanyuPinyinOutputFormat;
@@ -168,8 +170,11 @@ public class FileUtils {
         return "GBK";  
     }  
 	
-	public static File saveStream(File file, InputStream in) {
+	public static File saveStream(File file, InputStream in, ICallback<Integer> callBack, Long total) {
 		if(null == file || null == in) {
+			if(null != callBack) {
+				callBack.callback(-1);
+			}
 			return null;
 		}
 		FileOutputStream out = null;
@@ -177,8 +182,14 @@ public class FileUtils {
 			out = new FileOutputStream(file);
 			byte[] buffer = new byte[20480];
 			int len = 0;
+			long saved = 0;
 			while((len = in.read(buffer, 0, buffer.length)) >= 0) {
 				out.write(buffer, 0, len);
+				saved += len;
+				if(null != callBack && null != total) {
+					int perc = (int) (saved * 100 / total);
+					callBack.callback(perc);
+				}
 			}
 			out.flush();
 			return file;
@@ -207,6 +218,10 @@ public class FileUtils {
 			}
 		}
 		return null;
+	}
+	
+	public static File saveStream(File file, InputStream in) {
+		return saveStream(file, in, null, null);
 	}
 	
 	public static void main(String[] args) {

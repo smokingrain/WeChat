@@ -40,6 +40,9 @@ import java.util.concurrent.Executors;
 
 
 
+
+
+
 import org.apache.http.client.ClientProtocolException;
 import org.dom4j.Document;
 import org.dom4j.DocumentHelper;
@@ -56,6 +59,8 @@ import com.xk.chatlogs.ChatLogCache;
 import com.xk.ui.items.TypeItem;
 import com.xk.ui.main.MainWindow;
 import com.xk.uiLib.ICallback;
+import com.xk.utils.chain.SysMsgChain;
+import com.xk.utils.song.SongLocation;
 
 public class WeChatUtil {
 	
@@ -67,7 +72,7 @@ public class WeChatUtil {
 	
 	private static ExecutorService chatRobot = Executors.newFixedThreadPool(4);
 	
-	private static void addRandomReply(String ctt, String FromUserName, String user) {
+	public static void addRandomReply(String ctt, String FromUserName, String user) {
 		chatRobot.submit(new Runnable() {
 			int random = new Random().nextInt(11);
 			@Override
@@ -607,6 +612,43 @@ public class WeChatUtil {
 		return allGroups;
 	}
 	
+	/**
+	 * 抓取视频
+	 * 作者 ：肖逵
+	 * 时间 ：2016年12月30日 下午8:16:09
+	 * @param msgId
+	 * @param callback
+	 * @return
+	 */
+	public static File loadVideo(String msgId, ICallback<Integer> callback){
+		String url = String.format(Constant.LOAD_VIDEO, Constant.HOST);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("msgid", msgId);
+		try {
+			params.put("skey", URLEncoder.encode(Constant.sign.skey, "UTF-8"));
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		HTTPUtil hu = HTTPUtil.getInstance();
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("Accept", "*/*");
+		headers.put("Accept-Encoding", "identity;q=1, *;q=0");
+		headers.put("Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
+		headers.put("DNT", "1");
+		headers.put("Host", Constant.HOST);
+		headers.put("Range", "bytes=0-");
+		SongLocation in = hu.getInputStream(url, params, headers);
+		if(null != in) {
+			return FileUtils.saveStream(new File("temp", System.currentTimeMillis() + ".mp4"), in.input, callback, in.length);
+		} else {
+			if(null != callback ) {
+				callback.callback(-1);
+			}
+		}
+		return null;
+		
+	}
 	
 	/**
 	 * 用途：抓取聊天图片
@@ -860,6 +902,7 @@ public class WeChatUtil {
 		params.put("pass_ticket", Constant.sign.pass_ticket);
 		try {
 			final MainWindow main = MainWindow.getInstance();
+			SysMsgChain chain = new SysMsgChain();
 			String result =  hu.postBody(String.format(Constant.GET_STATUS, Constant.HOST), params, JSONUtil.toJson(bodyMap));
 			Map<String, Object> rst = JSONUtil.fromJson(result);
 			List<Map<String, Object>> modContactList = (List<Map<String, Object>>) rst.get("ModContactList");
@@ -873,95 +916,8 @@ public class WeChatUtil {
 				if(null != msgCount && msgCount > 0) {
 					List<Map<String, Object>> AddMsgList = (List<Map<String, Object>>) rst.get("AddMsgList");
 					for(Map<String, Object> msg : AddMsgList) {
-						Integer MsgType = (Integer) msg.get("MsgType");
-						String Content = (String) msg.get("Content");
-						String ToUserName = (String) msg.get("ToUserName");
-						String FromUserName = (String) msg.get("FromUserName");
-						if(51 == MsgType) {
-							String StatusNotifyUserName = (String) msg.get("StatusNotifyUserName");
-							if(null != StatusNotifyUserName && !main.syncGroup) {
-								String[] spl = StatusNotifyUserName.split(",");
-								List<String> groups = Arrays.asList(spl);
-								WeChatUtil.loadGroups(groups);
-								main.showGroupsAndFriends();
-								main.syncGroup = true;
-							}
-						}else if(10002 == MsgType) {//撤回
-							ChatLog log = ChatLog.fromMap(msg);
-							String xml = log.content.replace("&lt;", "<").replace("&gt;", ">");
-							Document doc = DocumentHelper.parseText(xml);
-							String oldid = null;
-							try {
-								oldid = doc.getRootElement().element("revokemsg").element("msgid").getText();
-							} catch (Exception e) {
-							}
-							for(ChatLog his : ChatLogCache.getLogs(FromUserName)) {
-								if(his.msgid.equals(oldid)) {
-									his.recalled = true;
-									break;
-								}
-							}
-							main.flushChatView(FromUserName, true);
-						}else if(10000 == MsgType) {//通知消息
-							ChatLog log = ChatLog.fromMap(msg);
-							if(null != log) {
-								if(FromUserName.equals(Constant.user.UserName)){
-									ChatLogCache.saveLogs(ToUserName, log);
-									main.flushChatView(ToUserName, true);
-								} else {
-									ChatLogCache.saveLogs(FromUserName, log);
-									main.flushChatView(FromUserName, true);
-								}
-							}
-						}else if(1 == MsgType || 3 == MsgType || 47 == MsgType || 49 == MsgType || 37 == MsgType) {
-							if(Constant.FILTER_USERS.contains(FromUserName)) {
-								System.out.println("忽略特殊用户信息！！" + Content);
-							}else if(FromUserName.equals(Constant.user.UserName)){
-								ChatLog log = ChatLog.fromMap(msg);
-								if(null != log) {
-									ChatLogCache.saveLogs(ToUserName, log);
-									main.flushChatView(ToUserName, false );
-									System.out.println("来自手机端自己的消息：" + Content);
-								}
-								
-							}else if(FromUserName.startsWith("@@")) {
-								ChatLog log = ChatLog.fromMap(msg);
-								if(null != log) {
-									ChatLogCache.saveLogs(FromUserName, log);
-									int start = Content.indexOf(":<br/>");
-									if(start > 0) {
-										String name = Content.substring(0, start);
-										String ctt = Content.substring(start + ":<br/>".length(), Content.length());
-										String sender = ContactsStruct.getGroupMember(name, Constant.getContact(FromUserName));
-										if(!Constant.noReply.contains(FromUserName) && !Constant.globalSilence) {
-											if(ctt.contains("@" + Constant.user.NickName)) {
-												String detail = ctt.replace("@" + Constant.user.NickName, "");
-												String reply = "什么情况?";
-												if(!detail.trim().isEmpty()) {
-													addRandomReply(reply, FromUserName, name);
-												}
-											}
-										}
-									}
-									main.flushChatView(FromUserName, true);
-								}
-								
-								
-							}else {
-								ChatLog log = ChatLog.fromMap(msg);
-								if(null != log) {
-									ChatLogCache.saveLogs(FromUserName, log);
-									String sender = ContactsStruct.getContactName(Constant.getContact(FromUserName));
-									String ctt = Content.replace("<br/>", "\n");
-									System.out.println(sender + " 说：" + ctt);
-									if(log.msgType == 1 && !Constant.noReply.contains(FromUserName) && !Constant.globalSilence) {
-										addRandomReply(ctt, FromUserName, FromUserName);
-									}
-									main.flushChatView(FromUserName, true);
-								}
-								
-							}
-						}
+						ChatLog log = ChatLog.fromMap(msg);
+						chain.fromMap(log, msg);
 					}
 				}
 			}

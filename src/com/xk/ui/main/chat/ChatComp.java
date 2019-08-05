@@ -591,7 +591,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 					user = ContactsStruct.getContactName(Constant.getContact(log.fromId));
 				}
 				List<Object> chatContent = new ArrayList<>();
-				if(3 == log.msgType || 47 == log.msgType || 49 == log.msgType) {
+				if(3 == log.msgType || 47 == log.msgType || 49 == log.msgType || 43 == log.msgType) {
 					if(null != log.img) {
 						chatContent.add(log.img);
 					}else {
@@ -615,6 +615,8 @@ public class ChatComp extends Composite implements HotKeyListener{
 					ci = new AddFriendItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
 				} else if(null != log.url && !"".equals(log.url)) {
 					ci = new LinkItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
+				} else if(43 == log.msgType) {
+					ci = new VideoItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
 				} else {
 					ci = new ChatItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
 				}

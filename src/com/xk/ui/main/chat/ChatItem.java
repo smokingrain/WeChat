@@ -65,7 +65,7 @@ public class ChatItem extends ListItem {
 	protected int maxWidth = 0;//气泡宽度
 	protected int nameHeight = 0;//名字高度
 	private int allHeight = MARGIN;//气泡高度
-	private Map<Rectangle, ImageNode> imgs = new HashMap<Rectangle, ImageNode>();
+	protected Map<Rectangle, ImageNode> imgs = new HashMap<Rectangle, ImageNode>();
 	
 	ChatItem() {
 		
@@ -373,7 +373,7 @@ public class ChatItem extends ListItem {
 				cLineWidth += imgWidth + LINE_SPACE_HEIGHT;
 				if(cLineWidth > ITEM_AREA_WIDTH) {
 					cHeight += cMaxHeight + LINE_SPACE_HEIGHT;
-					gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
+					gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
 //					gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
 					if(node.type == 1) {
 						Rectangle rect = new Rectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
@@ -383,7 +383,7 @@ public class ChatItem extends ListItem {
 					cLineWidth = imgWidth + LINE_SPACE_HEIGHT;
 					continue;
 				} else {
-					gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
+					gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
 //					gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
 					if(node.type == 1) {
 						Rectangle rect = new Rectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
@@ -402,14 +402,14 @@ public class ChatItem extends ListItem {
 					cMaxHeight = point.y;
 				}
 				if(cLineWidth < ITEM_AREA_WIDTH) {//聊天内容比较短，只有一行
-					gc.drawText(str, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
+					gc.drawText(str, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth - temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
 //					contentPath.addString(str,  width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
 				}else {
 					int lines = cLineWidth / ITEM_AREA_WIDTH;//有多少行
 					double wordWidth = (point.x + str.length()) / (double)str.length();//【平均一个字长度
 					int wordNum = (int) ((ITEM_AREA_WIDTH - temp) / wordWidth);//补齐第一行需要
 					String first = str.substring(0, wordNum);
-					gc.drawText(first, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
+					gc.drawText(first, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth - temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
 //					contentPath.addString(first, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
 					cHeight += cMaxHeight + LINE_SPACE_HEIGHT *2;
 					for(int i = 0; i < lines; i++) {
@@ -417,12 +417,12 @@ public class ChatItem extends ListItem {
 						if(wordNum + fullNum >= str.length()) {
 							String fullStr = str.substring(wordNum, str.length());
 							cLineWidth = gc.textExtent(fullStr).x + fullStr.length();
-							gc.drawText(fullStr, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
+							gc.drawText(fullStr, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
 //							contentPath.addString(fullStr, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
 							break;
 						} else {
 							String fullStr = str.substring(wordNum, wordNum += fullNum);
-							gc.drawText(fullStr, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
+							gc.drawText(fullStr, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
 //							contentPath.addString(fullStr, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
 						}
 						cHeight += point.y + LINE_SPACE_HEIGHT *2;

@@ -33,6 +33,7 @@ public class Constant {
 	public static final String LOGOUT_URL = "https://%s/cgi-bin/mmwebwx-bin/webwxlogout?redirect=1&type=1&skey={SKEY}";
 	public static final String LOAD_IMG = "https://%s/cgi-bin/mmwebwx-bin/webwxgetmsgimg";
 	public static final String LOAD_VOICE = "https://%s/cgi-bin/mmwebwx-bin/webwxgetvoice";
+	public static final String LOAD_VIDEO = "https://%s/cgi-bin/mmwebwx-bin/webwxgetvideo";
 	public static final String UPLOAD_MEDIA = "https://file.%s/cgi-bin/mmwebwx-bin/webwxuploadmedia?f=json";
 	public static final String SEND_IMG = "https://%s/cgi-bin/mmwebwx-bin/webwxsendmsgimg";
 	public static final String SEND_GIF = "https://%s/cgi-bin/mmwebwx-bin/webwxsendemoticon";

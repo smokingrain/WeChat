@@ -23,7 +23,7 @@ public class ImageChain extends ChatLogChain{
 	@Override
 	public ChatLog fromMap(ChatLog log, Map<String, Object> msg) {
 		//获取图片或者连接
-		if(log.msgType == 3 || log.msgType == 47 || log.msgType == 49) {
+		if(log.msgType == 3 || log.msgType == 47 || log.msgType == 49 || log.msgType == 43) {
 			Map<String, String> params = new HashMap<String, String>();
 			params.put("MsgID", log.msgid);
 			params.put("type", "big");
@@ -37,6 +37,8 @@ public class ImageChain extends ChatLogChain{
 				params.put("type", "slave");
 				params.put("skey", Constant.sign.skey);
 				log.content = (String) msg.get("FileName");
+			} else if(log.msgType == 43)	{
+				params.put("type", "slave");
 			} else {
 				log.content = 3 == log.msgType ? "[图片]" : "[表情]" ;
 			}
