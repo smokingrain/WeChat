@@ -64,6 +64,9 @@ public class VideoViewer extends Canvas implements VideoOutput ,PaintListener, I
 			
 			@Override
 			public void run() {
+				if(isDisposed()) {
+					return;
+				}
 				redraw();
 			}
 		});
@@ -76,7 +79,7 @@ public class VideoViewer extends Canvas implements VideoOutput ,PaintListener, I
 		if (img == null || pasp == null) {
 			g.setBackground(SWTResourceManager.getColor(0x00, 0x00, 0x00));
 			g.fillRectangle(client);
-			g.setBackground(SWTResourceManager.getColor(0xFF, 0xFF, 0xFF));
+			g.setForeground(SWTResourceManager.getColor(0xFF, 0xFF, 0xFF));
 			String text = "下载中:" + perc + "%";
 			g.drawText(text, (client.width - g.textExtent(text, StringNode.DRAW_FLAGS).x) / 2,
 					client.height - g.textExtent(text, StringNode.DRAW_FLAGS).y / 2, StringNode.DRAW_FLAGS);
@@ -113,13 +116,13 @@ public class VideoViewer extends Canvas implements VideoOutput ,PaintListener, I
 
 	@Override
 	public void mouseDoubleClick(MouseEvent paramMouseEvent) {
-		if(null != call) {
-			call.callback(call);
-			call = null;
-		}
 		if(null != player) {
 			player.destroy();
 			player = null;
+		}
+		if(null != call) {
+			call.callback(call);
+			call = null;
 		}
 		
 	}
