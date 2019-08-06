@@ -82,7 +82,7 @@ public class VideoViewer extends Canvas implements VideoOutput ,PaintListener, I
 			g.setForeground(SWTResourceManager.getColor(0xFF, 0xFF, 0xFF));
 			String text = "下载中:" + perc + "%";
 			g.drawText(text, (client.width - g.textExtent(text, StringNode.DRAW_FLAGS).x) / 2,
-					client.height - g.textExtent(text, StringNode.DRAW_FLAGS).y / 2, StringNode.DRAW_FLAGS);
+					(client.height - g.textExtent(text, StringNode.DRAW_FLAGS).y) / 2, StringNode.DRAW_FLAGS);
 			return;
 		}
          
