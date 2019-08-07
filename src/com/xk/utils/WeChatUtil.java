@@ -640,7 +640,9 @@ public class WeChatUtil {
 		headers.put("Range", "bytes=0-");
 		SongLocation in = hu.getInputStream(url, params, headers);
 		if(null != in) {
-			return FileUtils.saveStream(new File("temp", System.currentTimeMillis() + ".mp4"), in.input, callback, in.length);
+			File file = new File("temp", System.currentTimeMillis() + ".mp4");
+			file.getParentFile().mkdirs();
+			return FileUtils.saveStream(file, in.input, callback, in.length);
 		} else {
 			if(null != callback ) {
 				callback.callback(-1);
