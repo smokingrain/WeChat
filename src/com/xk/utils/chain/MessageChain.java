@@ -1,5 +1,7 @@
 package com.xk.utils.chain;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Map;
 
 import com.xk.bean.ContactsStruct;
@@ -13,11 +15,12 @@ import com.xk.utils.WeChatUtil;
 
 public class MessageChain extends ChatLogChain {
 	public IChatLogChain next = new VideoChain();
+	public static List<Integer> normalMsg = Arrays.asList(new Integer[]{1,3,47,49,37,43,34});
 
 	@Override
 	public ChatLog fromMap(ChatLog log, Map<String, Object> msg) {
 		Integer MsgType = (Integer) msg.get("MsgType");
-		if(1 == MsgType || 3 == MsgType || 47 == MsgType || 49 == MsgType || 37 == MsgType || 43 == MsgType) {
+		if(normalMsg.contains(MsgType)) {
 			String FromUserName = (String) msg.get("FromUserName");
 			String ToUserName = (String) msg.get("ToUserName");
 			String Content = (String) msg.get("Content");

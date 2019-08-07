@@ -11,6 +11,7 @@ import org.eclipse.swt.graphics.Font;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Path;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -114,7 +115,10 @@ public class ConvItem extends ListItem {
 				path.addString(node.base, offset, start + 15f, font);
 				offset += gc.textExtent(node.base, StringNode.DRAW_FLAGS).x + StringNode.SPACE;
 			}else {
-				gc.drawImage(icons, 0, ImojCache.computeLoc(node.base).y, 20, 20, (int)offset, start + 15, 20, 20);
+				Point loc = ImojCache.computeLoc(node.base);
+				if(null != loc) {
+					gc.drawImage(icons, 0, loc.y, 20, 20, (int)offset, start + 15, 20, 20);
+				}
 				offset += 20 + StringNode.SPACE;
 			}
 		}
