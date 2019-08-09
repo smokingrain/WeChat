@@ -30,7 +30,7 @@ public class ChatLog {
 	public Integer msgType;
 	
 	public String imgPath;
-	public String voicePath;
+	public String relatedPath;
 	public String content;
 	public String fromId;
 	public String toId;

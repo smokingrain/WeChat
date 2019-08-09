@@ -42,6 +42,9 @@ public class VoiceItem extends ChatItem implements BasicPlayerListener{
 
 	public VoiceItem(String user,Image head, List<Object> chatContent, boolean fromSelf, Font font, ChatLog log) {
 		super(user, head, chatContent, fromSelf, font, log);
+		if(null != log.relatedPath) {
+			file = new File(log.relatedPath);
+		}
 	}
 	
 	@Override
@@ -169,6 +172,7 @@ public class VoiceItem extends ChatItem implements BasicPlayerListener{
 				stat = 0;
 				if(null == file || !file.exists()) {
 					file = WeChatUtil.loadVoice(getLog().msgid, null);
+					getLog().relatedPath = file.getAbsolutePath();
 				}
 				
 				player = new BasicPlayer();
