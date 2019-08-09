@@ -12,6 +12,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Menu;
 import org.eclipse.wb.swt.SWTResourceManager;
 import org.jcodec.player.Player;
 import org.jcodec.player.filters.FrameGrabSource;
@@ -85,6 +86,14 @@ public class VideoItem extends ChatItem {
 		gc.setForeground(backup);
 		gc.setAlpha(255);
 		gc.drawImage(img, 0, 0, imgW, imgH, destX, destY, realSize, realSize);
+	}
+
+
+
+	@Override
+	protected void saveContent(MouseEvent e, Menu m) {
+		// TODO Auto-generated method stub
+		super.saveContent(e, m);
 	}
 
 

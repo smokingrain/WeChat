@@ -617,7 +617,9 @@ public class ChatComp extends Composite implements HotKeyListener{
 					ci = new LinkItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
 				} else if(43 == log.msgType) {
 					ci = new VideoItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
-				} else {
+				} else if(34 == log.msgType) {
+					ci = new VoiceItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
+				} else{
 					ci = new ChatItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
 				}
 				ci.setWeight(log.createTime);

@@ -60,11 +60,11 @@ public class ChatItem extends ListItem {
 	protected List<Object> chatContent;//聊天内容
 	protected boolean fromSelf;//是不是自己发送的 
 	protected Font font;//文本字体
-	private int height = -1;//总高度
+	protected int height = -1;//总高度
 	private int lineNum = 0;
 	protected int maxWidth = 0;//气泡宽度
 	protected int nameHeight = 0;//名字高度
-	private int allHeight = MARGIN;//气泡高度
+	protected int allHeight = MARGIN;//气泡高度
 	protected Map<Rectangle, ImageNode> imgs = new HashMap<Rectangle, ImageNode>();
 	
 	ChatItem() {
@@ -155,7 +155,7 @@ public class ChatItem extends ListItem {
 			}else {
 				height = tempHeight;
 			}
-			
+			nameGC.dispose();
 		}
 		return height + HEAD_FOOT_SAPCE;//聊天记录空间
 	}
@@ -521,6 +521,19 @@ public class ChatItem extends ListItem {
 				}
 			}
 		});
+		saveContent(e, m);
+		getParent().setMenu(m);
+		m.setVisible(true);
+	}
+	
+	/**
+	 * 保存内容
+	 * 作者 ：肖逵
+	 * 时间 ：2019年8月8日 下午22:50:05
+	 * @param e
+	 * @param m
+	 */
+	protected void saveContent(MouseEvent e, Menu m) {
 		Point point = new Point(e.x, e.y);
 		for(Rectangle rect : imgs.keySet()) {
 			if(rect.contains(point)) {//图片右键另存为
@@ -551,8 +564,6 @@ public class ChatItem extends ListItem {
 				break;
 			}
 		}
-		getParent().setMenu(m);
-		m.setVisible(true);
 	}
 	
 	/**

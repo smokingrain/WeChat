@@ -11,7 +11,7 @@ import com.xk.utils.WeChatUtil;
 public class VideoChain extends ChatLogChain {
 
 	
-	private IChatLogChain next;
+	private IChatLogChain next = new VoiceChain();
 	@Override
 	public ChatLog fromMap(ChatLog log, Map<String, Object> msg) {
 		Integer MsgType = (Integer) msg.get("MsgType");
@@ -19,7 +19,7 @@ public class VideoChain extends ChatLogChain {
 			String FromUserName = (String) msg.get("FromUserName");
 			WeChatUtil.statusNotify(Constant.user.UserName, FromUserName);
 		}
-		return null;
+		return processReturn(log, msg);
 	}
 
 	@Override

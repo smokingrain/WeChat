@@ -126,6 +126,7 @@ public class ChatLog {
 		log.fromId = (String) msg.get("FromUserName");
 		log.toId = (String) msg.get("ToUserName");
 		log.url = (String) msg.get("Url");
+		log.voiceLength = (Integer) msg.get("VoiceLength");
 		log.createTime = System.currentTimeMillis();
 		IChatLogChain firstChain = new GroupChain();
 		

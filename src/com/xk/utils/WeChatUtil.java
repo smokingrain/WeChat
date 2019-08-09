@@ -615,6 +615,45 @@ public class WeChatUtil {
 	/**
 	 * 抓取视频
 	 * 作者 ：肖逵
+	 * 时间 ：2016年12月30日 下午8:19:09
+	 * @param msgId
+	 * @param callback
+	 * @return
+	 */
+	public static File loadVoice(String msgId, ICallback<Integer> callback) {
+		String url = String.format(Constant.LOAD_VOICE, Constant.HOST);
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("msgid", msgId);
+		try {
+			params.put("skey", URLEncoder.encode(Constant.sign.skey, "UTF-8"));
+		} catch (UnsupportedEncodingException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		HTTPUtil hu = HTTPUtil.getInstance();
+		Map<String, String> headers = new HashMap<String, String>();
+		headers.put("Accept", "*/*");
+		headers.put("Accept-Encoding", "identity;q=1, *;q=0");
+		headers.put("Accept-Language", "zh-CN,zh;q=0.9,en-US;q=0.8,en;q=0.7");
+		headers.put("DNT", "1");
+		headers.put("Host", Constant.HOST);
+		headers.put("Range", "bytes=0-");
+		SongLocation in = hu.getInputStream(url, params, headers);
+		if(null != in) {
+			File file = new File("temp", System.currentTimeMillis() + ".mp3");
+			file.getParentFile().mkdirs();
+			return FileUtils.saveStream(file, in.input, callback, in.length);
+		} else {
+			if(null != callback ) {
+				callback.callback(-1);
+			}
+		}
+		return null;
+	}
+	
+	/**
+	 * 抓取视频
+	 * 作者 ：肖逵
 	 * 时间 ：2016年12月30日 下午8:16:09
 	 * @param msgId
 	 * @param callback
