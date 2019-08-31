@@ -39,6 +39,7 @@ public class ImageChain extends ChatLogChain{
 				log.content = (String) msg.get("FileName");
 			} else if(log.msgType == 43)	{
 				params.put("type", "slave");
+				log.content = "[视频]";
 			} else {
 				log.content = 3 == log.msgType ? "[图片]" : "[表情]" ;
 			}

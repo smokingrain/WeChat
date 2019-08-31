@@ -40,6 +40,9 @@ public class VideoItem extends ChatItem {
 	
 	public VideoItem(String user,Image head, List<Object> chatContent, boolean fromSelf, Font font, ChatLog log) {
 		super(user, head, chatContent, fromSelf, font, log);
+		if(null != log && null != log.relatedPath) {
+			video = new File(log.relatedPath);
+		}
 	}
 	
 	
@@ -120,6 +123,7 @@ public class VideoItem extends ChatItem {
 								video = null;
 								return;
 							}
+							getLog().relatedPath = video.getAbsolutePath();
 							try {
 								JCodecPacketSource jcp = new JCodecPacketSource(video);
 								final PacketSource videoTrack = jcp.getVideo();///http.getVideoTrack();

@@ -223,8 +223,15 @@ public class ChatComp extends Composite implements HotKeyListener{
 		text.addKeyListener(new KeyAdapter() {
 
 			@Override
+			public void keyReleased(KeyEvent e) {
+				if((e.keyCode == SWT.CR || e.keyCode == 16777296) && (e.stateMask & SWT.MODIFIER_MASK)==SWT.SHIFT) {
+					e.doit = false;
+				}
+			}
+
+			@Override
 			public void keyPressed(KeyEvent e) {
-				if(e.keyCode == SWT.CR || e.keyCode == 16777296) {
+				if((e.keyCode == SWT.CR || e.keyCode == 16777296) && (e.stateMask & SWT.MODIFIER_MASK)==SWT.SHIFT) {
 					sendMsg();
 					e.doit = false;
 				}
@@ -377,7 +384,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 	 * @date 2017年1月5日
 	 */
 	private void sendMsg() {
-		String msg = text.getText().trim();
+		String msg = text.getText();
 		if(sendText(msg)) {
 			text.setText("");
 		}
@@ -470,7 +477,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 			int index = str.indexOf('\uFFFC');
 			int lastIndex = 0;
 			while (index != -1) {
-				String msg = str.substring(lastIndex, index);
+				String msg = str.substring(lastIndex, index).trim();
 				if(!StringUtil.isBlank(msg)) {
 					ChatLog log = ChatLog.createSimpleLog(msg, convId);
 					sendLog(log, false);
@@ -494,8 +501,11 @@ public class ChatComp extends Composite implements HotKeyListener{
 			}
 			if(lastIndex < str.length()) {
 				String msg = str.substring(lastIndex, str.length());
-				ChatLog log = ChatLog.createSimpleLog(msg, convId);
-				sendLog(log, false);
+				if(!StringUtil.isBlank(msg)) {
+					ChatLog log = ChatLog.createSimpleLog(msg, convId);
+					sendLog(log, false);
+				}
+				
 			}
 			flush(item);
 			sent = true;
