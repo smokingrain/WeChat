@@ -29,9 +29,9 @@ import com.xk.utils.ImojCache;
  */
 public class ContactItem extends ListItem {
 
-	private ContactsStruct data;
+	private ContactsStruct data;//联系人详细数据
 	private static Image headDefault=SWTResourceManager.getImage(ContactItem.class, "/images/head.png");
-	private boolean dir;
+	private boolean dir;//true表示是依据首字母分割的单元格
 //	private String name;
 	private List<StringNode> name;
 	
@@ -40,6 +40,7 @@ public class ContactItem extends ListItem {
 		this.data = data;
 		this.dir = dir;
 		this.name = ImojCache.computeNode(name);
+		//异步加载头像，不然卡很久
 		ImageCache.asyncLoadPicture(data, new ICallback<Object>() {
 			
 			@Override
@@ -81,6 +82,7 @@ public class ContactItem extends ListItem {
 		Font font=SWTResourceManager.getFont("宋体", 10, SWT.NORMAL);
 		gc.setFont(font);
 		if(dir) {
+			//绘制ABCDEFG.....
 			int alf=gc.getAlpha();
 			Color bk = gc.getBackground();
 			gc.setBackground(SWTResourceManager.getColor(136, 136, 136));
@@ -100,6 +102,7 @@ public class ContactItem extends ListItem {
 			path.dispose();
 			gc.setForeground(fo);
 		}else {
+			//绘制联系人名称，头像
 			Image showHead = (null == data.head || data.head.isDisposed()) ? headDefault : data.head;
 			gc.drawImage(showHead, 0, 0, showHead.getImageData().width, showHead.getImageData().height, 10, start + 5, 50, 50);
 			Path path = new Path(null);

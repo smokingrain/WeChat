@@ -94,6 +94,12 @@ public class ContactsStruct {
 		EncryChatRoomId = encryChatRoomId;
 	}
 	
+	/**
+	 * 补全缺失的部分属性，从服务器拉下来的数据有时候会缺少，需要再次填充
+	 * 作者 ：肖逵
+	 * 时间 ：2018年8月30日 上午9:28:50
+	 * @param newInstance
+	 */
 	public void fixMissProps(ContactsStruct newInstance) {
 		if(MemberCount == null || MemberCount == 0) {
 			MemberCount = newInstance.MemberCount;
@@ -146,6 +152,13 @@ public class ContactsStruct {
 		return name;
 	}
 	
+	/**
+	 * 没有群名的群自己造名字
+	 * 作者 ：肖逵
+	 * 时间 ：2018年8月30日 上午9:30:46
+	 * @param cs
+	 * @return
+	 */
 	public static String getContactsStructName(ContactsStruct cs) {
 		String nick = cs.NickName;
 		String remark = cs.RemarkName;

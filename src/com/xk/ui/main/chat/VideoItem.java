@@ -27,9 +27,12 @@ import org.jcodec.player.filters.audio.JCodecAudioSource;
 import com.xk.chatlogs.ChatLog;
 import com.xk.ui.main.FloatWindow;
 import com.xk.uiLib.MyList;
+import com.xk.uiLib.VideoComp;
 import com.xk.uiLib.VideoViewer;
 import com.xk.utils.SWTTools;
 import com.xk.utils.WeChatUtil;
+import com.xk.utils.song.SongLocation;
+import com.xk.vlc.HTTPUrlCallbackMedia;
 
 public class VideoItem extends ChatItem {
 	
@@ -109,55 +112,23 @@ public class VideoItem extends ChatItem {
 				if(rect.contains(point)) {
 					final FloatWindow fw = FloatWindow.getInstance();
 					fw.init();
-					fw.setSize(100, 178);
-					final VideoViewer vv = new VideoViewer(fw.shell);
+					fw.setSize(100, 150);
+					final VideoComp vv = new VideoComp(fw.shell);
 					fw.add(vv);
 					new Thread(new Runnable() {
 						
 						@Override
 						public void run() {
+							SongLocation sl = null;
 							if(null == video) {
-								video = WeChatUtil.loadVideo(log.msgid, vv);
-							}
-							if(null == video || !video.exists()) {
-								video = null;
-								return;
-							}
-							getLog().relatedPath = video.getAbsolutePath();
-							try {
-								JCodecPacketSource jcp = new JCodecPacketSource(video);
-								final PacketSource videoTrack = jcp.getVideo();///http.getVideoTrack();
-								FrameGrabSource fgs = null;
-								if(null != videoTrack) {
-									fgs = new FrameGrabSource(VideoItem.this.video, videoTrack); 
-									VideoInfo vi = fgs.getMediaInfo();
-									if(null != vi) {
-										Display.getDefault().asyncExec(new Runnable() {
-											
-											@Override
-											public void run() {
-												fw.setSize(vi.getDim().getWidth(), vi.getDim().getHeight());
-											}
-										});
-									}
-						        }
-
-						        List<PacketSource> audioTracks = jcp.getAudio();//http.getAudioTracks();
-						        AudioSource[] audio = new AudioSource[audioTracks.size()];
-						        for (int i = 0; i < audioTracks.size(); i++) {
-						        	audio[i] = new JCodecAudioSource(audioTracks.get(i));
-						        }
-						        AudioMixer mixer = new AudioMixer(audio.length, audio);
-						        
-						        if(null != player) {
-						        	player.destroy();
-						        }
-						        player = new Player(fgs, mixer, vv, new JSoundAudioOut());
-						        vv.setPlayer(player);
-						        player.play();
-							} catch (IOException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+								sl = WeChatUtil.loadHttpVideo(log.msgid, vv);
+								video = new File("temp",System.currentTimeMillis() + ".mp4");
+								getLog().relatedPath = video.getAbsolutePath();
+								HTTPUrlCallbackMedia media = new HTTPUrlCallbackMedia(sl,video);
+								vv.play(media);
+//								video = WeChatUtil.loadVideo(log.msgid, vv);
+							} else {
+								vv.play(video);
 							}
 							
 						}

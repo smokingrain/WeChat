@@ -8,6 +8,11 @@ import com.xk.chatlogs.interfaces.IChatLogChain;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
 
+/**
+ * 处理添加好友
+ * @author Administrator
+ *
+ */
 public class AddFriendChain extends ChatLogChain {
 
 	private IChatLogChain nextChain;

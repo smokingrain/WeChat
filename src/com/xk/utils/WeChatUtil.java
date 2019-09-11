@@ -651,15 +651,7 @@ public class WeChatUtil {
 		return null;
 	}
 	
-	/**
-	 * 抓取视频
-	 * 作者 ：肖逵
-	 * 时间 ：2016年12月30日 下午8:16:09
-	 * @param msgId
-	 * @param callback
-	 * @return
-	 */
-	public static File loadVideo(String msgId, ICallback<Integer> callback){
+	public static SongLocation loadHttpVideo(String msgId, ICallback<Integer> callback){
 		String url = String.format(Constant.LOAD_VIDEO, Constant.HOST);
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("msgid", msgId);
@@ -677,7 +669,19 @@ public class WeChatUtil {
 		headers.put("DNT", "1");
 		headers.put("Host", Constant.HOST);
 		headers.put("Range", "bytes=0-");
-		SongLocation in = hu.getInputStream(url, params, headers);
+		return hu.getInputStream(url, params, headers);
+	}
+	
+	/**
+	 * 抓取视频
+	 * 作者 ：肖逵
+	 * 时间 ：2016年12月30日 下午8:16:09
+	 * @param msgId
+	 * @param callback
+	 * @return
+	 */
+	public static File loadVideo(String msgId, ICallback<Integer> callback){
+		SongLocation in = loadHttpVideo(msgId, callback);
 		if(null != in) {
 			File file = new File("temp", System.currentTimeMillis() + ".mp4");
 			file.getParentFile().mkdirs();

@@ -1,5 +1,10 @@
 package com.xk.bean;
 
+/**
+ * 浮点数坐标点
+ * @author Administrator
+ *
+ */
 public class Pointd {
 
 	public double x = 0d;

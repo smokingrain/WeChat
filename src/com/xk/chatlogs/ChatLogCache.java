@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 用途：聊天记录
+ * 用途：存储聊天记录
  *
  * @author xiaokui
  * @date 2017年1月3日

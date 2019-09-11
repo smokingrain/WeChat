@@ -59,6 +59,14 @@ public class ChatLog {
 	@JsonIgnore
 	public boolean local = false;
 	
+	/**
+	 * 创建普通聊天记录
+	 * 作者 ：肖逵
+	 * 时间 ：2019年8月31日 下午12:44:14
+	 * @param msg
+	 * @param to
+	 * @return
+	 */
 	public static ChatLog createSimpleLog(String msg, String to) {
 		ChatLog log = new ChatLog();
 		log.createTime = System.currentTimeMillis();
@@ -69,6 +77,14 @@ public class ChatLog {
 		return log;
 	}
 	
+	/**
+	 * 创建文件发送接收记录
+	 * 作者 ：肖逵
+	 * 时间 ：2019年8月31日 下午12:44:27
+	 * @param file
+	 * @param to
+	 * @return
+	 */
 	public static ChatLog createFileLog(File file, String to) {
 		ChatLog log = new ChatLog();
 		log.createTime = System.currentTimeMillis();
@@ -80,7 +96,14 @@ public class ChatLog {
 		return log;
 	}
 	
-	
+	/**
+	 * 创建图片聊天记录
+	 * 作者 ：肖逵
+	 * 时间 ：2019年8月31日 下午12:44:42
+	 * @param file
+	 * @param to
+	 * @return
+	 */
 	public static ChatLog createImageLog(File file, String to) {
 		ChatLog log = new ChatLog();
 		log.local = true;
@@ -97,6 +120,7 @@ public class ChatLog {
 		ImageData data = loader.data[0];
 		ImageNode node = new ImageNode(1, new Image(null, loader.data[0]), loader);
 		log.img = node;
+		//图片宽高固定不能超过200
 		if(data.width > 200 || data.height > 200) {
 			if(data.width > data.height) {
 				Integer w = 200;

@@ -93,6 +93,7 @@ public class ConvItem extends ListItem {
 
 	@Override
 	public void draw(GC gc, int start, int width, int index) {
+		//选中或者单击状态背景加深
 		if(selected || focused) {
 			int alf=gc.getAlpha();
 			Color bk = gc.getBackground();
@@ -110,7 +111,7 @@ public class ConvItem extends ListItem {
 		Path path=new Path(null);
 		float offset = 15 + 58f;
 		Image icons = SWTResourceManager.getImage(ContactItem.class, "/images/icons.png");
-		for(StringNode node : name) {
+		for(StringNode node : name) {//带表情的名称绘制
 			if(node.type == 0) {
 				path.addString(node.base, offset, start + 15f, font);
 				offset += gc.textExtent(node.base, StringNode.DRAW_FLAGS).x + StringNode.SPACE;

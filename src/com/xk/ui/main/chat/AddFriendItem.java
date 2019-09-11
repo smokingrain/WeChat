@@ -19,6 +19,11 @@ import com.xk.uiLib.MyList;
 import com.xk.utils.FileUtils;
 import com.xk.utils.WeChatUtil;
 
+/**
+ * 添加朋友的消息
+ * @author Administrator
+ *
+ */
 public class AddFriendItem extends ChatItem {
 
 	

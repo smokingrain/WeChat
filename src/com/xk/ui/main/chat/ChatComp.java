@@ -220,6 +220,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		text = new StyledText(this, SWT.MULTI | SWT.V_SCROLL);
 		text.setBackground(SWTResourceManager.getColor(0xF5, 0xFF, 0xFA));
 		text.setBounds(0, 430, 549, 115);
+		//发送消息shift+回车
 		text.addKeyListener(new KeyAdapter() {
 
 			@Override
@@ -239,6 +240,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 			
 		});
 		
+		//如果有图片被删除，需要将对应对象回收
 		text.addVerifyListener(new VerifyListener() {
 			
 			@Override
@@ -258,6 +260,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 			}
 		});
 		
+		//绘制图片
 		text.addPaintObjectListener(new PaintObjectListener() {
 			
 			@Override
@@ -272,7 +275,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 				}
 			}
 		});
-		
+		//编辑框被销毁，携带的数据要回收
 		text.addDisposeListener(new DisposeListener() {
 			
 			@Override
@@ -332,6 +335,12 @@ public class ChatComp extends Composite implements HotKeyListener{
 		
 	}
 
+	/**
+	 * 编辑框插入一张图
+	 * 作者 ：肖逵
+	 * 时间 ：2018年8月31日 下午12:55:35
+	 * @param image
+	 */
 	public void addImage(Image image) {
 		double limit = 120d;//宽高限制
 		int offset = text.getCaretOffset();
@@ -390,6 +399,13 @@ public class ChatComp extends Composite implements HotKeyListener{
 		}
  	}
 	
+	/**
+	 * 创建文件发送进度回调
+	 * 作者 ：肖逵
+	 * 时间 ：2018年9月2日 下午8:12:59
+	 * @param log
+	 * @return
+	 */
 	private ICallback<Long> createCount(final ChatLog log) {
 		ICallback<Long> callBack = new ICallback<Long>() {
 			private long count = 0;
@@ -406,6 +422,13 @@ public class ChatComp extends Composite implements HotKeyListener{
 		return callBack;
 	}
 	
+	/**
+	 * 创建图片发送进度回调
+	 * 作者 ：肖逵
+	 * 时间 ：2018年9月2日 下午8:11:55
+	 * @param log
+	 * @return
+	 */
 	private ICallback<Long> createProcess(final ChatLog log) {
 		ICallback<Long> callBack = new ICallback<Long>() {
 			private String convId = ChatComp.this.convId;
@@ -435,6 +458,13 @@ public class ChatComp extends Composite implements HotKeyListener{
 		return callBack;
 	}
 	
+	/**
+	 * 消息发送完毕回调
+	 * 作者 ：肖逵
+	 * 时间 ：2018年9月2日 下午8:13:19
+	 * @param log
+	 * @param del 临时文件需要发送完毕就删掉
+	 */
 	private void sendLog(final ChatLog log, final boolean del) {
 		ChatLogCache.saveLogs(convId, log);
 		ICallback callBack = new ICallback() {
@@ -453,6 +483,13 @@ public class ChatComp extends Composite implements HotKeyListener{
 		WeChatUtil.sendLog(log, 3 == log.msgType ? createProcess(log) : createCount(log), callBack);
 	}
 	
+	/**
+	 * 发送文件
+	 * 作者 ：肖逵
+	 * 时间 ：2018年9月2日 下午8:14:46
+	 * @param path
+	 * @return
+	 */
 	private boolean sendFile(String path) {
 		boolean sent = false;
 		if(!"".equals(path) && null != convId) {
@@ -514,6 +551,11 @@ public class ChatComp extends Composite implements HotKeyListener{
 		return sent;
 	}
 	
+	/**
+	 * 调用截图类
+	 * 作者 ：肖逵
+	 * 时间 ：2019年9月2日 下午8:18:43
+	 */
 	private void cutScreen() {
 		CutScreen cs = new CutScreen();
 		cs.open();
@@ -620,7 +662,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 				}
 				
 				ChatItem ci = null;
-				//这个是
+				//这个是创建具体
 				if(log.msgType == 37) {
 					ci = new AddFriendItem(user, head, chatContent, fromSelf, SWTResourceManager.getFont("楷体", 12, SWT.NORMAL), log);
 				} else if(null != log.url && !"".equals(log.url)) {

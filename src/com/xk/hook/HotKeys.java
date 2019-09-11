@@ -39,6 +39,12 @@ public class HotKeys {
 		return listeners.remove(o);
 	}
 
+	/**
+	 * 注册系统热键
+	 * 作者 ：肖逵
+	 * 时间 ：2018年8月31日 下午12:46:56
+	 * @return
+	 */
 	public boolean registerHotKey() {
 		if(registed) {
 			return true;
