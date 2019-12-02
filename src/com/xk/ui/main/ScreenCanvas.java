@@ -30,7 +30,6 @@ import com.sun.jna.platform.win32.WinDef.HWND;
 import com.sun.jna.platform.win32.WinDef.RECT;
 import com.sun.jna.platform.win32.WinUser.WNDENUMPROC;
 import com.xk.bean.Pointd;
-import com.xk.bean.StringNode;
 import com.xk.uiLib.ICallback;
 
 /**
@@ -41,22 +40,27 @@ import com.xk.uiLib.ICallback;
  */
 public class ScreenCanvas extends Canvas implements PaintListener{
 
+	public static int DRAW_FLAGS = SWT.DRAW_MNEMONIC | SWT.DRAW_TAB | SWT.DRAW_TRANSPARENT | SWT.DRAW_DELIMITER;
+	
 	private Shell parent;
 	private Image base;
+	private Point windSize;
 	private STATUS status = STATUS.NONE;
 	private Rectangle selection;
 	private Rectangle selecting;
+	private Point pointer;
 	private Point downLoc;
 	private List<Rectangle> windows = new ArrayList<Rectangle>();
 	private Rectangle nowWindow;
 	private List<Drawable> options = new CopyOnWriteArrayList<Drawable>();
-	private ICallback<Image> callBack;
+	private ICallback callBack;
 	private Drawable option;
 	
-	public ScreenCanvas(Shell parent, Image base, ICallback<Image> callBack) {
+	public ScreenCanvas(Shell parent, Image base, ICallback callBack) {
 		super(parent, SWT.DOUBLE_BUFFERED);
 		this.parent = parent;
 		this.base = base;
+		this.windSize = new Point(base.getImageData().width, base.getImageData().height);
 		this.callBack = callBack;
 		fatchAllWindows();
 		initEvent();
@@ -112,6 +116,7 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 			
 			@Override
 			public void mouseMove(MouseEvent e) {
+				pointer = new Point(e.x, e.y);
 				if(STATUS.INITED.equals(status)) {
 					moveOnInit(e);
 				}else if(STATUS.CLICKING.equals(status)) {
@@ -302,23 +307,21 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 			if(rect.contains(now)) {
 				if(null == nowWindow) {
 					nowWindow = rect;
-					redraw();
 					break;
 				} else if (!rect.equals(nowWindow)) {
 					if(rect.equals(nowWindow.intersection(rect))) {
 						nowWindow = rect;
-						redraw();
 						break;
 					}else {
 						if(rect.intersects(nowWindow) && nowWindow.contains(now)) {
 							continue;
 						}
 						nowWindow = rect;
-						redraw();
 					}
 				}
 			}
 		}
+		redraw();
 	}
 	
 	
@@ -335,8 +338,10 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 //		gc.drawImage(base, 0, 0);
 		if(STATUS.INITED.equals(status)) {
 			maskRect(gc, nowWindow, 2);
+			drawPointerScope(gc);
 		}else if(STATUS.DRAWING.equals(status)) {
 			maskRect(gc, selecting, 1);
+			drawPointerScope(gc);
 		}else if(STATUS.DRAWED.equals(status)) {
 			maskRect(gc, selection, 1);
 			drawOptions(gc);
@@ -351,6 +356,53 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 		
 	}
 	
+	/**
+	 * 放大鼠标当前点长宽四十范围内的图像，放大三倍
+	 * 作者 ：肖逵
+	 * 时间 ：2019年11月26日 下午2:58:17
+	 */
+	private void drawPointerScope(GC gc) {
+		if(null == pointer) {
+			return;
+		}
+//		int offset = 140;
+		int x = 20;
+		int y = 15;
+		//计算开始绘制的点
+		Point target = new Point((pointer.x > windSize.x - (x * 7)) ? (pointer.x - x * 7) : (pointer.x + x), (pointer.y > windSize.y - y * 7) ? (pointer.y - y * 7) : pointer.y + y);
+		//截取区域
+		int startx = (pointer.x > x) ? (pointer.x - x) : 0;
+		int starty = (pointer.y > y) ? (pointer.y - y) : 0;
+		int width = (pointer.x < windSize.x - x) ? (pointer.x < x ? (x + pointer.x) : x * 2) : (x - (pointer.x - windSize.x)); 
+		int height = (pointer.y < windSize.y - y) ? (pointer.y < y ? (y + pointer.y) : y * 2) : (y - (pointer.y - windSize.y));
+		
+		int targetx = (pointer.x < x) ? (target.x + ((x - pointer.x) * 3)) : target.x;
+		int targety = (pointer.y < y) ? (target.y + ((y - pointer.y) * 3)) : target.y;
+		
+		Rectangle rect = new Rectangle(target.x, target.y, x * 6, y * 6);
+		
+		//开始绘制
+		Color back = gc.getBackground();
+		gc.setBackground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
+		gc.fillRectangle(rect.x, rect.y, rect.width, rect.height + y * 2);
+		gc.setBackground(back);
+		gc.drawImage(base, startx, starty, width, height, targetx, targety, width * 3, height * 3);
+		drawRect(gc, 0, rect);
+		drawLine(gc, 0, new Rectangle(target.x + x * 3, target.y,0, y * 6));
+		drawLine(gc, 0, new Rectangle(target.x, target.y + y * 3, x * 6, 0));
+		Color fore = gc.getForeground();
+		gc.setForeground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+		gc.drawText("坐标:(" + pointer.x + "," + pointer.y + ")", target.x + 5 , target.y + y * 6 + 5, DRAW_FLAGS);
+		gc.setForeground(fore);
+	}
+	
+	
+	/**
+	 * 绘制工具
+	 * 作者 ：肖逵
+	 * 时间 ：2019年11月26日 下午4:45:03
+	 * @param gc
+	 */
 	private void drawOptions(GC gc) {
 		gc.setClipping(selection);
 		for(Drawable draw : options) {
@@ -404,13 +456,13 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 		Color back = gc.getBackground();
 		int alpha = gc.getAlpha();
 		String text = rect.width + " x " + rect.height;
-		Point textSize = gc.textExtent(text, StringNode.DRAW_FLAGS);
+		Point textSize = gc.textExtent(text, DRAW_FLAGS);
 		gc.setBackground(SWTResourceManager.getColor(0x33, 0x33, 0x33));
 		gc.setAlpha(200);
 		gc.fillRectangle(target.x, target.y, textSize.x + 5, (height + 6));
 		gc.setAlpha(alpha);
 		gc.setForeground(SWTResourceManager.getColor(0xff, 0xff, 0xff));
-		gc.drawText(text, target.x + 3, target.y + 3, StringNode.DRAW_FLAGS);
+		gc.drawText(text, target.x + 3, target.y + 3, DRAW_FLAGS);
 		gc.setBackground(back);
 	}
 	
@@ -427,6 +479,23 @@ public class ScreenCanvas extends Canvas implements PaintListener{
 		gc.setForeground(back);
 		gc.setLineWidth(width);
 		gc.drawRectangle(rect);
+		gc.setForeground(old);
+	}
+	
+	/**
+	 * 绘制线条
+	 * 作者 ：肖逵
+	 * 时间 ：2019年11月26日 下午3:36:12
+	 * @param gc
+	 * @param width
+	 * @param rect
+	 */
+	private void drawLine(GC gc, int width, Rectangle rect) {
+		Color back = SWTResourceManager.getColor(0, 174, 255);
+		Color old = gc.getForeground();
+		gc.setForeground(back);
+		gc.setLineWidth(width);
+		gc.drawLine(rect.x, rect.y, rect.x + rect.width, rect.y + rect.height);
 		gc.setForeground(old);
 	}
 	
