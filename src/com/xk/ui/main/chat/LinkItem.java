@@ -36,7 +36,7 @@ public class LinkItem extends ChatItem {
 
 	@Override
 	protected void drawContentL(GC gc, int start, int width) {
-		if(null != log.img) {
+		if(null != log.img && !log.img.getImg().isDisposed()) {
 			ImageData id = log.img.getImg().getImageData();
 			gc.drawImage(log.img.getImg(), 0, 0, id.width, id.height, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 4 + MARGIN * 4, HEAD_IMG_HEIGHT, HEAD_IMG_HEIGHT);
 		} else {

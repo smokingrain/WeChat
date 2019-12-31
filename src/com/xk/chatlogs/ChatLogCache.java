@@ -45,12 +45,20 @@ public class ChatLogCache {
 		List<ChatLog> logs = getLogs(convs);
 		if(null != logs) {
 			logs.remove(log);
+			if(null != log.img && log.img.type == 1) {
+				log.img.getImg().dispose();
+			}
 		}
 	}
 	
 	public static void removeConv(String convs) {
 		List<ChatLog> logs = getLogs(convs);
 		if(null != logs) {
+			for(ChatLog log : logs) {
+				if(null != log.img && log.img.type == 1) {
+					log.img.getImg().dispose();
+				}
+			}
 			logs.clear();
 		}
 	}
