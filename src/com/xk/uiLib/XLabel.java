@@ -620,7 +620,10 @@ void onPaint(PaintEvent event) {
 					gc.drawText(nd.base, lineX, lineY, DRAW_FLAGS);
 					lineX += gc.textExtent(nd.base).x + StringNode.SPACE;
 				} else {
-					gc.drawImage(icons, 0, ImojCache.computeLoc(nd.base).y, 20, 20, lineX, lineY, 20, 20);
+					Point poi = ImojCache.computeLoc(nd.base);
+					if(null != poi) {
+						gc.drawImage(icons, 0, poi.y, 20, 20, lineX, lineY, 20, 20);
+					}
 					lineX += 20 + StringNode.SPACE;
 				}
 			}
