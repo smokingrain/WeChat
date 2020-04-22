@@ -293,4 +293,34 @@ public class SWTTools {
 		}
 	}
 	
+	/**
+	 * 用途：由SWING的图片换成SWT的图片对象
+	 * @date 2017年1月10日
+	 * @param base
+	 * @param name
+	 * @return
+	 */
+	public static Image AWTImg2SWTImg(BufferedImage base, String name) {
+		ByteArrayOutputStream out = new ByteArrayOutputStream();
+		try {
+			ImageIO.write(base, "png", out);
+		} catch (IOException e) {
+			System.out.println(name + "初始化失败！");
+			e.printStackTrace();
+			return null;
+		}
+		byte[] data = out.toByteArray();
+		ByteArrayInputStream in = new ByteArrayInputStream(data);
+		ImageData id = new ImageData(in);
+		try {
+			out.close();
+			in.close();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		Image img = new Image(null, id);
+		return img;
+	}
+	
 }

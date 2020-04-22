@@ -1,5 +1,9 @@
 package com.xk.ui.main;
 
+import java.awt.AWTException;
+import java.awt.Robot;
+import java.awt.image.BufferedImage;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.dnd.ImageTransfer;
@@ -59,11 +63,18 @@ public class CutScreen implements ICallback{
 	 * Create contents of the window.
 	 */
 	protected void createContents() {
+		Image temps = null;
 		Rectangle rect = display.getBounds();
-		Image temps = new Image(display, rect.width, rect.height);  
-        GC gc = new GC(display);  
-        gc.copyArea(temps, 0, 0);  
-        gc.dispose();  
+		try {
+			Robot rb = new Robot();
+			BufferedImage bi = rb.createScreenCapture(new java.awt.Rectangle(0, 0, rect.width, rect.height));
+			temps = SWTTools.AWTImg2SWTImg(bi, "");
+		} catch (AWTException e) {
+			temps = new Image(display, rect.width, rect.height);  
+	        GC gc = new GC(display);  
+	        gc.copyArea(temps, 0, 0);  
+	        gc.dispose();  
+		}  
 		
 		shell = new Shell(SWT.FILL);
 		shell.setBounds(-1, -1, rect.width + 2, rect.height + 2);
