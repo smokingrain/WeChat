@@ -184,6 +184,7 @@ public class ImojCache {
 		splitImage(buff, "惊讶", 14, 0, IMG_WIDTH, IMG_WIDTH, 1);
 		
 		splitImage(buff, "难过", 0, 1, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "酷", 1, 1, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "囧", 2, 1, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "抓狂", 3, 1, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "吐", 4, 1, IMG_WIDTH, IMG_WIDTH, 1);
@@ -191,6 +192,7 @@ public class ImojCache {
 		splitImage(buff, "愉快", 6, 1, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "白眼", 7, 1, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "傲慢", 8, 1, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "饥饿", 9, 1, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "困", 10, 1, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "惊恐", 11, 1, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "流汗", 12, 1, IMG_WIDTH, IMG_WIDTH, 1);
@@ -210,6 +212,7 @@ public class ImojCache {
 		splitImage(buff, "擦汗", 10, 2, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "抠鼻", 11, 2, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "鼓掌", 12, 2, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "糗大了", 13, 2, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "坏笑", 14, 2, IMG_WIDTH, IMG_WIDTH, 1);
 		
 		splitImage(buff, "左哼哼", 0, 3, IMG_WIDTH, IMG_WIDTH, 1);
@@ -220,6 +223,7 @@ public class ImojCache {
 		splitImage(buff, "快哭了", 5, 3, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "阴险", 6, 3, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "亲亲", 7, 3, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "吓", 8, 3, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "可怜", 9, 3, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "菜刀", 10, 3, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "西瓜", 11, 3, IMG_WIDTH, IMG_WIDTH, 1);
@@ -254,6 +258,7 @@ public class ImojCache {
 		splitImage(buff, "抱拳", 8, 5, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "勾引", 9, 5, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "拳头", 10, 5, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "差劲", 11, 5, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "爱你", 12, 5, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "NO", 13, 5, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "OK", 14, 5, IMG_WIDTH, IMG_WIDTH, 1);
@@ -264,6 +269,15 @@ public class ImojCache {
 		splitImage(buff, "发抖", 3, 6, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "怄火", 4, 6, IMG_WIDTH, IMG_WIDTH, 1);
 		splitImage(buff, "转圈", 5, 6, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "磕头", 6, 6, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "回头", 7, 6, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "跳绳", 8, 6, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "投降", 9, 6, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "激动", 10, 6, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "乱舞", 11, 6, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "献吻", 12, 6, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "左太极", 13, 6, IMG_WIDTH, IMG_WIDTH, 1);
+		splitImage(buff, "右太极", 14, 6, IMG_WIDTH, IMG_WIDTH, 1);
 		
 	}
 	
@@ -279,7 +293,7 @@ public class ImojCache {
 	 */
 	private static void splitImage(BufferedImage base, String name, int x, int y, int width, int height, int type) {
 		BufferedImage sub = base.getSubimage(x * width + x, y * height + y, width, height);
-		Image target = AWTImg2SWTImg(sub, name);
+		Image target = SWTTools.AWTImg2SWTImg(sub, name);
 		if(null == target) {
 			return;
 		}
@@ -304,35 +318,7 @@ public class ImojCache {
 	}
 	
 	
-	/**
-	 * 用途：由SWING的图片换成SWT的图片对象
-	 * @date 2017年1月10日
-	 * @param base
-	 * @param name
-	 * @return
-	 */
-	private static Image AWTImg2SWTImg(BufferedImage base, String name) {
-		ByteArrayOutputStream out = new ByteArrayOutputStream();
-		try {
-			ImageIO.write(base, "png", out);
-		} catch (IOException e) {
-			System.out.println(name + "初始化失败！");
-			e.printStackTrace();
-			return null;
-		}
-		byte[] data = out.toByteArray();
-		ByteArrayInputStream in = new ByteArrayInputStream(data);
-		ImageData id = new ImageData(in);
-		try {
-			out.close();
-			in.close();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		Image img = new Image(null, id);
-		return img;
-	}
+	
 	
 	
 }
