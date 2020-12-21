@@ -33,7 +33,7 @@ public class SongHandler implements ICMDHandler {
 		}
 		String source = Constant.SONG_SOURCE.get(user);
 		if(StringUtil.isBlank(source)) {
-			source = "kugou";
+			source = "kuwo";
 			Constant.SONG_SOURCE.put(user, source);
 		}
 		IDownloadSource dSource = SourceFactory.getSource(source);
@@ -56,6 +56,7 @@ public class SongHandler implements ICMDHandler {
 					File saved = FileUtils.saveStream(target, location.input);
 					if(null != saved) {
 						fileCall.callback(saved);
+						textCall.callback("发送中...");
 						break;
 					}
 				}

@@ -97,6 +97,7 @@ public class Constant {
 			add("歌曲");
 			add("圣诞帽");
 			add("脸");
+			add("国庆");
 		}
 	};
 	

@@ -220,6 +220,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		text = new StyledText(this, SWT.MULTI | SWT.V_SCROLL);
 		text.setBackground(SWTResourceManager.getColor(0xF5, 0xFF, 0xFA));
 		text.setBounds(0, 430, 549, 115);
+		text.setAlignment(SWT.CENTER);
 		//发送消息shift+回车
 		text.addKeyListener(new KeyAdapter() {
 
@@ -251,8 +252,10 @@ public class ChatComp extends Composite implements HotKeyListener{
 				while (index != -1) {
 					StyleRange style = text.getStyleRangeAtOffset(event.start + index);
 					if (style != null) {
-						Image image = (Image)style.data;
-						if (image != null) image.dispose();
+						ImageNode image = (ImageNode)style.data;
+						if (image != null && image.type == 1) {
+							image.getImg().dispose();
+						}
 					}
 					index = str.indexOf('\uFFFC', index + 1);
 				}
@@ -266,12 +269,12 @@ public class ChatComp extends Composite implements HotKeyListener{
 			@Override
 			public void paintObject(PaintObjectEvent event) {
 				StyleRange style = event.style;
-				Image image = (Image)style.data;
-				if (!image.isDisposed()) {
-					ImageData id = image.getImageData();
+				ImageNode image = (ImageNode)style.data;
+				if (!image.getImg().isDisposed()) {
+					ImageData id = image.getImg().getImageData();
 					int x = event.x;
-					int y = event.y + event.ascent - style.metrics.ascent;
-					event.gc.drawImage(image, 0, 0, id.width, id.height, x, y, style.metrics.width, style.metrics.ascent);
+					int y = event.y + event.ascent - style.metrics.ascent + text.getBorderWidth();
+					event.gc.drawImage(image.getImg(), 0, 0, id.width, id.height, x, y, style.metrics.width, style.metrics.ascent);
 				}
 			}
 		});
@@ -284,8 +287,8 @@ public class ChatComp extends Composite implements HotKeyListener{
 				for (int i = 0; i < styles.length; i++) {
 					StyleRange style = styles[i];
 					if (style.data != null) {
-						Image image = (Image)style.data;
-						if (image != null) image.dispose();
+						ImageNode image = (ImageNode)style.data;
+						if (image != null && image.type == 1) image.getImg().dispose();
 					}
 				}
 				
@@ -334,24 +337,23 @@ public class ChatComp extends Composite implements HotKeyListener{
 		
 		
 	}
-
+	
 	/**
-	 * 编辑框插入一张图
+	 * 插入一个图片/表情节点
 	 * 作者 ：肖逵
-	 * 时间 ：2018年8月31日 下午12:55:35
-	 * @param image
+	 * 时间 ：2020年12月18日 下午5:06:21
+	 * @param node
 	 */
-	public void addImage(Image image) {
+	public void addImage(ImageNode node) {
 		double limit = 120d;//宽高限制
 		int offset = text.getCaretOffset();
 		text.insert("\uFFFC");
 		StyleRange style = new StyleRange ();
 		style.start = offset;
 		style.length = 1;
-		style.data = image;
-		Rectangle rect = image.getBounds();
-		int width = rect.width;
-		int height = rect.height;
+		style.data = node;
+		int width = node.getWidth();
+		int height = node.getHeight();
 		if(width > limit || height > limit) {
 			if(width > height) {
 				height = (int)(height * (limit / width));
@@ -363,6 +365,19 @@ public class ChatComp extends Composite implements HotKeyListener{
 		}
 		style.metrics = new GlyphMetrics(height, 0, width);
 		text.setStyleRange(style);
+		text.setCaretOffset(text.getCaretOffset() + 1);
+		
+	}
+
+	/**
+	 * 编辑框插入一张图
+	 * 作者 ：肖逵
+	 * 时间 ：2018年8月31日 下午12:55:35
+	 * @param image
+	 * @param type 0，表情，1，图片
+	 */
+	public void addImage(Image image, int type) {
+		addImage(new ImageNode(1, image, null, null));
 	}
 	
 	
@@ -506,40 +521,48 @@ public class ChatComp extends Composite implements HotKeyListener{
 	 * 发送消息，如果是图文，要分条发
 	 * @param str
 	 * @return
-	 * @author o-kui.xiao
+	 * @author kui.xiao
 	 */
 	public boolean sendText(String str) {
 		boolean sent = false;
 		if(!"".equals(str) && null != convId) {
+			//找到有存储图片的节点
 			int index = str.indexOf('\uFFFC');
 			int lastIndex = 0;
+			String msg = "";
 			while (index != -1) {
-				String msg = str.substring(lastIndex, index).trim();
-				if(!StringUtil.isBlank(msg)) {
-					ChatLog log = ChatLog.createSimpleLog(msg, convId);
-					sendLog(log, false);
-				}
+				String temp = str.substring(lastIndex, index).trim();
+				msg += temp;
 				StyleRange style = text.getStyleRangeAtOffset(index);
 				if (style != null) {
-					Image image = (Image)style.data;
+					ImageNode image = (ImageNode)style.data;
 					if (image != null) {
-						SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
-						File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
-						file.getParentFile().mkdirs();
-						ImageLoader loader = new ImageLoader();
-						loader.data = new ImageData[]{image.getImageData()};
-						loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
-						ChatLog imgLog = ChatLog.createImageLog(file, convId);
-						sendLog(imgLog, true);
+						if(image.type == 0) {
+							msg += "[" + image.getBase() + "]";
+						} else {
+							if(!StringUtil.isBlank(msg)) {
+								ChatLog log = ChatLog.createSimpleLog(msg, convId);
+								sendLog(log, false);
+								msg = "";
+							}
+							SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
+							File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
+							file.getParentFile().mkdirs();
+							ImageLoader loader = new ImageLoader();
+							loader.data = new ImageData[]{image.getImg().getImageData()};
+							loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
+							ChatLog imgLog = ChatLog.createImageLog(file, convId);
+							sendLog(imgLog, true);
+						}
 					}
 				}
 				lastIndex = index + 1;
 				index = str.indexOf('\uFFFC', lastIndex);
 			}
 			if(lastIndex < str.length()) {
-				String msg = str.substring(lastIndex, str.length());
+				msg += str.substring(lastIndex, str.length());
 				if(!StringUtil.isBlank(msg)) {
-					ChatLog log = ChatLog.createSimpleLog(msg, convId);
+					ChatLog log = ChatLog.createSimpleLog(msg.trim(), convId);
 					sendLog(log, false);
 				}
 				
@@ -561,7 +584,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		cs.open();
 		Image img = cs.img;
 		if(null != img && null != convId) {
-			addImage(cs.img);
+			addImage(cs.img, 1);
 //			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
 //			File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
 //			file.getParentFile().mkdirs();

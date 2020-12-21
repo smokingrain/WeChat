@@ -12,6 +12,7 @@ import org.eclipse.swt.graphics.Point;
 public class StringNode {
 	
 	public static final int SPACE = 2;
+	public static final int IMOJ_WIDTH = 20;
 	public static int DRAW_FLAGS = SWT.DRAW_MNEMONIC | SWT.DRAW_TAB | SWT.DRAW_TRANSPARENT | SWT.DRAW_DELIMITER;
 
 	public int type = 0;
@@ -44,8 +45,8 @@ public class StringNode {
 				x += pt.x + StringNode.SPACE;
 				y = Math.max(pt.y, y);
 			}else {
-				x += 20 + StringNode.SPACE;
-				y = Math.max(20 + StringNode.SPACE, y);
+				x += StringNode.IMOJ_WIDTH + StringNode.SPACE;
+				y = Math.max(StringNode.IMOJ_WIDTH + StringNode.SPACE, y);
 			}
 		}
 		return new Point(x, y);

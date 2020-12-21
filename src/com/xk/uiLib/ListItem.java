@@ -6,7 +6,7 @@ import org.eclipse.swt.graphics.GC;
 
 public abstract class ListItem implements Comparable<ListItem>{
 	
-	private MyList parent;
+	private MyList<ListItem> parent;
 	private Long weight = -1L;
 	protected boolean selected=false;
 	protected boolean focused=false;
@@ -71,11 +71,11 @@ public abstract class ListItem implements Comparable<ListItem>{
 		selected=false;
 	}
 
-	public MyList getParent() {
+	public MyList<ListItem> getParent() {
 		return parent;
 	}
 
-	public void setParent(MyList parent) {
+	public void setParent(MyList<ListItem> parent) {
 		this.parent = parent;
 	}
 }

@@ -54,6 +54,7 @@ public class VideoComp extends Composite implements ICallable,ICallback<Integer>
 	public void play(File video) {
 		media = new RandomAccessFileMedia(video);
 		mediaPlayerComponent.mediaPlayer().media().play(media);
+//		mediaPlayerComponent.mediaPlayer().media().play(video.getAbsolutePath());
 	}
 
 	public void play(CallbackMedia media) {

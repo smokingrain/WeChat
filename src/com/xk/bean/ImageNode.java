@@ -12,13 +12,15 @@ public class ImageNode {
 	public int type;//0，小表情，不可点击，1，正常图片
 	private Image img;//具体图片对象
 	private ImageLoader loader;//图片加载器，存储部分数据，也可以方便的保存图片
+	private String base;
 	private int width;//宽
 	private int height;//高
 	
-	public ImageNode(int type, Image img, ImageLoader loader) {
+	public ImageNode(int type, Image img, ImageLoader loader, String base) {
 		this.type = type;
 		this.img = img;
 		this.loader = loader;
+		this.setBase(base);
 		int w = img.getImageData().width;
 		int h = img.getImageData().height;
 		if(Math.max(w, h) > 200) {//固定图片不能太大。否则显示很奇怪
@@ -36,11 +38,11 @@ public class ImageNode {
 	}
 
 	public int getWidth() {
-		return width;
+		return type == 0? StringNode.IMOJ_WIDTH : width;
 	}
 	
 	public int getHeight() {
-		return height;
+		return type == 0? StringNode.IMOJ_WIDTH : height;
 	}
 	
 	
@@ -57,6 +59,14 @@ public class ImageNode {
 			this.img.dispose();
 		}
 		this.img = img;
+	}
+
+	public String getBase() {
+		return base;
+	}
+
+	public void setBase(String base) {
+		this.base = base;
 	}
 	
 }

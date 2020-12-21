@@ -118,7 +118,7 @@ public class ChatLog {
 		ImageLoader loader = new ImageLoader();
 		loader.load(file.getAbsolutePath());
 		ImageData data = loader.data[0];
-		ImageNode node = new ImageNode(1, new Image(null, loader.data[0]), loader);
+		ImageNode node = new ImageNode(1, new Image(null, loader.data[0]), loader, null);
 		log.img = node;
 		//图片宽高固定不能超过200
 		if(data.width > 200 || data.height > 200) {

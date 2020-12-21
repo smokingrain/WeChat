@@ -82,7 +82,7 @@ public class ImojCache {
 		}
 		String name = content.replace("[", "").replace("]", "");
 		Image img = ImojCache.qqface.get(name);
-		return null == img ? content : new ImageNode(0, img, null);
+		return null == img ? content : new ImageNode(0, img, null, name);
 	}
 	
 	/**

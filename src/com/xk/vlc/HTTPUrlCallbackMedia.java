@@ -11,7 +11,7 @@ import uk.co.caprica.vlcj.media.callback.seekable.SeekableCallbackMedia;
 public class HTTPUrlCallbackMedia extends SeekableCallbackMedia {
 
 	private WriteOnReadInputStream input;
-	private long length;
+	protected long length;
 	private SongLocation url;
 	private File target;
 	
@@ -34,7 +34,7 @@ public class HTTPUrlCallbackMedia extends SeekableCallbackMedia {
 		};
 	}
 	
-	private InputStream getStream() {
+	protected InputStream getStream() {
 		this.length = url.length;
 		return url.input;
 	}

@@ -5,8 +5,10 @@ import java.util.List;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.GC;
 
+import com.xk.bean.ImageNode;
 import com.xk.bean.Imoj;
 import com.xk.uiLib.ListItem;
+import com.xk.utils.ImojCache;
 
 public class ImojItem extends ListItem {
 	
@@ -38,7 +40,14 @@ public class ImojItem extends ListItem {
 	public boolean oncliek(MouseEvent e, int itemHeight, int index, int type) {
 		int indix = e.x / 30;
 		if(indix < data.size() && null != data.get(indix)) {
-			cc.sendText("[" + data.get(indix).name + "]");
+			String base = "[" + data.get(indix).name + "]";
+			List<Object> result = ImojCache.computeImoj(base);
+			for(Object obj : result) {
+				if(obj instanceof ImageNode) {
+					ImageNode node = (ImageNode) obj;
+					cc.addImage(node);
+				}
+			}
 			getParent().getShell().dispose();
 		}
 		return false;

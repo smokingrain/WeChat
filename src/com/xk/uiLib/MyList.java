@@ -428,7 +428,7 @@ public class MyList<T extends ListItem> extends Composite {
 			checkLimit();
 			items.sort(sort);
 			items.add(index, item);
-			item.setParent(this);
+			item.setParent((MyList<ListItem>)this);
 			countHeight();
 		}
 	}
@@ -438,7 +438,7 @@ public class MyList<T extends ListItem> extends Composite {
 			checkLimit();
 			items.add(item);
 			items.sort(sort);
-			item.setParent(this);
+			item.setParent((MyList<ListItem>)this);
 			countHeight();
 		}
 	}

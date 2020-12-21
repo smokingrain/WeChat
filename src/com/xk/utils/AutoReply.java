@@ -13,6 +13,7 @@ import java.util.concurrent.Executors;
 import org.jsoup.helper.StringUtil;
 
 import com.xk.uiLib.ICallback;
+import com.xk.utils.hat.FlagHandler;
 import com.xk.utils.hat.HatHandler;
 import com.xk.utils.interfaces.ICMDHandler;
 import com.xk.utils.pic.PictureHandler;
@@ -27,16 +28,17 @@ public class AutoReply {
 			textCall.callback("说人话！！");
 			return;
 		}
+		text = text.replace("：", ":");
 		if(!text.contains(":") || text.indexOf(":") == text.length() - 1) {
-			String reply = call(text, userid);
-			textCall.callback(reply);
+//			String reply = call(text, userid);
+//			textCall.callback(reply);
 			return;
 		}
 		String[] txts = text.split(":");
 		String cmd = txts[0];
 		if(!Constant.SUPPORTED_CMD.contains(cmd)) {
-			String reply = call(text, userid);
-			textCall.callback(reply);
+//			String reply = call(text, userid);
+//			textCall.callback(reply);
 			return;
 		}
 		String content = text.substring(cmd.length() + 1, text.length()).trim();
@@ -92,6 +94,8 @@ public class AutoReply {
 			return new HatHandler();
 		} else if("脸".equals(cmd)) {
 			return new PictureHandler();
+		} else if("国庆".equals(cmd)) {
+			return new FlagHandler();
 		}
 		return null;
 	}

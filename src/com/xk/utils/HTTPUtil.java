@@ -39,6 +39,7 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.impl.client.AbstractHttpClient;
 import org.apache.http.impl.client.BasicCookieStore;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
@@ -49,8 +50,7 @@ import com.xk.utils.song.SongLocation;
 
 public class HTTPUtil {
 	private CookieStore cookieStore = new BasicCookieStore(); 
-	public CloseableHttpClient httpClient = HttpClientUtils.createSSLClientDefault(cookieStore);
-	public static String cid=null;
+	public CloseableHttpClient httpClient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();//HttpClientUtils.createSSLClientDefault(cookieStore);
 	private static HTTPUtil instance;
 	
 	

@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,8 @@ public class ImageCache {
 	
 	private static Map<String, ImageNode> userHeads = new ConcurrentHashMap<String, ImageNode>();
 	private static Map<String, ImageNode> chatImages = new ConcurrentHashMap<String, ImageNode>();
+	
+	private static List<String> failedImg = new ArrayList<String>();
 	
 	private static ExecutorService service = Executors.newFixedThreadPool(20);
 	
@@ -73,7 +76,7 @@ public class ImageCache {
 				ImageData[] datas = loader.load(file.getAbsolutePath());
 				if(null != datas && datas.length > 0) {
 					Image img = new Image(null,datas[0]);
-					ImageNode node = new ImageNode(1, img, loader);
+					ImageNode node = new ImageNode(1, img, loader, null);
 					userHeads.put(id, node);
 					count++;
 				}
@@ -93,7 +96,7 @@ public class ImageCache {
 		ImageLoader loader = new ImageLoader();
 		loader.load(file.getAbsolutePath());
 		ImageData data = loader.data[0];
-		ImageNode node = new ImageNode(1, new Image(null, loader.data[0]), loader);
+		ImageNode node = new ImageNode(1, new Image(null, loader.data[0]), loader, null);
 		if(data.width > 200 || data.height > 200) {
 			if(data.width > data.height) {
 				Integer w = 200;
@@ -133,6 +136,9 @@ public class ImageCache {
 	
 	
 	private static ImageNode getImage(final String id, File cache, Map<String, ImageNode> caches, String url, Map<String, String> params) {
+		if(failedImg.contains(id)) {
+			return null;
+		}
 		if(!cache.exists()) {
 			cache.mkdirs();
 		}else if(cache.exists() && !cache.isDirectory()) {
@@ -151,7 +157,7 @@ public class ImageCache {
 				ImageLoader loader = new ImageLoader();
 				ImageData[] datas = loader.load(heads[0].getAbsolutePath());
 				if(null != datas && datas.length > 0) {
-					ImageNode node = new ImageNode(1, new Image(null, datas[0]), loader);
+					ImageNode node = new ImageNode(1, new Image(null, datas[0]), loader, null);
 					caches.put(id, node);
 					return node;
 				}
@@ -166,13 +172,14 @@ public class ImageCache {
 			ImageLoader loader = new ImageLoader();
 			ImageData[] datas = loader.load(in);
 			if(null != datas && datas.length > 0) {
-				ImageNode node = new ImageNode(1, new Image(null, datas[0]), loader);
+				ImageNode node = new ImageNode(1, new Image(null, datas[0]), loader, null);
 				caches.put(id, node);
 				return node;
 			}
 		} catch (Exception e) {
 			System.out.println(url);
 			e.printStackTrace();
+			failedImg.add(id);
 		} finally {
 			if(null != in) {
 				try {
