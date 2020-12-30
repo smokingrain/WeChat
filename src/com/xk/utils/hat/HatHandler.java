@@ -34,15 +34,14 @@ public class HatHandler implements ICMDHandler {
 			textCall.callback("老哥，你没有头像P个jj");
 			return;
 		}
-//		InputStream input = HTTPUtil.getInstance().getInput(target.HeadImgUrl);
-//		if(null == input) {
-//			textCall.callback("貌似你头像有问题...");
-//			return;
-//		}
+		InputStream input = HTTPUtil.getInstance().getInput(String.format(Constant.BASE_URL, Constant.HOST) + target.HeadImgUrl + "&type=big");
 		ImageLoader loader = new ImageLoader();
-		ImageData source = target.head.getImageData();
-//		loader.load(input);
-		loader.data = new ImageData[]{source};
+		if(null == input) {
+			ImageData source = target.head.getImageData();
+			loader.data = new ImageData[]{source};
+		} else {
+			loader.load(input);
+		}
 		Image greenHat = SWTResourceManager.getImage(HatHandler.class, "/images/green.png");
 		String path = "temp/source" + target.NickName + Constant.FORMATS[SWT.IMAGE_JPEG];
 		String pathTarget = "temp/target" + target.NickName + Constant.FORMATS[SWT.IMAGE_JPEG];
@@ -54,7 +53,7 @@ public class HatHandler implements ICMDHandler {
 		}
 		
 		ImageData id = greenHat.getImageData();
-		Image img = new Image(null, source);
+		Image img = new Image(null, path);
 		GC gc = new GC(img);
 		for(Rect rect : faces) {
 			int width = rect.width;
