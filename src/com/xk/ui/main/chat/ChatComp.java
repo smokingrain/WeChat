@@ -559,7 +559,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 				lastIndex = index + 1;
 				index = str.indexOf('\uFFFC', lastIndex);
 			}
-			if(!StringUtil.isBlank(msg)) {
+			if(!StringUtil.isBlank(msg) || lastIndex < str.length()) {
 				if(lastIndex < str.length()) {
 					msg += str.substring(lastIndex, str.length());
 				}
