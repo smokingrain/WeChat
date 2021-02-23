@@ -5,8 +5,6 @@ import java.util.TimerTask;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
-import org.eclipse.swt.events.FocusAdapter;
-import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.internal.win32.OS;
 import org.eclipse.swt.internal.win32.POINT;
 import org.eclipse.swt.internal.win32.RECT;
@@ -16,7 +14,6 @@ import com.xk.uiLib.ICallable;
 import com.xk.uiLib.ICallback;
 import com.xk.utils.SWTTools;
 
-import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 

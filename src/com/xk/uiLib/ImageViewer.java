@@ -60,7 +60,7 @@ public class ImageViewer extends Canvas implements ICallable{
 	 */
 	public void setImages(ImageData[] imageDatas, int repeatCount) {
 		checkWidget();
-
+		stopAnimationTimer();
 		this.image = null;
 		this.imageDatas = imageDatas;
 		this.repeatCount = repeatCount;
@@ -240,11 +240,17 @@ public class ImageViewer extends Canvas implements ICallable{
 	}
 
 	Image getCurrentImage() {
-		if (image != null)
+		if (image != null) {
 			return image;
+		}
 
-		if (images == null)
+		if (images == null) {
 			return null;
+		}
+		
+		if(images.length <= current) {
+			return null;
+		}
 
 		return images[current];
 	}

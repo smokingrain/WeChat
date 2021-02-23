@@ -26,6 +26,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import com.xk.bean.ImageNode;
 import com.xk.bean.Imoj;
 import com.xk.bean.StringNode;
+import com.xk.bean.ImageNode.TYPE;
 
 public class ImojCache {
 	private static final Integer IMG_WIDTH = 28;
@@ -82,7 +83,7 @@ public class ImojCache {
 		}
 		String name = content.replace("[", "").replace("]", "");
 		Image img = ImojCache.qqface.get(name);
-		return null == img ? content : new ImageNode(0, img, null, name);
+		return null == img ? content : new ImageNode(TYPE.IMOJ, img, null, name);
 	}
 	
 	/**

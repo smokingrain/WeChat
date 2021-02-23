@@ -1,12 +1,14 @@
 package com.xk.ui.main.chat;
 
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.wb.swt.GifTransfer;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.sun.jna.platform.win32.WinUser.MSG;
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.ImageNode;
 import com.xk.bean.MemberStruct;
+import com.xk.bean.ImageNode.TYPE;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
 import com.xk.hook.HotKeyListener;
@@ -25,31 +27,6 @@ import com.xk.utils.ImojCache;
 import com.xk.utils.SWTTools;
 import com.xk.utils.WeChatUtil;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -57,8 +34,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
@@ -66,6 +41,8 @@ import org.eclipse.swt.custom.PaintObjectEvent;
 import org.eclipse.swt.custom.PaintObjectListener;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.custom.StyledTextUtils;
+import org.eclipse.swt.custom.VerifyKeyListener;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
 import org.eclipse.swt.dnd.DropTargetAdapter;
@@ -74,24 +51,23 @@ import org.eclipse.swt.dnd.FileTransfer;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.KeyAdapter;
-import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.events.VerifyListener;
 import org.eclipse.swt.graphics.GC;
-import org.eclipse.swt.graphics.GlyphMetrics;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.MenuItem;
 import org.jsoup.helper.StringUtil;
 
 /**
@@ -180,8 +156,8 @@ public class ChatComp extends Composite implements HotKeyListener{
 				ImojWindow fw = ImojWindow.getInstance();
 				fw.setCc(ChatComp.this);
 				fw.init(loc.x, loc.y);
-				fw.shell.setSize(30 * 15 + MyList.BAR_WIDTH + 4, 215);
-				fw.setTimeOut(2000L);
+				fw.shell.setSize(30 * 15 + MyList.BAR_WIDTH + 54, 215);
+				fw.setTimeOut(-1L);
 				fw.open(-1, -1);
 				
 				
@@ -218,82 +194,95 @@ public class ChatComp extends Composite implements HotKeyListener{
 		
 		//内容输入框
 		text = new StyledText(this, SWT.MULTI | SWT.V_SCROLL);
-		text.setBackground(SWTResourceManager.getColor(0xF5, 0xFF, 0xFA));
+//		text.setBackground(SWTResourceManager.getColor(0xF5, 0xFF, 0xFA));
 		text.setBounds(0, 430, 549, 115);
 		text.setAlignment(SWT.CENTER);
-		//发送消息shift+回车
-		text.addKeyListener(new KeyAdapter() {
-
-			@Override
-			public void keyReleased(KeyEvent e) {
-				if((e.keyCode == SWT.CR || e.keyCode == 16777296) && (e.stateMask & SWT.MODIFIER_MASK)==SWT.SHIFT) {
-					e.doit = false;
-				}
-			}
-
-			@Override
-			public void keyPressed(KeyEvent e) {
-				if((e.keyCode == SWT.CR || e.keyCode == 16777296) && (e.stateMask & SWT.MODIFIER_MASK)==SWT.SHIFT) {
-					sendMsg();
-					e.doit = false;
-				}
-			}
-			
-		});
 		
-		//如果有图片被删除，需要将对应对象回收
-		text.addVerifyListener(new VerifyListener() {
-			
+		text.addMouseListener(new MouseAdapter() {
+
 			@Override
-			public void verifyText(VerifyEvent event) {
-				if (event.start == event.end) return;
-				String str = text.getText(event.start, event.end - 1);
-				int index = str.indexOf('\uFFFC');
-				while (index != -1) {
-					StyleRange style = text.getStyleRangeAtOffset(event.start + index);
-					if (style != null) {
-						ImageNode image = (ImageNode)style.data;
-						if (image != null && image.type == 1) {
-							image.getImg().dispose();
+			public void mouseUp(MouseEvent e) {
+				if(e.button == 3) {
+					Menu m=new Menu(getParent());
+					Menu menu=getParent().getMenu();
+					if (menu != null) {
+						menu.dispose();
+					}
+					MenuItem cut = new MenuItem(m, SWT.NONE);//剪切菜单
+					cut.setText("剪切");
+					cut.addSelectionListener(new SelectionAdapter() {
+
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							StyledTextUtils.cut(text);
 						}
-					}
-					index = str.indexOf('\uFFFC', index + 1);
+					});
+					cut.setEnabled(!text.getText().trim().isEmpty());
+					
+					MenuItem copy = new MenuItem(m, SWT.NONE);//复制菜单
+					copy.setText("复制");
+					copy.addSelectionListener(new SelectionAdapter() {
+						
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							StyledTextUtils.copy(text);
+						}
+					});
+					copy.setEnabled(!text.getText().trim().isEmpty());
+					
+					MenuItem pause = new MenuItem(m, SWT.NONE);//粘贴菜单
+					pause.setText("粘贴");
+					pause.addSelectionListener(new SelectionAdapter() {
+						
+						@Override
+						public void widgetSelected(SelectionEvent e) {
+							StyledTextUtils.pause(text);
+						}
+					});
+					
+					
+					getParent().setMenu(m);
+					m.setVisible(true);
 				}
+			}
+			
+		});
+		
+		//发送消息shift+回车
+		text.addVerifyKeyListener(new VerifyKeyListener() {
+			
+			@Override
+			public void verifyKey(VerifyEvent event) {
 				
+				if((event.keyCode == SWT.CR || event.keyCode == 16777296) && (event.stateMask & SWT.MODIFIER_MASK)==SWT.SHIFT) {
+					sendMsg();
+					event.doit = false;
+					return;
+				}
+				if(event.keyCode == 'a' && (event.stateMask & SWT.MODIFIER_MASK) == SWT.CTRL) {
+					event.doit = false;
+					text.selectAll();
+					return;
+				}
+				if(event.keyCode == 'v' && (event.stateMask & SWT.MODIFIER_MASK) == SWT.CTRL) {
+					event.doit = false;
+					StyledTextUtils.pause(text);
+					return;
+				}
+				if(event.keyCode == 'c' && (event.stateMask & SWT.MODIFIER_MASK) == SWT.CTRL) {
+					event.doit = false;
+					StyledTextUtils.copy(text);
+					return;
+				}
+				if(event.keyCode == 'x' && (event.stateMask & SWT.MODIFIER_MASK) == SWT.CTRL) {
+					event.doit = false;
+					StyledTextUtils.cut(text);
+					return;
+				}
 			}
 		});
 		
-		//绘制图片
-		text.addPaintObjectListener(new PaintObjectListener() {
-			
-			@Override
-			public void paintObject(PaintObjectEvent event) {
-				StyleRange style = event.style;
-				ImageNode image = (ImageNode)style.data;
-				if (!image.getImg().isDisposed()) {
-					ImageData id = image.getImg().getImageData();
-					int x = event.x;
-					int y = event.y + event.ascent - style.metrics.ascent + text.getBorderWidth();
-					event.gc.drawImage(image.getImg(), 0, 0, id.width, id.height, x, y, style.metrics.width, style.metrics.ascent);
-				}
-			}
-		});
-		//编辑框被销毁，携带的数据要回收
-		text.addDisposeListener(new DisposeListener() {
-			
-			@Override
-			public void widgetDisposed(DisposeEvent event) {
-				StyleRange[] styles = text.getStyleRanges();
-				for (int i = 0; i < styles.length; i++) {
-					StyleRange style = styles[i];
-					if (style.data != null) {
-						ImageNode image = (ImageNode)style.data;
-						if (image != null && image.type == 1) image.getImg().dispose();
-					}
-				}
-				
-			}
-		});
+		StyledTextUtils.enablePictures(text);
 		
 		//发送按钮
 		lbls = new CLabel(this, SWT.CENTER);
@@ -333,53 +322,26 @@ public class ChatComp extends Composite implements HotKeyListener{
 			}
 		});
 		
+		clearTemp();
 		registerHotKey();
-		
-		
 	}
 	
+	
 	/**
-	 * 插入一个图片/表情节点
+	 * 清理上一次启动后临时文件
 	 * 作者 ：肖逵
-	 * 时间 ：2020年12月18日 下午5:06:21
-	 * @param node
+	 * 时间 ：2021年1月25日 上午10:51:18
 	 */
-	public void addImage(ImageNode node) {
-		double limit = 120d;//宽高限制
-		int offset = text.getCaretOffset();
-		text.insert("\uFFFC");
-		StyleRange style = new StyleRange ();
-		style.start = offset;
-		style.length = 1;
-		style.data = node;
-		int width = node.getWidth();
-		int height = node.getHeight();
-		if(width > limit || height > limit) {
-			if(width > height) {
-				height = (int)(height * (limit / width));
-				width = (int)limit;
-			}else {
-				width = (int)(width * (limit / height));
-				height = (int)limit;
+	private void clearTemp() {
+		File file = new File("temp");
+		if(file.exists() && file.isDirectory()) {
+			File[] tempFiles = file.listFiles();
+			for(File temp : tempFiles) {
+				temp.delete();
 			}
 		}
-		style.metrics = new GlyphMetrics(height, 0, width);
-		text.setStyleRange(style);
-		text.setCaretOffset(text.getCaretOffset() + 1);
 		
 	}
-
-	/**
-	 * 编辑框插入一张图
-	 * 作者 ：肖逵
-	 * 时间 ：2018年8月31日 下午12:55:35
-	 * @param image
-	 * @param type 0，表情，1，图片
-	 */
-	public void addImage(Image image, int type) {
-		addImage(new ImageNode(1, image, null, null));
-	}
-	
 	
 	/**
 	 * 发送图片
@@ -534,26 +496,36 @@ public class ChatComp extends Composite implements HotKeyListener{
 				String temp = str.substring(lastIndex, index).trim();
 				msg += temp;
 				StyleRange style = text.getStyleRangeAtOffset(index);
-				if (style != null) {
-					ImageNode image = (ImageNode)style.data;
-					if (image != null) {
-						if(image.type == 0) {
-							msg += "[" + image.getBase() + "]";
-						} else {
-							if(!StringUtil.isBlank(msg)) {
-								ChatLog log = ChatLog.createSimpleLog(msg, convId);
-								sendLog(log, false);
-								msg = "";
-							}
-							SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
-							File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
-							file.getParentFile().mkdirs();
+				if(null == style) {
+					lastIndex = index + 1;
+					index = str.indexOf('\uFFFC', lastIndex);
+					continue;
+				}
+				ImageNode image = (ImageNode)style.data;
+				if (image != null) {
+					if(image.type == TYPE.IMOJ) {
+						msg += "[" + image.getBase() + "]";
+					} else {
+						if(!StringUtil.isBlank(msg)) {
+							ChatLog log = ChatLog.createSimpleLog(msg, convId);
+							sendLog(log, false);
+							msg = "";
+						}
+						SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
+						File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
+						file.getParentFile().mkdirs();
+						if(null == image.getLoader()) {
 							ImageLoader loader = new ImageLoader();
 							loader.data = new ImageData[]{image.getImg().getImageData()};
 							loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
-							ChatLog imgLog = ChatLog.createImageLog(file, convId);
-							sendLog(imgLog, true);
+						} else {
+							file = new File("temp","shortcut" + sdf.format(new Date()) + Constant.FORMATS[image.getLoader().format]);
+							image.getLoader().save(file.getAbsolutePath(), image.getLoader().format);
 						}
+						
+						ChatLog imgLog = ChatLog.createImageLog(file, convId);
+						sendLog(imgLog, true);
+						image.getImg().dispose();
 					}
 				}
 				lastIndex = index + 1;
@@ -584,17 +556,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 		cs.open();
 		Image img = cs.img;
 		if(null != img && null != convId) {
-			addImage(cs.img, 1);
-//			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmmss");
-//			File file = new File("temp","shortcut" + sdf.format(new Date()) + ".jpg");
-//			file.getParentFile().mkdirs();
-//			ImageLoader loader = new ImageLoader();
-//			loader.data = new ImageData[]{img.getImageData()};
-//			loader.save(file.getAbsolutePath(), SWT.IMAGE_JPEG);
-//			ChatLog log = ChatLog.createImageLog(file, convId);
-//			sendLog(log, true);
-//			flush(item);
-			
+			StyledTextUtils.addImage(text, cs.img, TYPE.IMAGE);
 		}
 	}
 	
@@ -721,6 +683,10 @@ public class ChatComp extends Composite implements HotKeyListener{
 	@Override
 	protected void checkSubclass() {
 		// Disable the check that prevents subclassing of SWT components
+	}
+	
+	public StyledText getText() {
+		return text;
 	}
 
 	@Override

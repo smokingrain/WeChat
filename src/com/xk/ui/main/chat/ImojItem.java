@@ -2,6 +2,7 @@ package com.xk.ui.main.chat;
 
 import java.util.List;
 
+import org.eclipse.swt.custom.StyledTextUtils;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.GC;
 
@@ -45,10 +46,9 @@ public class ImojItem extends ListItem {
 			for(Object obj : result) {
 				if(obj instanceof ImageNode) {
 					ImageNode node = (ImageNode) obj;
-					cc.addImage(node);
+					StyledTextUtils.addImage(cc.getText(), node);
 				}
 			}
-			getParent().getShell().dispose();
 		}
 		return false;
 	}

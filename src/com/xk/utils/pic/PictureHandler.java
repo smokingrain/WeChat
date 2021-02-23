@@ -11,6 +11,7 @@ import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.wb.swt.SWTResourceManager;
 import org.opencv.core.Rect;
 
+import com.xk.bean.ImageNode.TYPE;
 import com.xk.chatlogs.ChatLog;
 import com.xk.chatlogs.ChatLogCache;
 import com.xk.uiLib.ICallback;
@@ -32,7 +33,7 @@ public class PictureHandler implements ICMDHandler {
 		if(null == log.img) {
 			return;
 		}
-		if(log.img.type == 1) {
+		if(log.img.type == TYPE.IMAGE) {
 			String filePath = "temp/pic" + System.currentTimeMillis() + Constant.FORMATS[SWT.IMAGE_JPEG];
 			ImageLoader loader = new ImageLoader();
 			loader.data = new ImageData[]{log.img.getImg().getImageData()};

@@ -9,14 +9,14 @@ import org.eclipse.swt.graphics.ImageLoader;
  *
  */
 public class ImageNode {
-	public int type;//0，小表情，不可点击，1，正常图片
+	public TYPE type;//0，小表情，不可点击，1，正常图片
 	private Image img;//具体图片对象
 	private ImageLoader loader;//图片加载器，存储部分数据，也可以方便的保存图片
 	private String base;
 	private int width;//宽
 	private int height;//高
 	
-	public ImageNode(int type, Image img, ImageLoader loader, String base) {
+	public ImageNode(TYPE type, Image img, ImageLoader loader, String base) {
 		this.type = type;
 		this.img = img;
 		this.loader = loader;
@@ -38,11 +38,11 @@ public class ImageNode {
 	}
 
 	public int getWidth() {
-		return type == 0? StringNode.IMOJ_WIDTH : width;
+		return TYPE.IMOJ == type ? StringNode.IMOJ_WIDTH : width;
 	}
 	
 	public int getHeight() {
-		return type == 0? StringNode.IMOJ_WIDTH : height;
+		return TYPE.IMOJ == type ? StringNode.IMOJ_WIDTH : height;
 	}
 	
 	
@@ -67,6 +67,19 @@ public class ImageNode {
 
 	public void setBase(String base) {
 		this.base = base;
+	}
+	
+	public enum TYPE{
+		IMAGE(1),IMOJ(0);
+		private int type = 0;
+		private TYPE(int type){
+			this.type = type;
+		}
+		
+		public int getType() {
+			return type;
+		}
+		
 	}
 	
 }

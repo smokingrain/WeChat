@@ -52,6 +52,18 @@ public abstract class ListItem implements Comparable<ListItem>{
 	 */
 	public abstract boolean oncliek(MouseEvent e, int itemHeight, int index, int type);
 	
+	/**
+	 * item触发鼠标移动
+	 * 作者 ：肖逵
+	 * 时间 ：2021年1月13日 下午8:08:00
+	 * @param e
+	 * @param itemHeight
+	 * @param index
+	 */
+	public void onMove(MouseEvent e,int itemHeight, int index) {
+		
+	}
+	
 	void focus(){
 		focused=true;
 	}

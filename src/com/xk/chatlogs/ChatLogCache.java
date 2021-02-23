@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.xk.bean.ImageNode.TYPE;
+
 /**
  * 用途：存储聊天记录
  *
@@ -45,7 +47,7 @@ public class ChatLogCache {
 		List<ChatLog> logs = getLogs(convs);
 		if(null != logs) {
 			logs.remove(log);
-			if(null != log.img && log.img.type == 1) {
+			if(null != log.img && log.img.type == TYPE.IMAGE) {
 				log.img.getImg().dispose();
 			}
 		}
@@ -55,7 +57,7 @@ public class ChatLogCache {
 		List<ChatLog> logs = getLogs(convs);
 		if(null != logs) {
 			for(ChatLog log : logs) {
-				if(null != log.img && log.img.type == 1) {
+				if(null != log.img && log.img.type == TYPE.IMAGE) {
 					log.img.getImg().dispose();
 				}
 			}

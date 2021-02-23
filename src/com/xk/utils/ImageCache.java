@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.ImageLoader;
 
 import com.xk.bean.ContactsStruct;
 import com.xk.bean.ImageNode;
+import com.xk.bean.ImageNode.TYPE;
 import com.xk.uiLib.ICallback;
 
 public class ImageCache {
@@ -76,7 +77,7 @@ public class ImageCache {
 				ImageData[] datas = loader.load(file.getAbsolutePath());
 				if(null != datas && datas.length > 0) {
 					Image img = new Image(null,datas[0]);
-					ImageNode node = new ImageNode(1, img, loader, null);
+					ImageNode node = new ImageNode(TYPE.IMAGE, img, loader, null);
 					userHeads.put(id, node);
 					count++;
 				}
@@ -96,7 +97,7 @@ public class ImageCache {
 		ImageLoader loader = new ImageLoader();
 		loader.load(file.getAbsolutePath());
 		ImageData data = loader.data[0];
-		ImageNode node = new ImageNode(1, new Image(null, loader.data[0]), loader, null);
+		ImageNode node = new ImageNode(TYPE.IMAGE, new Image(null, loader.data[0]), loader, null);
 		if(data.width > 200 || data.height > 200) {
 			if(data.width > data.height) {
 				Integer w = 200;
@@ -157,7 +158,7 @@ public class ImageCache {
 				ImageLoader loader = new ImageLoader();
 				ImageData[] datas = loader.load(heads[0].getAbsolutePath());
 				if(null != datas && datas.length > 0) {
-					ImageNode node = new ImageNode(1, new Image(null, datas[0]), loader, null);
+					ImageNode node = new ImageNode(TYPE.IMAGE, new Image(null, datas[0]), loader, null);
 					caches.put(id, node);
 					return node;
 				}
@@ -172,7 +173,7 @@ public class ImageCache {
 			ImageLoader loader = new ImageLoader();
 			ImageData[] datas = loader.load(in);
 			if(null != datas && datas.length > 0) {
-				ImageNode node = new ImageNode(1, new Image(null, datas[0]), loader, null);
+				ImageNode node = new ImageNode(TYPE.IMAGE, new Image(null, datas[0]), loader, null);
 				caches.put(id, node);
 				return node;
 			}

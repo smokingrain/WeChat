@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.http.Header;
 import org.apache.http.HeaderElement;
@@ -52,6 +53,13 @@ public class HTTPUtil {
 	private CookieStore cookieStore = new BasicCookieStore(); 
 	public CloseableHttpClient httpClient = HttpClients.custom().setDefaultCookieStore(cookieStore).build();//HttpClientUtils.createSSLClientDefault(cookieStore);
 	private static HTTPUtil instance;
+	private static Map<String, HTTPUtil> cache = new ConcurrentHashMap<String, HTTPUtil>();
+	
+	public static HTTPUtil getInstance(String name){
+		HTTPUtil util = cache.getOrDefault(name, new HTTPUtil());
+		cache.put(name, util);
+		return util;
+	}
 	
 	
 	public static HTTPUtil getInstance(){
@@ -195,6 +203,7 @@ public class HTTPUtil {
 		            while ((temp = br.readLine()) != null) {  
 		                result.append(temp);  
 		            }  
+		            response1.close();
 				}
 				return null;
 			}else if(200==response.getStatusLine().getStatusCode()){
@@ -240,8 +249,9 @@ public class HTTPUtil {
 		}
 		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(50000).setConnectTimeout(50000).setConnectionRequestTimeout(50000).build();//设置请求和传输超时时间
 		httppost.setConfig(requestConfig);
+		CloseableHttpResponse response = null;
 		try {
-			CloseableHttpResponse response = httpClient.execute(httppost);  
+			response = httpClient.execute(httppost);  
 			if(302==response.getStatusLine().getStatusCode()){
 				Header[] headers=response.getHeaders("Location");
 				response.close();
@@ -257,15 +267,16 @@ public class HTTPUtil {
 				location.length = entity.getContentLength();
 				return location;
 			}
-		} catch (ClientProtocolException e) {
-			// TODO Auto-generated catch block
+		} catch (Exception e) {
 			e.printStackTrace();
-		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			if(null != response) {
+				try {
+					response.close();
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
 		}
 		return null;
 	}

@@ -27,6 +27,7 @@ import com.xk.uiLib.listeners.ItemEvent;
 import com.xk.uiLib.listeners.ItemListener;
 import com.xk.uiLib.listeners.ItemSelectionEvent;
 import com.xk.uiLib.listeners.ItemSelectionListener;
+import com.xk.uiLib.listeners.ListListener;
 
 
 
@@ -39,6 +40,7 @@ public class MyList<T extends ListItem> extends Composite {
 	private static final int BAR_ARROW_HEIGHT=8;
 	private List<ItemListener<T>> itemListeners=new ArrayList<ItemListener<T>>();
 	private List<ItemSelectionListener<T>> selectionListeners=new ArrayList<ItemSelectionListener<T>>();
+	private List<ListListener> listListeners = new ArrayList<ListListener>();
 	private int allHeight=0;
 	private int width;
 	private int height;
@@ -173,6 +175,7 @@ public class MyList<T extends ListItem> extends Composite {
 					startY=(int) (0-(allHeight-height)*per);
 					back.redraw();
 				}
+				checkMove(e);
 				
 			}
 		});
@@ -196,19 +199,24 @@ public class MyList<T extends ListItem> extends Composite {
 				
 			}
 		});
-		//这个体验有点坑，在输入内容的时候，鼠标全选然后发现失去焦点了。。。好尴尬
-//		back.addMouseTrackListener(new MouseTrackAdapter() {
-//
-//			@Override
-//			public void mouseEnter(MouseEvent mouseevent) {
-//				setFocus();//让自己获得焦点
-//			}
-//
-//			@Override
-//			public void mouseExit(MouseEvent mouseevent) {
-//			}
-//			
-//		});
+		
+		back.addMouseTrackListener(new MouseTrackAdapter() {
+
+			@Override
+			public void mouseEnter(MouseEvent mouseevent) {
+				for(ListListener listener : listListeners) {
+					listener.onMouseEnter();
+				}
+			}
+
+			@Override
+			public void mouseExit(MouseEvent mouseevent) {
+				for(ListListener listener : listListeners) {
+					listener.onMouseExit();
+				}
+			}
+			
+		});
 	}
 	
 	public void scrollToBottom() {
@@ -236,11 +244,39 @@ public class MyList<T extends ListItem> extends Composite {
 		}
 	}
 	
+	private void checkMove(MouseEvent e) {
+		int realY=e.y+Math.abs(startY);//得到真实Y位移
+		int itemHeight=0;
+		int index=0;
+		for(T item:items){
+			itemHeight+=item.getHeight();
+			if(itemHeight>realY){
+				item.onMove(e, itemHeight, index);
+				return;
+			}
+			index++;
+		}
+	}
+	
+	private T findItem(int y) {
+		int realY=y+Math.abs(startY);//得到真实Y位移
+		int itemHeight=0;
+		for(T item:items){
+			itemHeight+=item.getHeight();
+			if(itemHeight>realY){
+				return item;
+			}
+		}
+		return null;
+	}
+	
 	/**
 	 * 检查选总item
 	 * @param y
 	 */
 	private void checkSelection(MouseEvent e, int type){
+		
+		
 		int realY=e.y+Math.abs(startY);//得到真实Y位移
 		int itemHeight=0;
 		int index=0;
@@ -278,6 +314,7 @@ public class MyList<T extends ListItem> extends Composite {
 		item.select();
 		countHeight();//重新计算整个高度
 		int itemHeight=0;
+		int index = 0;
 		for(T it:items){
 			itemHeight+=it.getHeight();
 			if(it.equals(item)){
@@ -292,6 +329,7 @@ public class MyList<T extends ListItem> extends Composite {
 				}
 				break;
 			}
+			index++;
 		}
 		if(sync){
 			Display.getDefault().asyncExec(new Runnable() {
@@ -306,6 +344,7 @@ public class MyList<T extends ListItem> extends Composite {
 		even.item=item;
 		even.itemHeights=itemHeight;
 		even.source=this;
+		even.index = index;
 		for(ItemSelectionListener<T> listener:selectionListeners){
 			listener.selected(even);	
 		}
@@ -377,7 +416,12 @@ public class MyList<T extends ListItem> extends Composite {
 				break;
 			}
 			gc.setClipping(0, nowY, width, item.getHeight());//限制每个item只能在自己的区域绘制，在其他区域的绘制将被剪切
-			item.draw(gc, nowY,width,index);
+			try {
+				item.draw(gc, nowY,width,index);
+			} catch (Exception e) {
+				e.printStackTrace();
+				break;
+			}
 			nowY+=item.getHeight();
 		}
 		gc.setClipping(0,0,width,height);
@@ -522,6 +566,15 @@ public class MyList<T extends ListItem> extends Composite {
 
 	public void add(ItemSelectionListener<T> element) {
 		selectionListeners.add(element);
+	}
+	
+
+	public boolean add(ListListener e) {
+		return listListeners.add(e);
+	}
+
+	public boolean remove(ListListener e) {
+		return listListeners.remove(e);
 	}
 
 	@Override

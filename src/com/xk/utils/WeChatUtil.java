@@ -468,6 +468,7 @@ public class WeChatUtil {
 		
 		try {
 			String result = hu.postBody(String.format(Constant.GET_INIT, Constant.HOST).replace("{TIME}", System.currentTimeMillis() + ""), JSONUtil.toJson(bodyMap));
+			System.out.println("init result : " + result);
 			Map<String, Object> rstMap = JSONUtil.fromJson(result);
 			Map<String, Object> baseResponse = (Map<String, Object>) rstMap.get("BaseResponse");
 			if(null != baseResponse && new Integer(0).equals(baseResponse.get("Ret"))) {

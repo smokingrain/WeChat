@@ -12,6 +12,7 @@ import org.eclipse.swt.graphics.ImageLoader;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.xk.bean.ImageNode;
+import com.xk.bean.ImageNode.TYPE;
 import com.xk.chatlogs.interfaces.IChatLogChain;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
@@ -118,7 +119,7 @@ public class ChatLog {
 		ImageLoader loader = new ImageLoader();
 		loader.load(file.getAbsolutePath());
 		ImageData data = loader.data[0];
-		ImageNode node = new ImageNode(1, new Image(null, loader.data[0]), loader, null);
+		ImageNode node = new ImageNode(TYPE.IMAGE, new Image(null, loader.data[0]), loader, null);
 		log.img = node;
 		//图片宽高固定不能超过200
 		if(data.width > 200 || data.height > 200) {
