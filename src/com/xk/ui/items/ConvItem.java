@@ -44,6 +44,7 @@ public class ConvItem extends ListItem {
 	private String lastChat;//上一个发言人
 	private String lastMsg;//上一条消息
 	private Long lastTime;//上一条消息的时间
+	private Long activeTime = System.currentTimeMillis();
 	private boolean top;//是否置顶
 	private boolean silence;//是否不提示消息数
 	private Integer unread = 0;//未读数
@@ -319,5 +320,25 @@ public class ConvItem extends ListItem {
 	
 	public void clearUnread() {
 		unread = 0;
+	}
+
+	@Override
+	public int compareTo(ListItem o) {
+		if(null == o) {
+			return -1;
+		}
+		if(o instanceof ConvItem) {
+			ConvItem c = (ConvItem) o;
+			
+			return top && c.top ? c.activeTime.compareTo(activeTime) : (top ? -1 : c.top ? 1 :c.activeTime.compareTo(activeTime));
+		} else {
+			return 1;
+		}
+		
+	}
+
+
+	public void setActiveTime(Long activeTime) {
+		this.activeTime = activeTime;
 	}
 }

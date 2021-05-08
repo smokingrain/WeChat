@@ -15,6 +15,7 @@ import com.xk.hook.HotKeyListener;
 import com.xk.hook.HotKeys;
 import com.xk.ui.items.ConvItem;
 import com.xk.ui.main.CutScreen;
+import com.xk.ui.main.MainWindow;
 import com.xk.uiLib.ICallback;
 import com.xk.uiLib.MyList;
 import com.xk.uiLib.XLabel;
@@ -458,6 +459,7 @@ public class ChatComp extends Composite implements HotKeyListener{
 			}
 		};
 		WeChatUtil.sendLog(log, 3 == log.msgType ? createProcess(log) : createCount(log), callBack);
+		MainWindow.getInstance().flushChatView(convId, false);
 	}
 	
 	/**
@@ -535,12 +537,14 @@ public class ChatComp extends Composite implements HotKeyListener{
 				if(lastIndex < str.length()) {
 					msg += str.substring(lastIndex, str.length());
 				}
-				ChatLog log = ChatLog.createSimpleLog(msg.trim(), convId);
-				sendLog(log, false);
-				
+				if(!msg.trim().isEmpty()) {
+					ChatLog log = ChatLog.createSimpleLog(msg.trim(), convId);
+					sendLog(log, false);
+				}
 			}
 			flush(item);
 			sent = true;
+			MainWindow.getInstance().flushChatView(convId, false);
 		}
 		text.setFocus();
 		return sent;

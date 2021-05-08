@@ -1,14 +1,9 @@
 package com.xk.ui.main.chat;
 
-import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.apache.http.client.ClientProtocolException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StackLayout;
 import org.eclipse.swt.events.DisposeEvent;
@@ -41,7 +36,6 @@ import com.xk.uiLib.listeners.ItemSelectionListener;
 import com.xk.uiLib.listeners.ListListener;
 import com.xk.utils.HTTPUtil;
 import com.xk.utils.ImojCache;
-import com.xk.utils.JSONUtil;
 
 public class ImojWindow extends FloatWindow {
 
@@ -197,53 +191,26 @@ public class ImojWindow extends FloatWindow {
 			public void run() {
 				try {
 					pictures.clearAll();
-					Map<String, String> params = new HashMap<String, String>();
-					params.put("types", "search");
-					params.put("action", "searchpic");
-					params.put("wd", query.trim());
-					params.put("limit", "60");
-					params.put("offset", "0");
 					
-					String json = HTTPUtil.getInstance("picture").readJsonfromURL2("https://www.52doutu.cn/api/", params);
-					Map<String, Object> map = JSONUtil.fromJson(json);
-					Object rows = map.get("rows");
-					List<Map<String, String>> urls = new ArrayList<Map<String, String>>();
-					if(null != rows && rows instanceof List) {
-						urls.addAll((List<Map<String, String>>) rows);
-					}
 					
 					List<String> imgList = new ArrayList<String>();
 					
-					if(!urls.isEmpty()) {
-						for(Map<String, String> urlMap : urls) {
-							String url = urlMap.get("url");
-							if (!StringUtils.isEmpty(url)) {
-								imgList.add(url);
-								if (imgList.size() >= 7) {
-									PictureItem item = new PictureItem(cc, imgList);
-									pictures.addItem(item);
-									imgList.clear();
-								}
-							}
-						}
-					} else {
-						String html = HTTPUtil.getInstance("picture").getHtml("http://www.adoutu.com/search?keyword=" + URLEncoder.encode(query.trim(), "utf-8"));
-						if(StringUtils.isEmpty(html)) {
-							return;
-						}
-						Document doc = Jsoup.parse(html);
-						Element resultList = doc.getElementById("search-results-picture");
-						Elements imgs = resultList.getElementsByTag("img");
-						
-						for(Element img : imgs) {
-							String url = img.attr("src");
-							if (!StringUtils.isEmpty(url)) {
-								imgList.add(url);
-								if (imgList.size() >= 7) {
-									PictureItem item = new PictureItem(cc, imgList);
-									pictures.addItem(item);
-									imgList.clear();
-								}
+					String html = HTTPUtil.getInstance("picture").getHtml("http://www.adoutu.com/search?keyword=" + URLEncoder.encode(query.trim(), "utf-8"));
+					if(StringUtils.isEmpty(html)) {
+						return;
+					}
+					Document doc = Jsoup.parse(html);
+					Element resultList = doc.getElementById("search-results-picture");
+					Elements imgs = resultList.getElementsByTag("img");
+					
+					for(Element img : imgs) {
+						String url = img.attr("src");
+						if (!StringUtils.isEmpty(url)) {
+							imgList.add(url);
+							if (imgList.size() >= 7) {
+								PictureItem item = new PictureItem(cc, imgList);
+								pictures.addItem(item);
+								imgList.clear();
 							}
 						}
 					}

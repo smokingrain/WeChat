@@ -470,8 +470,8 @@ public class MyList<T extends ListItem> extends Composite {
 	public void addItem(Integer index, T item) {
 		if(null != item && null != index){
 			checkLimit();
-			items.sort(sort);
 			items.add(index, item);
+			items.sort(sort);
 			item.setParent((MyList<ListItem>)this);
 			countHeight();
 		}
@@ -503,23 +503,6 @@ public class MyList<T extends ListItem> extends Composite {
 	}
 	
 	
-	/**
-	 * 用途：更改一个单元格的位置
-	 * @date 2017年1月11日
-	 * @param t
-	 * @param index
-	 */
-	public T changeItemIndex(T t, int index) {
-		if(null == t) {
-			return null;
-		}
-		if(items.indexOf(t) < 0) {
-			return null;
-		}
-		items.remove(t);
-		items.add(index, t);
-		return t;
-	}
 	
 	/**
 	 * 移除指定位置的item
@@ -613,6 +596,10 @@ public class MyList<T extends ListItem> extends Composite {
 	
 	private enum STATE{
 		NORMAL , DRAGING
+	}
+	
+	public void sortItem() {
+		items.sort(sort);
 	}
 	
 	private class SortItem implements Comparator<T> {

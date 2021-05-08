@@ -391,19 +391,7 @@ public class MainWindow {
 			return;
 		}
 		item.setTop(type == 1);
-		if(type == 1) {
-			convers.changeItemIndex(item, 0);
-		}else {
-			List<ConvItem> items = convers.getItems();
-			int index = 0;
-			for(ConvItem ci : items) {
-				if(ci.isTop()) {
-					index ++;
-				}
-			}
-			convers.changeItemIndex(item, index);
-		}
-		
+		convers.sortItem();
 	}
 	
 	
@@ -421,15 +409,12 @@ public class MainWindow {
 		List<ConvItem> items = convers.getItems();
 		for(ConvItem item : items) {
 			if(item.getData().UserName.equals(convs.UserName)) {
+				item.setActiveTime(System.currentTimeMillis());
 				return item;
 			}
 		}
 		ConvItem ci = new ConvItem(convs, name, null, null, null, top, (convs.MemberCount > 0 && Statues == 0) || (convs.MemberCount == 0 && ContactFlag == 513), 0);
-		if(top || first) {
-			convers.addItem(0, ci);
-		} else {
-			convers.addItem(ci);
-		}
+		convers.addItem(0, ci);
 		return ci;
 	}
 	
@@ -531,19 +516,10 @@ public class MainWindow {
 				if(null == ci) {
 					return;
 				}
-				List<ConvItem> items = convers.getItems();
-				int index = 0;
-				if(!ci.isTop()) {
-					for(ConvItem item : items) {
-						if(item.isTop()) {
-							index ++;
-						}else{
-							break;
-						}
-					}
-				}
+				convers.sortItem();
 				
-				ConvItem itm = convers.changeItemIndex(ci, index);
+				
+				ConvItem itm = ci;
 				if(null != itm) {//这时候还找不到的话，那就真的跪了，目测是新好友
 					if(itm.equals(convers.getSelection())) {
 						cc.flush(itm);

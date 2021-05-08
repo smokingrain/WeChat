@@ -6,10 +6,16 @@ import com.xk.bean.User;
 import com.xk.ui.items.ContactItem;
 import com.xk.uiLib.ICallable;
 import com.xk.uiLib.ICallback;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
+import org.eclipse.swt.events.PaintEvent;
+import org.eclipse.swt.events.PaintListener;
+import org.eclipse.swt.graphics.GC;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.wb.swt.SWTResourceManager;
 
@@ -38,10 +44,21 @@ public class MyInfoComp extends Composite implements ICallable {
 		Composite composite = new Composite(this, SWT.NONE);
 		composite.setBounds(0, 0, 180, 180);
 		if(null != user && null != user.head) {
-			composite.setBackgroundImage(user.head);
+			composite.setData("bg", user.head);
 		} else {
-			composite.setBackgroundImage(SWTResourceManager.getImage(ContactItem.class, "/images/head.png"));
+			composite.setData("bg",SWTResourceManager.getImage(ContactItem.class, "/images/head.png"));
 		}
+		composite.addPaintListener(new PaintListener() {
+			
+			@Override
+			public void paintControl(PaintEvent e) {
+				GC gc = e.gc;
+				Image image = (Image) composite.getData("bg");
+				ImageData img = image.getImageData();
+				gc.drawImage(image, 0, 0, img.width, img.height, 0, 0, composite.getSize().x, composite.getSize().y);
+				gc.dispose();
+			}
+		});
 		
 		//分割线
 		Label label = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
