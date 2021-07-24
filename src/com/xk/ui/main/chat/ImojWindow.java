@@ -1,5 +1,6 @@
 package com.xk.ui.main.chat;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
@@ -190,36 +191,7 @@ public class ImojWindow extends FloatWindow {
 			@Override
 			public void run() {
 				try {
-					pictures.clearAll();
-					
-					
-					List<String> imgList = new ArrayList<String>();
-					
-					String html = HTTPUtil.getInstance("picture").getHtml("http://www.adoutu.com/search?keyword=" + URLEncoder.encode(query.trim(), "utf-8"));
-					if(StringUtils.isEmpty(html)) {
-						return;
-					}
-					Document doc = Jsoup.parse(html);
-					Element resultList = doc.getElementById("search-results-picture");
-					Elements imgs = resultList.getElementsByTag("img");
-					
-					for(Element img : imgs) {
-						String url = img.attr("src");
-						if (!StringUtils.isEmpty(url)) {
-							imgList.add(url);
-							if (imgList.size() >= 7) {
-								PictureItem item = new PictureItem(cc, imgList);
-								pictures.addItem(item);
-								imgList.clear();
-							}
-						}
-					}
-					
-					if (!imgList.isEmpty()) {
-						PictureItem item = new PictureItem(cc, imgList);
-						pictures.addItem(item);
-						imgList.clear();
-					}
+					new DoutulaSearcher().search(query, pictures);
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -239,5 +211,104 @@ public class ImojWindow extends FloatWindow {
 			}
 		}).start();
 	}
+	private interface ImojSearcher{
+		public List<String> search(String text, MyList<PictureItem> pictures);
+	}
 	
+	private class ADoutuSearcher implements ImojSearcher{
+
+		@Override
+		public List<String> search(String query, MyList<PictureItem> pictures) {
+			pictures.clearAll();
+			
+			
+			List<String> imgList = new ArrayList<String>();
+			
+			String html = null;
+			try {
+				html = HTTPUtil.getInstance("picture").getHtml("http://www.adoutu.com/search?keyword=" + URLEncoder.encode(query.trim(), "utf-8"));
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				return imgList;
+			}
+			if(StringUtils.isEmpty(html)) {
+				return imgList;
+			}
+			Document doc = Jsoup.parse(html);
+			Element resultList = doc.getElementById("search-results-picture");
+			Elements imgs = resultList.getElementsByTag("img");
+			
+			for(Element img : imgs) {
+				String url = img.attr("src");
+				if (!StringUtils.isEmpty(url)) {
+					imgList.add(url);
+					if (imgList.size() >= 7) {
+						PictureItem item = new PictureItem(cc, imgList);
+						pictures.addItem(item);
+						imgList.clear();
+					}
+				}
+			}
+			
+			if (!imgList.isEmpty()) {
+				PictureItem item = new PictureItem(cc, imgList);
+				pictures.addItem(item);
+				imgList.clear();
+			}
+			return imgList;
+		}
+		
+	}
+	
+	private class DoutulaSearcher implements ImojSearcher{
+
+		@Override
+		public List<String> search(String query, MyList<PictureItem> pictures) {
+			pictures.clearAll();
+			
+			
+			List<String> imgList = new ArrayList<String>();
+			
+			String html = null;
+			try {
+				html = HTTPUtil.getInstance("picture").getHtml("https://www.doutula.com/search?keyword=" + URLEncoder.encode(query.trim(), "utf-8"));
+			} catch (UnsupportedEncodingException e) {
+				e.printStackTrace();
+				return imgList;
+			}
+			if(StringUtils.isEmpty(html)) {
+				return imgList;
+			}
+			Document doc = Jsoup.parse(html);
+			if(null == doc) {
+				return imgList;
+			}
+			Elements pics = doc.getElementsByClass("random_picture");
+			if(pics.size() == 0) {
+				return imgList;
+			}
+			Element resultList = pics.first();
+			Elements imgs = resultList.getElementsByTag("img");
+			
+			for(Element img : imgs) {
+				String url = img.attr("data-original");
+				if (!StringUtils.isEmpty(url)) {
+					imgList.add(url);
+					if (imgList.size() >= 7) {
+						PictureItem item = new PictureItem(cc, imgList);
+						pictures.addItem(item);
+						imgList.clear();
+					}
+				}
+			}
+			
+			if (!imgList.isEmpty()) {
+				PictureItem item = new PictureItem(cc, imgList);
+				pictures.addItem(item);
+				imgList.clear();
+			}
+			return imgList;
+		}
+		
+	}
 }
