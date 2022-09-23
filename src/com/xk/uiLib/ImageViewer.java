@@ -225,7 +225,12 @@ public class ImageViewer extends Canvas implements ICallable{
 
 			// Draw the current image and clean up.
 			Image img = new Image(display, id);
-			gc.drawImage(img, 0, 0, id.width, id.height, id.x, id.y, id.width, id.height);
+			try {
+				gc.drawImage(img, 0, 0, id.width, id.height, id.x, id.y, id.width, id.height);
+			} catch (Exception e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 			img.dispose();
 			gc.dispose();
 

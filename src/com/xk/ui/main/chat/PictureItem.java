@@ -23,6 +23,7 @@ import com.xk.bean.ImageNode.TYPE;
 import com.xk.uiLib.FakeTooltips;
 import com.xk.uiLib.ListItem;
 import com.xk.utils.HTTPUtil;
+import com.xk.utils.song.SongLocation;
 
 public class PictureItem extends ListItem {
 	
@@ -118,13 +119,16 @@ public class PictureItem extends ListItem {
 		
 		@Override
 		public void run() {
-			InputStream in = HTTPUtil.getInstance("picture").getInput(url);
-			if(null != in) {
+			SongLocation in = HTTPUtil.getInstance("picture").getInput(url);
+			if(null != in && null != in.input) {
 				ImageLoader loader = new ImageLoader();
-				loader.load(in);
+				loader.load(in.input);
 				pictures[index] = loader;
 				try {
-					in.close();
+					in.input.close();
+					if(null != in.response) {
+						in.response.close();
+					}
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

@@ -14,8 +14,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.xk.bean.ImageNode;
 import com.xk.bean.ImageNode.TYPE;
 import com.xk.chatlogs.interfaces.IChatLogChain;
+import com.xk.pojo.WechatLogPojo;
 import com.xk.utils.Constant;
 import com.xk.utils.ImageCache;
+import com.xk.utils.JSONUtil;
 import com.xk.utils.SWTTools;
 
 /**
@@ -25,6 +27,8 @@ import com.xk.utils.SWTTools;
  * @date 2017年1月3日
  */
 public class ChatLog {
+	
+	public Long seqNum;
 
 	public String msgid;
 	public Long newMsgId;
@@ -57,8 +61,6 @@ public class ChatLog {
 	@JsonIgnore
 	public boolean sent = true;
 	
-	@JsonIgnore
-	public boolean local = false;
 	
 	/**
 	 * 创建普通聊天记录
@@ -107,7 +109,6 @@ public class ChatLog {
 	 */
 	public static ChatLog createImageLog(File file, String to) {
 		ChatLog log = new ChatLog();
-		log.local = true;
 		log.sent = false;
 		log.createTime = System.currentTimeMillis();
 		log.toId = to;
@@ -157,6 +158,57 @@ public class ChatLog {
 		
 		
 		return firstChain.fromMap(log, msg);
+	}
+	
+	public WechatLogPojo toPojo() {
+		WechatLogPojo pojo = new WechatLogPojo();
+		pojo.seqNum = seqNum;
+		pojo.msgid = msgid;
+		pojo.newMsgId = newMsgId;
+		pojo.msgType = msgType;
+		pojo.imgPath = imgPath;
+		pojo.relatedPath = relatedPath;
+		pojo.content = content;
+		pojo.fromId = fromId;
+		pojo.toId = toId;
+		pojo.url = url;
+		pojo.createTime = createTime;
+		pojo.voiceLength = voiceLength;
+		pojo.recommendInfo = JSONUtil.toJson(recommendInfo);
+		pojo.imgType = img.type.getType();
+		pojo.base = img.getBase();
+		pojo.filePath = file == null ? null : file.getAbsolutePath();
+		pojo.recalled = recalled ? 0 : 1;
+		pojo.sent = sent ? 0 : 1;
+		return pojo;
+	}
+	
+	public static ChatLog fromPojo(WechatLogPojo pojo) {
+		ChatLog log = new ChatLog();
+		log.seqNum = pojo.seqNum;
+		log.msgid = pojo.msgid;
+		log.newMsgId = pojo.newMsgId;
+		log.msgType = pojo.msgType;
+		log.imgPath = pojo.imgPath;
+		log.relatedPath = pojo.relatedPath;
+		log.content = pojo.content;
+		log.fromId = pojo.fromId;
+		log.toId = pojo.toId;
+		log.url = pojo.url;
+		log.createTime = pojo.createTime;
+		log.voiceLength = pojo.voiceLength;
+		log.recommendInfo = JSONUtil.fromJson(pojo.recommendInfo);
+		if(null != pojo.imgPath && !"".equals(pojo.imgPath)) {
+			ImageLoader loader = new ImageLoader();
+			loader.load(pojo.imgPath);
+			log.img = new ImageNode(pojo.imgType == 0 ? TYPE.IMOJ : TYPE.IMAGE, new Image(null, loader.data[0]), loader, pojo.base);
+		}
+		if(null != pojo.filePath && !"".equals(pojo.filePath)) {
+			log.file = new File(pojo.filePath);
+		}
+		log.recalled = pojo.recalled == 0;
+		log.sent = pojo.sent == 0;
+		return log;
 	}
 	
 }

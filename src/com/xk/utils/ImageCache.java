@@ -21,6 +21,7 @@ import com.xk.bean.ContactsStruct;
 import com.xk.bean.ImageNode;
 import com.xk.bean.ImageNode.TYPE;
 import com.xk.uiLib.ICallback;
+import com.xk.utils.song.SongLocation;
 
 public class ImageCache {
 
@@ -168,10 +169,10 @@ public class ImageCache {
 			}
 		}
 		HTTPUtil hu = HTTPUtil.getInstance();
-		InputStream in = hu.getInput(url, params);
+		SongLocation in = hu.getInput(url, params);
 		try {
 			ImageLoader loader = new ImageLoader();
-			ImageData[] datas = loader.load(in);
+			ImageData[] datas = loader.load(in.input);
 			if(null != datas && datas.length > 0) {
 				ImageNode node = new ImageNode(TYPE.IMAGE, new Image(null, datas[0]), loader, null);
 				caches.put(id, node);
@@ -184,7 +185,8 @@ public class ImageCache {
 		} finally {
 			if(null != in) {
 				try {
-					in.close();
+					in.response.close();
+					in.input.close();
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();

@@ -1,6 +1,7 @@
 package com.xk.utils.hat;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 
@@ -18,6 +19,7 @@ import com.xk.uiLib.ICallback;
 import com.xk.utils.Constant;
 import com.xk.utils.HTTPUtil;
 import com.xk.utils.interfaces.ICMDHandler;
+import com.xk.utils.song.SongLocation;
 
 public class HatHandler implements ICMDHandler {
 
@@ -34,13 +36,21 @@ public class HatHandler implements ICMDHandler {
 			textCall.callback("老哥，你没有头像P个jj");
 			return;
 		}
-		InputStream input = HTTPUtil.getInstance().getInput(String.format(Constant.BASE_URL, Constant.HOST) + target.HeadImgUrl + "&type=big");
+		SongLocation input = HTTPUtil.getInstance().getInput(String.format(Constant.BASE_URL, Constant.HOST) + target.HeadImgUrl + "&type=big");
 		ImageLoader loader = new ImageLoader();
-		if(null == input) {
+		if(null == input || null == input.input) {
 			ImageData source = target.head.getImageData();
 			loader.data = new ImageData[]{source};
 		} else {
-			loader.load(input);
+			loader.load(input.input);
+			if(null != input.response) {
+				try {
+					input.response.close();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
 		}
 		Image greenHat = SWTResourceManager.getImage(HatHandler.class, "/images/green.png");
 		String path = "temp/source" + target.NickName + Constant.FORMATS[SWT.IMAGE_JPEG];

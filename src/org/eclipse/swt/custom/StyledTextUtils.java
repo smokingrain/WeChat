@@ -3,6 +3,7 @@ package org.eclipse.swt.custom;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -37,6 +38,7 @@ import com.xk.bean.ImageNode;
 import com.xk.bean.ImageNode.TYPE;
 import com.xk.utils.Constant;
 import com.xk.utils.HTTPUtil;
+import com.xk.utils.song.SongLocation;
 
 public class StyledTextUtils {
 
@@ -276,14 +278,22 @@ public class StyledTextUtils {
 						continue;
 					}
 					InputStream in = null;
+					SongLocation loc = null;
 					if(src.startsWith("file:///")) {
 						try {
 							in = new FileInputStream(src.replace("file:///", ""));
 						} catch (FileNotFoundException e) {
 							e.printStackTrace();
 						}
+					} else if(new File(src).exists()){
+						try {
+							in = new FileInputStream(new File(src));
+						} catch (FileNotFoundException e) {
+							e.printStackTrace();
+						}
 					} else {
-						in = HTTPUtil.getInstance("clipboard").getInput(src);
+						loc = HTTPUtil.getInstance("clipboard").getInput(src);
+						in = loc.input;
 					}
 					if(null == in) {
 						continue;
@@ -299,6 +309,24 @@ public class StyledTextUtils {
 					} catch (Exception e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
+					} finally {
+						if(null != loc) {
+							try {
+								loc.response.close();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						if(null != in) {
+							try {
+								in.close();
+							} catch (IOException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						
 					}
 					
 				}

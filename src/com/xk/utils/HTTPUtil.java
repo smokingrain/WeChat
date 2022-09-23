@@ -263,6 +263,7 @@ public class HTTPUtil {
 			}else{
 				HttpEntity entity = response.getEntity();
 				SongLocation location = new SongLocation();
+				location.response = response;
 				location.input = entity.getContent();
 				location.length = entity.getContentLength();
 				return location;
@@ -287,15 +288,12 @@ public class HTTPUtil {
 	
 	
 	
-	public InputStream getInput(String url, Map<String, String> params){
+	public SongLocation getInput(String url, Map<String, String> params){
 		SongLocation loc = getInputStream(url, params);
-		if(null != loc) {
-			return loc.input;
-		}
-		return null;
+		return loc;
 		
 	}
-	public InputStream getInput(String url){
+	public SongLocation getInput(String url){
 		return getInput(url, null);
 		
 	}
@@ -391,7 +389,7 @@ public class HTTPUtil {
 		return result.toString();
 	}
 	
-	public String readJsonfromURL2(String url, Map<String, String> params, Map<String, String> cookie) throws ClientProtocolException, IOException{
+	public String readJsonfromURL2(String url, Map<String, String> params, Map<String, String> header) throws ClientProtocolException, IOException{
 		List<NameValuePair> formparams = new ArrayList<NameValuePair>();
 		if(null!=params){
 			Set<String> keys=params.keySet();
@@ -406,7 +404,10 @@ public class HTTPUtil {
 		httppost.setEntity(entity1);  
 		RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(30000).setConnectTimeout(30000).build();//设置请求和传输超时时间
 		httppost.setConfig(requestConfig);
-		if(null != cookie) {
+		if(null != header) {
+			for(String key : header.keySet()) {
+				httppost.addHeader(key, header.get(key));
+			}
 		}
 		
 		//处理请求，得到响应  

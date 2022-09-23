@@ -2,15 +2,12 @@ package com.xk.utils;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.math.BigDecimal;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
@@ -26,26 +23,7 @@ import java.util.concurrent.Executors;
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import org.apache.http.client.ClientProtocolException;
-import org.dom4j.Document;
-import org.dom4j.DocumentHelper;
 import org.dom4j.Element;
 import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.widgets.Display;
@@ -715,11 +693,11 @@ public class WeChatUtil {
 			params.put("type", type);
 		}
 		HTTPUtil hu = HTTPUtil.getInstance();
-		InputStream in = hu.getInput(url, params);
+		SongLocation in = hu.getInput(url, params);
 		try {
 			
 			ImageLoader load = new ImageLoader();
-			load.load(in);
+			load.load(in.input);
 			return load;
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -727,7 +705,8 @@ public class WeChatUtil {
 		} finally {
 			if(null != in) {
 				try {
-					in.close();
+					in.response.close();
+					in.input.close();
 				} catch (IOException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();

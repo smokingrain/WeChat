@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
 
 import com.xk.bean.ImageNode.TYPE;
 
@@ -20,6 +21,8 @@ public class ChatLogCache {
 	
 	private static Map<String, List<ChatLog>> cache = new ConcurrentHashMap<String, List<ChatLog>>();
 	
+	private static AtomicLong logSeq = new AtomicLong(0L);
+	
 	public static void saveLogs(String conv, ChatLog log) {
 		if(null == conv || null == log) {
 			return ;
@@ -31,11 +34,13 @@ public class ChatLogCache {
 			folder.delete();
 			folder.mkdirs();
 		}
+		log.seqNum = logSeq.incrementAndGet();
 		List<ChatLog> logs = cache.get(conv);
 		if(null == logs) {
 			logs = new ArrayList<ChatLog>();
 			cache.put(conv, logs);
 		}
+		//此处要存数据库
 		logs.add(log);
 	}
 	
@@ -46,6 +51,7 @@ public class ChatLogCache {
 	public static void removeLog(String convs, ChatLog log) {
 		List<ChatLog> logs = getLogs(convs);
 		if(null != logs) {
+			//此处要存数据库
 			logs.remove(log);
 			if(null != log.img && log.img.type == TYPE.IMAGE) {
 				log.img.getImg().dispose();

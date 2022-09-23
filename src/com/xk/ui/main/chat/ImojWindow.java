@@ -271,7 +271,7 @@ public class ImojWindow extends FloatWindow {
 			
 			String html = null;
 			try {
-				html = HTTPUtil.getInstance("picture").getHtml("https://www.doutula.com/search?keyword=" + URLEncoder.encode(query.trim(), "utf-8"));
+				html = HTTPUtil.getInstance("picture").getHtml("https://www.pkdoutu.com/search?keyword=" + URLEncoder.encode(query.trim(), "utf-8"));
 			} catch (UnsupportedEncodingException e) {
 				e.printStackTrace();
 				return imgList;

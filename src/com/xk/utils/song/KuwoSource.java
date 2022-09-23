@@ -356,11 +356,11 @@ public class KuwoSource implements IDownloadSource {
 							return url;
 						}
 						String uuid = UUID.randomUUID().toString();
-						String requestUrl = String.format("http://www.kuwo.cn/url?format=mp3&rid=%s&response=url&type=convert_url3&br=128kmp3&from=web&t=%d&httpsStatus=1&reqId=%s", this.url, System.currentTimeMillis(), uuid);
+						String requestUrl = String.format("http://www.kuwo.cn/api/v1/www/music/playUrl?mid=%s&type=music&httpsStatus=1&reqId=%s", this.url, uuid);
 						String json = get(requestUrl);
 						Map<String, Object> map = JSONUtil.fromJson(json);
 						this.lrcUrl = String.format("http://m.kuwo.cn/newh5/singles/songinfoandlrc?musicId=%s&httpsStatus=1&reqId=%s", this.url, uuid);
-						this.url = (String) map.get("url");
+						this.url =(String) (( Map<String, Object>) map.get("data")).get("url");
 						this.urlFound = true;
 						return this.url;
 					}

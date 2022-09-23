@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.xk.utils.HTTPUtil;
+import com.xk.utils.song.SongLocation;
 
 public class M3U8InputStream extends InputStream {
 	
@@ -20,7 +21,7 @@ public class M3U8InputStream extends InputStream {
 	private String key;
 	private long readed = 0;
 	
-	private InputStream current;
+	private SongLocation current;
 	/**
 	 * 从文件初始化
 	 * @param file m3u8文件
@@ -47,8 +48,12 @@ public class M3U8InputStream extends InputStream {
 	 */
 	public M3U8InputStream(String url) {
 		this.base = url.substring(0, url.lastIndexOf("/"));
-		try(InputStream in = HTTPUtil.getInstance().getInput(url)) {
-			init(in);
+		try {
+			SongLocation in = HTTPUtil.getInstance().getInput(url);
+			init(in.input);
+			if(null != in.response) {
+				in.response.close();
+			}
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -112,20 +117,21 @@ public class M3U8InputStream extends InputStream {
 			System.out.println("没有current了 ");
 			return -1;
 		}
-		int rst = current.read();
+		int rst = current.input.read();
 		if(rst >= 0) {
 			return rst;
 		}
 		//此时，已经读完一段
 		System.out.println("此时，已经读完一段");
 		try {
-			current.close();
+			current.response.close();
+			current.input.close();
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		if(next()) {
-			return current.read();
+			return current.input.read();
 		}
 		return -1;
 	}
@@ -135,7 +141,9 @@ public class M3U8InputStream extends InputStream {
 		System.out.println("我被关闭了");
 		sites.clear();
 		if(null != current) {
-			current.close();
+			current.response.close();
+			current.input.close();
+			
 		}
 	}
 
