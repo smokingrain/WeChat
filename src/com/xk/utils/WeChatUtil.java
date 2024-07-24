@@ -121,6 +121,168 @@ public class WeChatUtil {
 		});
 	}
 	
+	/**
+	 * 修改群名称
+	 * 作者 ：肖逵
+	 * 时间 ：2024年7月15日 下午7:18:25
+	 * @param topic
+	 * @param roomName
+	 * @return
+	 */
+	public static String modifyRoomName(String topic, String roomName) {
+		Map<String, String> params = new HashMap<>();
+		params.put("pass_ticket", Constant.sign.pass_ticket);
+		params.put("fun", "modtopic");
+		
+		Map<String, Object> body = new HashMap<>();
+		Map<String, Object> bodyInner = new HashMap<String, Object>();
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
+		body.put("BaseRequest", bodyInner);
+		body.put("ChatRoomName", roomName);
+		body.put("NewTopic", topic);
+		HTTPUtil hu = HTTPUtil.getInstance();
+		try {
+			String result = hu.postBody(String.format(Constant.UPDATE_ROOM, Constant.HOST), params, JSONUtil.toJson(body));
+			Map<String, Object> rstMap= JSONUtil.fromJson(result);
+			Integer MemberCount = Integer.parseInt(String.valueOf(rstMap.get("MemberCount")));
+			return MemberCount >= 0 ? topic : null;
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	/**
+	 * 管理踢人
+	 * 作者 ：肖逵
+	 * 时间 ：2024年7月15日 下午7:22:14
+	 * @param members
+	 * @param roomName
+	 * @return
+	 */
+	public static boolean kickRoomMember(List<String> members, String roomName) {
+		Map<String, String> params = new HashMap<>();
+		params.put("pass_ticket", Constant.sign.pass_ticket);
+		params.put("fun", "delmember");
+		
+		Map<String, Object> body = new HashMap<>();
+		Map<String, Object> bodyInner = new HashMap<String, Object>();
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
+		body.put("BaseRequest", bodyInner);
+		body.put("ChatRoomName", roomName);
+		body.put("DelMemberList", String.join(",", members));
+		
+		HTTPUtil hu = HTTPUtil.getInstance();
+		try {
+			String result = hu.postBody(String.format(Constant.UPDATE_ROOM, Constant.HOST), params, JSONUtil.toJson(body));
+			Map<String, Object> rstMap= JSONUtil.fromJson(result);
+			Integer MemberCount = Integer.parseInt(String.valueOf(rstMap.get("MemberCount")));
+			return MemberCount.equals(new Integer(0));
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	/**
+	 * 拉人进群
+	 * 作者 ：肖逵
+	 * 时间 ：2024年7月15日 下午7:22:25
+	 * @param members
+	 * @param roomName
+	 * @return
+	 */
+	public static boolean addRoomMember(List<String> members, String roomName) {
+		Map<String, String> params = new HashMap<>();
+		params.put("pass_ticket", Constant.sign.pass_ticket);
+		params.put("fun", "addmember");
+		
+		Map<String, Object> body = new HashMap<>();
+		Map<String, Object> bodyInner = new HashMap<String, Object>();
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
+		body.put("BaseRequest", bodyInner);
+		body.put("ChatRoomName", roomName);
+		body.put("AddMemberList", String.join(",", members));
+		
+		HTTPUtil hu = HTTPUtil.getInstance();
+		try {
+			String result = hu.postBody(String.format(Constant.UPDATE_ROOM, Constant.HOST), params, JSONUtil.toJson(body));
+			Map<String, Object> rstMap= JSONUtil.fromJson(result);
+			Integer MemberCount = Integer.parseInt(String.valueOf(rstMap.get("MemberCount")));
+			return MemberCount > 0;
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return false;
+	}
+	
+	
+	/**
+	 * 创建群聊
+	 * 作者 ：肖逵
+	 * 时间 ：2024年7月15日 下午7:01:58
+	 * @param members
+	 * @param roomName
+	 * @return
+	 */
+	public static String createChatRoom(List<String> members, String topic) {
+		Map<String, String> params = new HashMap<>();
+		params.put("pass_ticket", Constant.sign.pass_ticket);
+		params.put("r", String.valueOf(System.currentTimeMillis()));
+		
+		Map<String, Object> body = new HashMap<>();
+		Map<String, Object> bodyInner = new HashMap<String, Object>();
+		bodyInner.put("Uin", Constant.sign.wxuin);
+		bodyInner.put("Sid", Constant.sign.wxsid);
+		bodyInner.put("Skey", Constant.sign.skey);
+		bodyInner.put("DeviceID", Constant.sign.deviceid);
+		body.put("BaseRequest", bodyInner);
+		body.put("MemberCount", members.size());
+		List<Map<String, String>> memberList = new ArrayList<Map<String,String>>();
+		members.forEach(str -> {
+			Map<String, String> member = new HashMap<String, String>();
+			member.put("UserName", str);
+			memberList.add(member);
+		});
+		body.put("MemberList", memberList);
+		body.put("Topic", null == topic ? "" : topic);
+		
+		HTTPUtil hu = HTTPUtil.getInstance();
+		try {
+			String result = hu.postBody(String.format(Constant.CREATE_ROOM, Constant.HOST), params, JSONUtil.toJson(body));
+			Map<String, Object> rstMap= JSONUtil.fromJson(result);
+			String chatRoomName = String.valueOf(rstMap.get("ChatRoomName"));
+			return chatRoomName;
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 	/**
 	 * 用途：置顶取消置顶
@@ -926,7 +1088,6 @@ public class WeChatUtil {
 		params.put("skey", Constant.sign.skey);
 		params.put("pass_ticket", Constant.sign.pass_ticket);
 		try {
-			final MainWindow main = MainWindow.getInstance();
 			SysMsgChain chain = new SysMsgChain();
 			String result =  hu.postBody(String.format(Constant.GET_STATUS, Constant.HOST), params, JSONUtil.toJson(bodyMap));
 			Map<String, Object> rst = JSONUtil.fromJson(result);
@@ -947,7 +1108,7 @@ public class WeChatUtil {
 				}
 			}
 			Map<String, Object> SyncKey = (Map<String, Object>) rst.get("SyncKey");
-			WeChatUtil.flushSyncKey(SyncKey);
+			flushSyncKey(SyncKey);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

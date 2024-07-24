@@ -23,6 +23,7 @@ public class Constant {
 	public static final String GET_STATUS = "https://%s/cgi-bin/mmwebwx-bin/webwxsync";
 	public static final String SYNC_CHECK = "https://webpush.%s/cgi-bin/mmwebwx-bin/synccheck";
 	public static final String GET_MEMBER_ICON = "https://%s/cgi-bin/mmwebwx-bin/webwxgeticon";
+//	public static final String GET_GROUP_ICON = "https://%s/cgi-bin/mmwebwx-bin/webwxgetheadimg";
 	public static final String GET_CONTACT = "https://%s/cgi-bin/mmwebwx-bin/webwxgetcontact";
 	public static final String GET_GROUPS = "https://%s/cgi-bin/mmwebwx-bin/webwxbatchgetcontact?type=ex&lang=zh_CN&r={TIME}&pass_ticket={TICKET}";
 	public static final String GET_CONV_ID = "https://login.weixin.qq.com/jslogin?appid=wx782c26e4c19acffb&redirect_uri=https%3A%2F%2Fwx.qq.com%2Fcgi-bin%2Fmmwebwx-bin%2Fwebwxnewloginpage&fun=new&lang=zh_CN&_={TIME}";
@@ -41,6 +42,8 @@ public class Constant {
 	public static final String OP_LOG = "https://%s/cgi-bin/mmwebwx-bin/webwxoplog";
 	public static final String REVOKE_MSG = "https://%s/cgi-bin/mmwebwx-bin/webwxrevokemsg";
 	public static final String VERIFY_USER = "https://%s/cgi-bin/mmwebwx-bin/webwxverifyuser";
+	public static final String CREATE_ROOM = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxcreatechatroom";
+	public static final String UPDATE_ROOM = "https://wx.qq.com/cgi-bin/mmwebwx-bin/webwxupdatechatroom";
 	public static final String[] HOSTS = {"wx.qq.com", "wx2.qq.com", "wx8.qq.com", "web.wechat.com", "web2.wechat.com"};
 	public static String HOST = "wx.qq.com";
 	

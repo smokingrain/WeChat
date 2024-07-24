@@ -164,7 +164,7 @@ public class HTTPUtil {
 			}
 			url += sb.toString();
 		}
-		return getHtml(url);
+		return getHtml(null, url);
 	}
 	
 	
@@ -177,14 +177,23 @@ public class HTTPUtil {
 			}
 			url += sb.toString();
 		}
-		return getHtml(url);
+		return getHtml(null, url);
 	}
 	
 	public String getHtml(String url){
+		return getHtml(null, url);
+	}
+	
+	public String getHtml(Map<String, String> rHeaders, String url){
 		StringBuffer result=new StringBuffer();
 		try {
 			HttpGet httppost = new HttpGet(url);  
 			httppost.addHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/44.0.2403.155 Safari/537.36");
+			if(null != rHeaders) {
+				for(String key : rHeaders.keySet()) {
+					httppost.addHeader(key, rHeaders.get(key));
+				}
+			}
 			RequestConfig requestConfig = RequestConfig.custom().setSocketTimeout(50000).setConnectTimeout(50000).setConnectionRequestTimeout(50000).build();//设置请求和传输超时时间
 			httppost.setConfig(requestConfig);
 			CloseableHttpResponse response = httpClient.execute(httppost);  

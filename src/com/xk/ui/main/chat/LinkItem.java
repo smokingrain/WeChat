@@ -11,6 +11,7 @@ import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Path;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.xk.bean.IMessageNode;
 import com.xk.bean.StringNode;
 import com.xk.chatlogs.ChatLog;
 import com.xk.uiLib.MyList;
@@ -21,7 +22,7 @@ public class LinkItem extends ChatItem {
 	
 	private static Image linkDefault=SWTResourceManager.getImage(LinkItem.class, "/images/link.png");
 
-	public LinkItem (String user,Image head, List<Object> chatContent, boolean fromSelf, Font font, ChatLog log) {
+	public LinkItem (String user,Image head, List<IMessageNode> chatContent, boolean fromSelf, Font font, ChatLog log) {
 		super(user, head, chatContent, fromSelf, font, log);
 	}
 	

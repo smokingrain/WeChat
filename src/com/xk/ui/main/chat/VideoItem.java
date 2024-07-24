@@ -24,6 +24,7 @@ import org.jcodec.player.filters.audio.AudioMixer;
 import org.jcodec.player.filters.audio.AudioSource;
 import org.jcodec.player.filters.audio.JCodecAudioSource;
 
+import com.xk.bean.IMessageNode;
 import com.xk.chatlogs.ChatLog;
 import com.xk.ui.main.FloatWindow;
 import com.xk.uiLib.MyList;
@@ -41,7 +42,7 @@ public class VideoItem extends ChatItem {
 	
 	private Player player;
 	
-	public VideoItem(String user,Image head, List<Object> chatContent, boolean fromSelf, Font font, ChatLog log) {
+	public VideoItem(String user,Image head, List<IMessageNode> chatContent, boolean fromSelf, Font font, ChatLog log) {
 		super(user, head, chatContent, fromSelf, font, log);
 		if(null != log && null != log.relatedPath) {
 			video = new File(log.relatedPath);

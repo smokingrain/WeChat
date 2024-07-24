@@ -49,7 +49,6 @@ public abstract class AutoCombo{
 	private boolean match = true;
 	private Shell shell;
 	private StyledText combo;
-	private List list;
 	private Map<String, ContactsStruct> items = new HashMap<String, ContactsStruct>();
 	public AutoCombo(StyledText combo){
 		this.combo=combo;

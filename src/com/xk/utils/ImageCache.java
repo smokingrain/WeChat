@@ -90,31 +90,37 @@ public class ImageCache {
 		System.out.println("load " + count + " caches!!");
 	}
 	
-	public static ImageNode getChatImage(String msgId, File file) {
-		ImageNode temp = chatImages.get(msgId);
-		if(null != temp && !temp.getImg().isDisposed()) {
-			return temp;
-		}
-		ImageLoader loader = new ImageLoader();
-		loader.load(file.getAbsolutePath());
-		ImageData data = loader.data[0];
-		ImageNode node = new ImageNode(TYPE.IMAGE, new Image(null, loader.data[0]), loader, null);
-		if(data.width > 200 || data.height > 200) {
-			if(data.width > data.height) {
-				Integer w = 200;
-				Integer h = (int) (data.height * 200D / data.width);
-				node.setImg(SWTTools.scaleImage(data, w, h));
-				chatImages.put(msgId, node);
-			}else {
-				Integer h = 200;
-				Integer w = (int) (data.width * 200D / data.height);
-				node.setImg(SWTTools.scaleImage(data, w, h));
-				chatImages.put(msgId, node);
-			}
-		}
-		return node;
-	}
+//	private static ImageNode getChatImage(String msgId, File file) {
+//		ImageNode temp = chatImages.get(msgId);
+//		if(null != temp && !temp.getImg().isDisposed()) {
+//			return temp;
+//		}
+//		ImageLoader loader = new ImageLoader();
+//		loader.load(file.getAbsolutePath());
+//		ImageData data = loader.data[0];
+//		ImageNode node = new ImageNode(TYPE.IMAGE, new Image(null, loader.data[0]), loader, null);
+//		if(data.width > 200 || data.height > 200) {
+//			if(data.width > data.height) {
+//				Integer w = 200;
+//				Integer h = (int) (data.height * 200D / data.width);
+//				node.setImg(SWTTools.scaleImage(data, w, h));
+//				chatImages.put(msgId, node);
+//			}else {
+//				Integer h = 200;
+//				Integer w = (int) (data.width * 200D / data.height);
+//				node.setImg(SWTTools.scaleImage(data, w, h));
+//				chatImages.put(msgId, node);
+//			}
+//		}
+//		return node;
+//	}
 	
+	public static void cleanChatImage(String msgId) {
+		ImageNode temp = chatImages.remove(msgId);
+		if(null != temp && !temp.getImg().isDisposed()) {
+			temp.getImg().dispose();
+		}
+	}
 	
 	
 	/**

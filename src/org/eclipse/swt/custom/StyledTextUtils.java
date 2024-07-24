@@ -425,8 +425,9 @@ public class StyledTextUtils {
 		style.start = offset;
 		style.length = 1;
 		style.data = node;
-		int width = node.getWidth();
-		int height = node.getHeight();
+		Point size = node.getSize();
+		int width = size.x;
+		int height = size.y;
 		if(width > limit || height > limit) {
 			if(width > height) {
 				height = (int)(height * (limit / width));

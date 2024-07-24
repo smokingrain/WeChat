@@ -14,6 +14,7 @@ import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.xk.bean.IMessageNode;
 import com.xk.chatlogs.ChatLog;
 import com.xk.uiLib.MyList;
 
@@ -41,10 +42,9 @@ public class TimeItem extends ChatItem {
 		this.time = time;
 	}
 	
-	public TimeItem(String user, Image head, List<Object> chatContent,
+	public TimeItem(String user, Image head, List<IMessageNode> chatContent,
 			boolean fromSelf, Font font, ChatLog log) {
 		super(user, head, chatContent, fromSelf, font, log);
-		// TODO Auto-generated constructor stub
 	}
 
 	@Override

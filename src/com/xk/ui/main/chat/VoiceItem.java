@@ -17,6 +17,7 @@ import org.eclipse.swt.graphics.Region;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.xk.bean.IMessageNode;
 import com.xk.bean.StringNode;
 import com.xk.chatlogs.ChatLog;
 import com.xk.player.core.BasicController;
@@ -40,7 +41,7 @@ public class VoiceItem extends ChatItem implements BasicPlayerListener{
 	private long playedMill = 0;
 	private File file;
 
-	public VoiceItem(String user,Image head, List<Object> chatContent, boolean fromSelf, Font font, ChatLog log) {
+	public VoiceItem(String user,Image head, List<IMessageNode> chatContent, boolean fromSelf, Font font, ChatLog log) {
 		super(user, head, chatContent, fromSelf, font, log);
 		if(null != log.relatedPath) {
 			file = new File(log.relatedPath);

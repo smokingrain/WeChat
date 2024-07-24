@@ -6,6 +6,7 @@ import org.eclipse.swt.custom.StyledTextUtils;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.graphics.GC;
 
+import com.xk.bean.IMessageNode;
 import com.xk.bean.ImageNode;
 import com.xk.bean.Imoj;
 import com.xk.uiLib.ListItem;
@@ -42,8 +43,8 @@ public class ImojItem extends ListItem {
 		int indix = e.x / 30;
 		if(indix < data.size() && null != data.get(indix)) {
 			String base = "[" + data.get(indix).name + "]";
-			List<Object> result = ImojCache.computeImoj(base);
-			for(Object obj : result) {
+			List<IMessageNode> result = ImojCache.computeImoj(base);
+			for(IMessageNode obj : result) {
 				if(obj instanceof ImageNode) {
 					ImageNode node = (ImageNode) obj;
 					StyledTextUtils.addImage(cc.getText(), node);

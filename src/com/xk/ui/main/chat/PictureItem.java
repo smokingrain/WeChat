@@ -27,19 +27,15 @@ import com.xk.utils.song.SongLocation;
 
 public class PictureItem extends ListItem {
 	
-	public static ExecutorService loadPicture = Executors.newFixedThreadPool(3);
 	private static Image emptyPic=SWTResourceManager.getImage(PictureItem.class, "/images/emptyPic.png");
 	private ChatComp cc;
 	private ImageLoader[] pictures;
 	
 	public PictureItem(ChatComp cc, List<String> srcs) {
-		if(loadPicture.isShutdown()) {
-			loadPicture = Executors.newSingleThreadExecutor();
-		}
 		this.cc = cc;
 		this.pictures = new ImageLoader[srcs.size()];
 		for(int i = 0; i < srcs.size(); i++) {
-			loadPicture.submit(new LoadPictureTask(i, pictures, srcs.get(i)));
+			ImojWindow.loadPicture.submit(new LoadPictureTask(i, pictures, srcs.get(i)));
 		}
 	}
 	
@@ -128,6 +124,7 @@ public class PictureItem extends ListItem {
 					in.input.close();
 					if(null != in.response) {
 						in.response.close();
+						System.out.println("closing connect" + url);
 					}
 				} catch (IOException e) {
 					e.printStackTrace();

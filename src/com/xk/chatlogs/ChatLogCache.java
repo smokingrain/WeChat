@@ -2,12 +2,14 @@ package com.xk.chatlogs;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.xk.bean.ImageNode.TYPE;
+import com.xk.utils.ImageCache;
 
 /**
  * 用途：存储聊天记录
@@ -35,17 +37,13 @@ public class ChatLogCache {
 			folder.mkdirs();
 		}
 		log.seqNum = logSeq.incrementAndGet();
-		List<ChatLog> logs = cache.get(conv);
-		if(null == logs) {
-			logs = new ArrayList<ChatLog>();
-			cache.put(conv, logs);
-		}
+		List<ChatLog> logs = cache.compute(conv, (k, v) -> null == v ? new ArrayList<ChatLog>() : v);
 		//此处要存数据库
 		logs.add(log);
 	}
 	
 	public static List<ChatLog> getLogs(String convs) {
-		return cache.get(convs);
+		return cache.getOrDefault(convs, Collections.emptyList());
 	}
 	
 	public static void removeLog(String convs, ChatLog log) {
@@ -56,6 +54,7 @@ public class ChatLogCache {
 			if(null != log.img && log.img.type == TYPE.IMAGE) {
 				log.img.getImg().dispose();
 			}
+			ImageCache.cleanChatImage(log.msgid);
 		}
 	}
 	
@@ -66,6 +65,7 @@ public class ChatLogCache {
 				if(null != log.img && log.img.type == TYPE.IMAGE) {
 					log.img.getImg().dispose();
 				}
+				ImageCache.cleanChatImage(log.msgid);
 			}
 			logs.clear();
 		}

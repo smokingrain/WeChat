@@ -30,8 +30,10 @@ import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.wb.swt.GifTransfer;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.xk.bean.IMessageNode;
 import com.xk.bean.ImageNode;
 import com.xk.bean.StringNode;
+import com.xk.bean.TextNode;
 import com.xk.bean.ImageNode.TYPE;
 import com.xk.chatlogs.ChatLog;
 import com.xk.ui.items.ContactItem;
@@ -53,7 +55,7 @@ import com.xk.utils.WeChatUtil;
 public class ChatItem extends ListItem {
 
 	protected static final Integer ITEM_AREA_WIDTH = 450;
-	protected static final Integer LINE_SPACE_HEIGHT = 2;
+	protected static final Integer LINE_SPACE_HEIGHT = 1;
 	protected static final Integer HEAD_FOOT_SAPCE = 15;
 	protected static final Integer HEAD_IMG_HEIGHT = 50;
 	protected static final Integer MARGIN = 5;
@@ -61,7 +63,7 @@ public class ChatItem extends ListItem {
 	protected ChatLog log;
 	protected List<StringNode> user;//聊天发送者
 	protected Image head;//发送者头像
-	protected List<Object> chatContent;//聊天内容
+	protected List<IMessageNode> chatContent;//聊天内容
 	protected boolean fromSelf;//是不是自己发送的 
 	protected Font font;//文本字体
 	protected int height = -1;//总高度
@@ -75,7 +77,7 @@ public class ChatItem extends ListItem {
 		
 	}
 	
-	public ChatItem(String user,Image head, List<Object> chatContent, boolean fromSelf, Font font, ChatLog log) {
+	public ChatItem(String user,Image head, List<IMessageNode> chatContent, boolean fromSelf, Font font, ChatLog log) {
 		this.user = ImojCache.computeNode(user);
 		this.head = head;
 		this.chatContent = chatContent;
@@ -90,58 +92,43 @@ public class ChatItem extends ListItem {
 			GC gc = new GC(getParent());
 			gc.setFont(font);
 			int allLength = 0;
-			int maxHeight = 0;//本行最高高度
+			int maxHeight = 16;//本行最高高度
 			//计算每一行行高
-			for(Object content : chatContent) {
-				if(content instanceof ImageNode) {
-					ImageNode node = (ImageNode) content;
-					int width = node.getWidth();
-					allLength += width + LINE_SPACE_HEIGHT;
-					if(lineNum == 0) {
-						if(maxWidth < width) {
-							maxWidth += width + 10 + MARGIN;
-						}else {
-							maxWidth += width + LINE_SPACE_HEIGHT;
-						}
+			for(IMessageNode node : chatContent) {
+				node.computeSize(gc);
+				int width = node.getSize().x;
+				allLength += width + LINE_SPACE_HEIGHT;
+				if(lineNum == 0) {
+					if(maxWidth < width) {
+						maxWidth += width + 10 + MARGIN;
+					}else {
+						maxWidth += width + LINE_SPACE_HEIGHT;
 					}
-					int height = node.getHeight();
-					if(maxHeight < height) {
-						maxHeight = height;
-					}
-					if(allLength > ITEM_AREA_WIDTH) {
-						maxWidth = ITEM_AREA_WIDTH + 10;
+				}
+				if(maxWidth < allLength) {
+					maxWidth = allLength + 10;
+				}
+				if(node instanceof TextNode) {
+					TextNode str = ((TextNode) node);
+					if("\n".equals(str.getBase())) {
 						allHeight += maxHeight + LINE_SPACE_HEIGHT;
 						lineNum++;
-						maxHeight = 0;
-						allLength = width + LINE_SPACE_HEIGHT;
+						maxHeight = 16;
+						allLength = 0;
 						continue;
 					}
-					
-				}else if(content instanceof String) {
-					String str = ((String) content).replace("\n", "").replace("\r", "");
-					Point point = gc.textExtent(str);
-					if(lineNum == 0) {
-						if(maxWidth < point.x) {
-							maxWidth += point.x + str.length() + 10;//字间距
-						}else {
-							maxWidth +=point.x + str.length();
-						}
-					}
-					int curLen = point.x + str.length();
-					allLength += curLen;//字间距
-					if(maxHeight < point.y) {
-						maxHeight = point.y;
-					}
-					if(allLength > ITEM_AREA_WIDTH) {
-						maxWidth = ITEM_AREA_WIDTH + 10;
-						int num = allLength / ITEM_AREA_WIDTH ;
-						lineNum += num;
-						allHeight += maxHeight + point.y * (num - 1) + num * LINE_SPACE_HEIGHT * 3;
-						maxHeight = 0;
-						allLength = allLength - ITEM_AREA_WIDTH * num;
-						continue;
-					}
-					
+				}
+				int height = node.getSize().y;
+				if(maxHeight < height) {
+					maxHeight = height;
+				}
+				if(allLength > ITEM_AREA_WIDTH) {
+					maxWidth = ITEM_AREA_WIDTH;
+					allHeight += maxHeight + LINE_SPACE_HEIGHT;
+					lineNum++;
+					maxHeight = 16;
+					allLength = width + LINE_SPACE_HEIGHT;
+					continue;
 				}
 			}
 			gc.dispose();
@@ -151,7 +138,7 @@ public class ChatItem extends ListItem {
 			nameHeight = nameGC.textExtent("test").y;
 			nameGC.dispose();
 			//首尾间隙,行间距
-			allHeight += maxHeight + HEAD_FOOT_SAPCE;
+			allHeight += maxHeight + 10;
 			//名字高度
 			int tempHeight = allHeight + nameHeight + LINE_SPACE_HEIGHT;
 			if(tempHeight < HEAD_IMG_HEIGHT) {
@@ -161,7 +148,7 @@ public class ChatItem extends ListItem {
 			}
 			nameGC.dispose();
 		}
-		return height + HEAD_FOOT_SAPCE;//聊天记录空间
+		return height + 10;//聊天记录空间
 	}
 
 	@Override
@@ -274,77 +261,41 @@ public class ChatItem extends ListItem {
 	protected void drawContentL(GC gc,int start, int width) {
 		int cLineWidth = 0;
 		int cHeight = 0;
-		int cMaxHeight = 0;
+		int cMaxHeight = 16;
 //		Path contentPath = new Path(null);
-		for(Object content : chatContent) {
-			if(content instanceof ImageNode) {
-				ImageNode node = (ImageNode) content;
-				Image img = node.getImg();
-				int imgWidth = node.getWidth();
-				int imgHeight = node.getHeight();
-				cLineWidth += imgWidth;
-				if(cLineWidth > ITEM_AREA_WIDTH) {
-					gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT, imgWidth, imgHeight);
-					if(node.type == TYPE.IMAGE) {
-						Rectangle rect = new Rectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
-						imgs.put(rect, node);
-					}
-					cHeight += cMaxHeight;
-					cMaxHeight = 0;
-					cLineWidth = 0;
-					continue;
-				} else {
-					gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + cLineWidth - imgWidth + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT, imgWidth, imgHeight);
-					if(node.type == TYPE.IMAGE) {
-						Rectangle rect = new Rectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + cLineWidth - imgWidth + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
-						imgs.put(rect, node);
-					}
+		for(IMessageNode node : chatContent) {
+			Point size = node.getSize();
+			cLineWidth += size.x + LINE_SPACE_HEIGHT;
+			if(node instanceof TextNode) {
+				TextNode str = ((TextNode) node);
+				if("\n".equals(str.getBase())) {
+					cLineWidth = ITEM_AREA_WIDTH + 1;
 				}
-				if(imgHeight > cMaxHeight) {
-					cMaxHeight = imgHeight;
-				}
-			} else if(content instanceof String) {
-				String str = ((String) content).replace("\n", "").replace("\r", "");
-				Point point = gc.textExtent(str);
-				int temp = cLineWidth;
-				cLineWidth += point.x + str.length();//字间距
-				if(cMaxHeight < point.y) {
-					cMaxHeight = point.y;
-				}
-				if(cLineWidth < ITEM_AREA_WIDTH) {
-					gc.drawText(str, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + temp + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5 + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
-//					contentPath.addString(str,  HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + temp + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
-				}else {
-					int lines = cLineWidth / ITEM_AREA_WIDTH;//有多少行
-					double wordWidth = (point.x + str.length()) / (double)str.length();//【平均一个子长度
-					int wordNum = (int) ((ITEM_AREA_WIDTH - temp) / wordWidth);//补齐第一行需要
-					String first = str.substring(0, wordNum);
-					gc.drawText(first, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + temp + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5 + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
-//					contentPath.addString(first, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + temp + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
-					cHeight += cMaxHeight + LINE_SPACE_HEIGHT *2;
-					boolean full = false;
-					for(int i = 0; i < lines; i++) {
-						int fullNum = (int) (ITEM_AREA_WIDTH / wordWidth);//补齐一行需要
-						if(wordNum + fullNum > str.length()) {
-							full = true;
-							String fullStr = str.substring(wordNum, str.length());
-							cLineWidth = gc.textExtent(fullStr).x + fullStr.length();
-							gc.drawText(fullStr, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5 + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
-//							contentPath.addString(fullStr, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
-							break;
-						} else {
-							String fullStr = str.substring(wordNum, wordNum += fullNum);
-							gc.drawText(fullStr, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5 + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
-//							contentPath.addString(fullStr, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 2 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
-						}
-						cHeight += point.y + LINE_SPACE_HEIGHT *2;
-					}
-					if(!full) {
-						cLineWidth = 0;
-					}
-					continue;
+			}
+			
+			if(cLineWidth > ITEM_AREA_WIDTH) {
+				cHeight += cMaxHeight + LINE_SPACE_HEIGHT;
+				node.draw(gc, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 7 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT);
+				
+//				gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT, size.x, size.y);
+				if(TYPE.IMAGE.equals(node.getType())) {
+					Rectangle rect = new Rectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 7 + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT + MARGIN, size.x, size.y);
+					imgs.put(rect, (ImageNode)node);
 				}
 				
+				cMaxHeight = 16;
+				cLineWidth = size.x + LINE_SPACE_HEIGHT;
+				continue;
+			} else {
+				node.draw(gc, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 7 + cLineWidth - size.x + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT);
+//				gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + cLineWidth - size.x + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT, size.x, size.y);
+				if(TYPE.IMAGE.equals(node.getType())) {
+					Rectangle rect = new Rectangle(HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 7 + cLineWidth - size.x + MARGIN, start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT + MARGIN, size.x, size.y);
+					imgs.put(rect, (ImageNode)node);
+				}
+			}
+			if(size.y > cMaxHeight) {
+				cMaxHeight = size.y;
 			}
 		}
 //		gc.drawPath(contentPath);
@@ -366,82 +317,40 @@ public class ChatItem extends ListItem {
 	protected void drawContentR(GC gc,int start, int width) {
 		int cLineWidth = 0;
 		int cHeight = 0;
-		int cMaxHeight = 0;
+		int cMaxHeight = 16;
 //		Path contentPath = new Path(null);
-		for(Object content : chatContent) {
-			if(content instanceof ImageNode) {//绘制图片
-				ImageNode node = (ImageNode) content;
-				Image img = node.getImg();
-				int imgWidth = node.getWidth();
-				int imgHeight = node.getHeight();
-				cLineWidth += imgWidth + LINE_SPACE_HEIGHT;
-				if(cLineWidth > ITEM_AREA_WIDTH) {
-					cHeight += cMaxHeight + LINE_SPACE_HEIGHT;
-					gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT, imgWidth, imgHeight);
-//					gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
-					if(node.type == TYPE.IMAGE) {
-						Rectangle rect = new Rectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT + MARGIN, imgWidth, imgHeight);
-						imgs.put(rect, node);
-					}
-					cMaxHeight = 0;
-					cLineWidth = imgWidth + LINE_SPACE_HEIGHT;
-					continue;
-				} else {
-					gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT, imgWidth, imgHeight);
-//					gc.drawImage(img, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 2  + cHeight + LINE_SPACE_HEIGHT + MARGIN);
-					if(node.type == TYPE.IMAGE) {
-						Rectangle rect = new Rectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth - cLineWidth  + imgWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT, imgWidth, imgHeight);
-						imgs.put(rect, node);
-					}
+		for(IMessageNode node : chatContent) {
+			Point size = node.getSize();
+			cLineWidth += size.x + LINE_SPACE_HEIGHT;
+			if(node instanceof TextNode) {
+				TextNode str = ((TextNode) node);
+				if("\n".equals(str.getBase())) {
+					cLineWidth = ITEM_AREA_WIDTH + 1;
 				}
-				if(imgHeight > cMaxHeight) {
-					cMaxHeight = imgHeight;
-				}
-			} else if(content instanceof String) {//绘制文字
-				String str = ((String) content).replace("\n", "").replace("\r", "");//先去掉换行，懒得计算换行了
-				Point point = gc.textExtent(str);
-				int temp = cLineWidth;
-				cLineWidth += point.x + str.length();//字间距
-				if(cMaxHeight < point.y) {
-					cMaxHeight = point.y;
-				}
-				if(cLineWidth < ITEM_AREA_WIDTH) {//聊天内容比较短，只有一行
-					gc.drawText(str, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth - temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 5 + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
-//					contentPath.addString(str,  width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
-				}else {
-					int lines = cLineWidth / ITEM_AREA_WIDTH;//有多少行
-					double wordWidth = (point.x + str.length()) / (double)str.length();//【平均一个字长度
-					int wordNum = (int) ((ITEM_AREA_WIDTH - temp) / wordWidth);//补齐第一行需要
-					String first = str.substring(0, wordNum);
-					gc.drawText(first, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth - temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 5 + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
-//					contentPath.addString(first, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth - temp + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
-					cHeight += cMaxHeight + LINE_SPACE_HEIGHT *2;
-					boolean full = false;
-					for(int i = 0; i < lines; i++) {
-						int fullNum = (int) (ITEM_AREA_WIDTH / wordWidth);//补齐一行需要
-						if(wordNum + fullNum >= str.length()) {
-							full = true;
-							String fullStr = str.substring(wordNum, str.length());
-							cLineWidth = gc.textExtent(fullStr).x + fullStr.length();
-							gc.drawText(fullStr, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 5 + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
-//							contentPath.addString(fullStr, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
-							break;
-						} else {
-							String fullStr = str.substring(wordNum, wordNum += fullNum);
-							gc.drawText(fullStr, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 5 + cHeight + LINE_SPACE_HEIGHT, StringNode.DRAW_FLAGS);
-//							contentPath.addString(fullStr, width - ( HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT + LINE_SPACE_HEIGHT + cHeight + LINE_SPACE_HEIGHT, font);
-						}
-						cHeight += point.y + LINE_SPACE_HEIGHT *2;
-					}
-					//重置宽高
-//					cMaxHeight = 0;
-					if(!full) {
-						cLineWidth = 0;
-					}
-					continue;
+			}
+			
+			if(cLineWidth > ITEM_AREA_WIDTH) {
+				cHeight += cMaxHeight + LINE_SPACE_HEIGHT;
+				node.draw(gc, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT);
+				if(TYPE.IMAGE.equals(node.getType())) {
+					Rectangle rect = new Rectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT + MARGIN, size.x, size.y);
+					imgs.put(rect, (ImageNode)node);
 				}
 				
+				cMaxHeight = 16;
+				cLineWidth = size.x + LINE_SPACE_HEIGHT;
+				continue;
+			} else {
+				node.draw(gc, width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth - cLineWidth  + size.x + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT);
+				if(TYPE.IMAGE.equals(node.getType())) {
+					Rectangle rect = new Rectangle(width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 5 + maxWidth - cLineWidth  + size.x + MyList.BAR_WIDTH - MARGIN), start + nameHeight + LINE_SPACE_HEIGHT * 5  + cHeight + LINE_SPACE_HEIGHT, size.x, size.y);
+					imgs.put(rect, (ImageNode)node);
+				}
 			}
+			if(size.y > cMaxHeight) {
+				cMaxHeight = size.y;
+			}
+			
 		}
 //		gc.drawPath(contentPath);
 //		gc.fillPath(contentPath);
@@ -517,9 +426,9 @@ public class ChatItem extends ListItem {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
 				StringBuffer sb = new StringBuffer();
-				for(Object obj : chatContent) {
-					if(obj instanceof String) {
-						sb.append(obj);
+				for(IMessageNode obj : chatContent) {
+					if(obj instanceof TextNode) {
+						sb.append(obj.getBase());
 					} else if(obj instanceof ImageNode) {
 						StyledTextUtils.copyImageNode((ImageNode)obj);
 					}

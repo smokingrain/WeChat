@@ -1,20 +1,23 @@
 package com.xk.bean;
 
+import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.ImageLoader;
+import org.eclipse.swt.graphics.Point;
 
 /**
  * 图片对象，表情对象
  * @author Administrator
  *
  */
-public class ImageNode {
+public class ImageNode implements IMessageNode{
 	public TYPE type;//0，小表情，不可点击，1，正常图片
 	private Image img;//具体图片对象
 	private ImageLoader loader;//图片加载器，存储部分数据，也可以方便的保存图片
 	private String base;
 	private int width;//宽
 	private int height;//高
+	private Point size;
 	
 	public ImageNode(TYPE type, Image img, ImageLoader loader, String base) {
 		this.type = type;
@@ -35,16 +38,18 @@ public class ImageNode {
 			this.width = w;
 			this.height = h;
 		}
+		size = new Point(TYPE.IMOJ.equals(type) ? StringNode.IMOJ_WIDTH : width, TYPE.IMOJ.equals(type) ? StringNode.IMOJ_WIDTH : height);
 	}
 
-	public int getWidth() {
-		return TYPE.IMOJ == type ? StringNode.IMOJ_WIDTH : width;
+	@Override
+	public Point getSize() {
+		return size;
 	}
 	
-	public int getHeight() {
-		return TYPE.IMOJ == type ? StringNode.IMOJ_WIDTH : height;
+	@Override
+	public void draw(GC gc, int x, int y) {
+		gc.drawImage(img, 0, 0, img.getImageData().width, img.getImageData().height, x, y, size.x, size.y);
 	}
-	
 	
 	public ImageLoader getLoader() {
 		return loader;
@@ -70,7 +75,7 @@ public class ImageNode {
 	}
 	
 	public enum TYPE{
-		IMAGE(1),IMOJ(0);
+		TEXT(2),IMAGE(1),IMOJ(0);
 		private int type = 0;
 		private TYPE(int type){
 			this.type = type;
@@ -80,6 +85,16 @@ public class ImageNode {
 			return type;
 		}
 		
+	}
+
+	@Override
+	public void computeSize(GC gc) {
+		
+	}
+
+	@Override
+	public TYPE getType() {
+		return type;
 	}
 	
 }

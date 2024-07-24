@@ -23,9 +23,11 @@ import org.eclipse.swt.graphics.ImageLoader;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.xk.bean.IMessageNode;
 import com.xk.bean.ImageNode;
 import com.xk.bean.Imoj;
 import com.xk.bean.StringNode;
+import com.xk.bean.TextNode;
 import com.xk.bean.ImageNode.TYPE;
 
 public class ImojCache {
@@ -41,8 +43,8 @@ public class ImojCache {
 		init();
 	}
 	
-	public static List<Object> computeImoj(String base) {
-		List<Object> chatContent = new ArrayList<Object>();
+	public static List<IMessageNode> computeImoj(String base) {
+		List<IMessageNode> chatContent = new ArrayList<IMessageNode>();
 		boolean hasImoj = false;
 		String reg = "\\[(\\w+|[\u4E00-\u9FA5]+)\\]";
 		Pattern patternNode = Pattern.compile(reg);
@@ -54,7 +56,7 @@ public class ImojCache {
 			if(index < splt.length) {
 				String txt = splt[index++];
 				for(int i = 0; i < txt.length(); i++ ) {
-					chatContent.add(String.valueOf(txt.charAt(i)));
+					chatContent.add(new TextNode(String.valueOf(txt.charAt(i))));
 				}
 			}
 			String match = matcherNode.group();
@@ -65,25 +67,25 @@ public class ImojCache {
 			for(int i = index ;i < splt.length ; i++) {
 				String txt = splt[i];
 				for(int j = 0; j < txt.length(); j++ ) {
-					chatContent.add(String.valueOf(txt.charAt(j)));
+					chatContent.add(new TextNode(String.valueOf(txt.charAt(j))));
 				}
 			}
 		}else {
 			String txt = base;
 			for(int i = 0; i < txt.length(); i++ ) {
-				chatContent.add(String.valueOf(txt.charAt(i)));
+				chatContent.add(new TextNode(String.valueOf(txt.charAt(i))));
 			}
 		}
 		return chatContent;
 	}
 	
-	private static Object getContent(String content) {
+	private static IMessageNode getContent(String content) {
 		if(null == content) {
-			return "";
+			return new TextNode("");
 		}
 		String name = content.replace("[", "").replace("]", "");
 		Image img = ImojCache.qqface.get(name);
-		return null == img ? content : new ImageNode(TYPE.IMOJ, img, null, name);
+		return null == img ? new TextNode(content) : new ImageNode(TYPE.IMOJ, img, null, name);
 	}
 	
 	/**

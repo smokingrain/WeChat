@@ -13,6 +13,7 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.wb.swt.SWTResourceManager;
 import org.jsoup.helper.StringUtil;
 
+import com.xk.bean.IMessageNode;
 import com.xk.bean.StringNode;
 import com.xk.chatlogs.ChatLog;
 import com.xk.ui.items.ContactItem;
@@ -32,7 +33,7 @@ public class NotifyItem extends ChatItem {
 		this.log = log;
 	}
 	
-	public NotifyItem(String user, Image head, List<Object> chatContent,
+	public NotifyItem(String user, Image head, List<IMessageNode> chatContent,
 			boolean fromSelf, Font font, ChatLog log) {
 		super(user, head, chatContent, fromSelf, font, log);
 		// TODO Auto-generated constructor stub

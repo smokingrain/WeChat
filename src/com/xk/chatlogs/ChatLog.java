@@ -145,8 +145,8 @@ public class ChatLog {
 	 */
 	public static ChatLog fromMap(Map<String, Object> msg) {
 		ChatLog log = new ChatLog();
-		log.msgid = (String) msg.get("MsgId");
-		log.newMsgId = (Long) msg.get("NewMsgId");
+		log.msgid = (String) msg.getOrDefault("MsgId", "");
+		log.newMsgId = (Long.parseLong(String.valueOf(msg.get("NewMsgId")))) ;
 		log.msgType = (Integer) msg.get("MsgType");
 		log.content = (String) msg.get("Content");
 		log.fromId = (String) msg.get("FromUserName");

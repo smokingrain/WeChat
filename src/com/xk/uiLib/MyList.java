@@ -36,6 +36,7 @@ public class MyList<T extends ListItem> extends Composite {
 	public static final int CLICK_FOCUS = 1;//响应鼠标点击  -- 单击事件,获得焦点
 	public static final int CLICK_SINGLE = 2;//响应鼠标点击  -- 单击事件,选中
 	public static final int CLICK_DOUBLE = 3;//响应鼠标点击  -- 双击事件
+	
 	public static final int BAR_WIDTH=8;//滚动条宽度
 	private static final int BAR_ARROW_HEIGHT=8;
 	private List<ItemListener<T>> itemListeners=new ArrayList<ItemListener<T>>();

@@ -13,6 +13,7 @@ import org.eclipse.swt.graphics.Path;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import com.xk.bean.IMessageNode;
 import com.xk.bean.StringNode;
 import com.xk.chatlogs.ChatLog;
 import com.xk.uiLib.MyList;
@@ -27,7 +28,7 @@ import com.xk.utils.WeChatUtil;
 public class AddFriendItem extends ChatItem {
 
 	
-	public AddFriendItem (String user,Image head, List<Object> chatContent, boolean fromSelf, Font font, ChatLog log) {
+	public AddFriendItem (String user,Image head, List<IMessageNode> chatContent, boolean fromSelf, Font font, ChatLog log) {
 		super(user, head, chatContent, fromSelf, font, log);
 	}
 
@@ -55,8 +56,8 @@ public class AddFriendItem extends ChatItem {
 		Color fg = gc.getBackground();
 		Color back = SWTResourceManager.getColor(0xF4, 0xF4, 0xF4);
 		gc.setBackground(back);
-		gc.drawText(FileUtils.getLimitString(log.recommendInfo.get("NickName").toString(), 20), HEAD_IMG_HEIGHT * 2 + LINE_SPACE_HEIGHT * 6 + MARGIN * 2, start + nameHeight + LINE_SPACE_HEIGHT * 6 + LINE_SPACE_HEIGHT + MARGIN * 5, StringNode.DRAW_FLAGS);
-		gc.drawText(FileUtils.getLimitString(log.recommendInfo.get("Content").toString(), 20), HEAD_IMG_HEIGHT * 2 + LINE_SPACE_HEIGHT * 6 + MARGIN * 2, start + nameHeight + LINE_SPACE_HEIGHT * 6 + LINE_SPACE_HEIGHT + MARGIN * 10, StringNode.DRAW_FLAGS);
+		gc.drawText(FileUtils.getLimitString(log.recommendInfo.getOrDefault("NickName", "").toString(), 20), HEAD_IMG_HEIGHT * 2 + LINE_SPACE_HEIGHT * 6 + MARGIN * 2, start + nameHeight + LINE_SPACE_HEIGHT * 6 + LINE_SPACE_HEIGHT + MARGIN * 5, StringNode.DRAW_FLAGS);
+		gc.drawText(FileUtils.getLimitString(log.recommendInfo.getOrDefault("Content", "").toString(), 20), HEAD_IMG_HEIGHT * 2 + LINE_SPACE_HEIGHT * 6 + MARGIN * 2, start + nameHeight + LINE_SPACE_HEIGHT * 6 + LINE_SPACE_HEIGHT + MARGIN * 10, StringNode.DRAW_FLAGS);
 		gc.setBackground(fg);
 	}
 
@@ -78,8 +79,8 @@ public class AddFriendItem extends ChatItem {
 		Color fg = gc.getBackground();
 		Color back = SWTResourceManager.getColor(0xF4, 0xF4, 0xF4);
 		gc.setBackground(back);
-		gc.drawText(FileUtils.getLimitString(log.recommendInfo.get("NickName").toString(), 10), width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN *2) + HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT, start + nameHeight + LINE_SPACE_HEIGHT * 6 + LINE_SPACE_HEIGHT + MARGIN * 5, StringNode.DRAW_FLAGS);
-		gc.drawText(FileUtils.getLimitString(log.recommendInfo.get("Content").toString(), 20), width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN *2) + HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT, start + nameHeight + LINE_SPACE_HEIGHT * 6 + LINE_SPACE_HEIGHT + MARGIN * 9, StringNode.DRAW_FLAGS);
+		gc.drawText(FileUtils.getLimitString(log.recommendInfo.getOrDefault("NickName", "").toString(), 10), width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN *2) + HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT, start + nameHeight + LINE_SPACE_HEIGHT * 6 + LINE_SPACE_HEIGHT + MARGIN * 5, StringNode.DRAW_FLAGS);
+		gc.drawText(FileUtils.getLimitString(log.recommendInfo.getOrDefault("Content", "").toString(), 20), width - (HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT * 4 + maxWidth + MyList.BAR_WIDTH - MARGIN *2) + HEAD_IMG_HEIGHT + LINE_SPACE_HEIGHT, start + nameHeight + LINE_SPACE_HEIGHT * 6 + LINE_SPACE_HEIGHT + MARGIN * 9, StringNode.DRAW_FLAGS);
 		gc.setBackground(fg);
 		
 	}
@@ -88,7 +89,7 @@ public class AddFriendItem extends ChatItem {
 	protected void onDoubleClick(MouseEvent e) {
 		MessageBox mb = new MessageBox(getParent().getShell(), SWT.OK|SWT.CANCEL);
 		mb.setText("添加好友");
-		mb.setMessage("确定要添加" + log.recommendInfo.get("NickName") + "为好友?");
+		mb.setMessage("确定要添加" + log.recommendInfo.getOrDefault("NickName", "") + "为好友?");
 		int result = mb.open();
 		if(SWT.OK == result) {
 			WeChatUtil.acceptFriends(log);

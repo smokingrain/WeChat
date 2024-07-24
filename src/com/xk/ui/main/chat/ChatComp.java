@@ -6,6 +6,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import com.sun.jna.platform.win32.WinUser.MSG;
 import com.xk.bean.ContactsStruct;
+import com.xk.bean.IMessageNode;
 import com.xk.bean.ImageNode;
 import com.xk.bean.MemberStruct;
 import com.xk.bean.ImageNode.TYPE;
@@ -613,8 +614,8 @@ public class ChatComp extends Composite implements HotKeyListener{
 						if(log.fromId.equals(ms.UserName)) {
 							Map<String, String> params = new HashMap<String, String>();
 							params.put("seq", "0");
+							params.put("chatroomid", "0");
 							params.put("username", ms.UserName);
-							params.put("chatroomid", struct.EncryChatRoomId);
 							params.put("skey", Constant.sign.skey);
 							ImageNode node = ImageCache.getUserHeadCache(log.fromId, String.format(Constant.GET_MEMBER_ICON, Constant.HOST), params);
 							if(null != node) {
@@ -631,15 +632,15 @@ public class ChatComp extends Composite implements HotKeyListener{
 					head = ImageCache.getUserHeadCache(user, Constant.getContact(user).HeadImgUrl, null).getImg();
 					user = ContactsStruct.getContactName(Constant.getContact(log.fromId));
 				}
-				List<Object> chatContent = new ArrayList<>();
+				List<IMessageNode> chatContent = new ArrayList<>();
 				if(3 == log.msgType || 47 == log.msgType || 49 == log.msgType || 43 == log.msgType) {
 					if(null != log.img) {
 						chatContent.add(log.img);
 					}else {
-						chatContent.add(log.content);
+						chatContent.addAll(ImojCache.computeImoj(log.content.replace("<br/>", "\n").replace("\r", "").replace("&gt;", ">").replace("&lt;", "<")));
 					}
 				}else {
-					chatContent.addAll(ImojCache.computeImoj(log.content));
+					chatContent.addAll(ImojCache.computeImoj(log.content.replace("<br/>", "\n").replace("\r", "").replace("&gt;", ">").replace("&lt;", "<")));
 				}
 				
 				if(log.createTime - current > limitTime || ++limitCount  >= 10) {

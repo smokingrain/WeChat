@@ -246,6 +246,36 @@ public class ConvItem extends ListItem {
 					
 				});
 			}
+			//群可以改名，加人
+			if(data.UserName.startsWith("@@")) {
+				MenuItem add=new MenuItem(m, SWT.NONE);
+				add.setText("添加群成员");
+				add.addSelectionListener(new SelectionAdapter() {
+					
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						
+					}
+				});
+				MenuItem modify=new MenuItem(m, SWT.NONE);
+				modify.setText("修改群名");
+				modify.addSelectionListener(new SelectionAdapter() {
+					
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						
+					}
+				});
+				MenuItem kick=new MenuItem(m, SWT.NONE);
+				kick.setText("踢人");
+				kick.addSelectionListener(new SelectionAdapter() {
+					
+					@Override
+					public void widgetSelected(SelectionEvent arg0) {
+						
+					}
+				});
+			}
 			
 			
 			getParent().setMenu(m);
